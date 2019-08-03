@@ -1,0 +1,68 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: nightelf
+ * Date: 2019/8/1
+ * Time: 9:28
+ */
+
+namespace App\Http\Model;
+
+
+use Illuminate\Support\Facades\DB;
+
+class WarehouseModel
+{
+    private $table = 'warehouse';
+
+    public function lists(array $input)
+    {
+        $limit = config('yucheng.limit');
+        $start = 0;
+
+        if (isset($input['limit']) && !is_null($input['limit'])) {
+            $limit = $input['limit'];
+        }
+
+        if (isset($input['page']) && !is_null($input['page'])) {
+            $start = ($input['page'] - 1) * $limit;
+        }
+
+        return DB::table($this->table)
+            ->leftJoin('material as m','m.id','=',$this->table.'.materialId')
+            ->leftJoin('material_spec as ms','ms.id','=',$this->table.'.specId')
+            ->leftJoin('supplier as s','s.id','=',$this->table.'.supplierId')
+            ->leftJoin('unit as u','u.id','=',$this->table.'.unitId')
+            ->where(function ($query) use ($input) {
+                if (isset($input['search']) && !is_null($input['search'])) {
+                    $query->where($this->table.'.name', 'like', '%' . $input['search'] . '%');
+                }
+            })
+            ->offset($start)->limit($limit)
+            ->select($this->table.'.*','m.name as materialName','ms.spec','ms.brand','s.name as supplierName','u.name as unitName')
+            ->get()->toArray();
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function info(array $data)
+    {
+        $result = DB::table($this->table)->where($data)->first();
+        return empty($result) ? [] : get_object_vars($result);
+    }
+
+    /**
+     * @param $pk
+     * @param array $data
+     * @return mixed
+     */
+    public function update($id, array $data)
+    {
+        return DB::table($this->table)->where('id',$id);
+    }
+
+
+
+}

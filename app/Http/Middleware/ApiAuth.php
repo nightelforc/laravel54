@@ -10,7 +10,6 @@ namespace App\Http\Middleware;
 
 use App\Http\Controllers\Controller;
 use Closure;
-use Illuminate\Http\Response;
 
 class ApiAuth
 {
@@ -28,10 +27,10 @@ class ApiAuth
 //        if (!$token) {
 //            return Response::create(['code' => 100001, 'msg' => '身份信息已过时，请重新登录'], 403);
 //        }
-        $session = $this->sessionValidate($request);
-        if (!$session) {
-            return Response::create(['code' => 100002, 'msg' => '登录信息已过时，请重新登录'], 403);
-        }
+//        $session = $this->sessionValidate($request);
+//        if (!$session) {
+//            return Response::create(['code' => 100002, 'msg' => '登录信息已过时，请重新登录'], 403);
+//        }
         return $next($request);
     }
 

@@ -1,22 +1,25 @@
-<?php
-class foo{
-	public function test(){
-		echo 1111;
-	}
-}
-$a = 'foo1';
-$b = 'test';
-call_user_func([$c,$b]);
-?>
 <!DOCTYPE html>
 <html>
 <head>
 	<title></title>
+	<script type="text/javascript" src="jquery-3.2.1.min.js"></script>
 </head>
 <body>
 <script type="text/javascript">
-	var oldTime = (new Date(1543211234000)).getFullYear();
-	console.log(oldTime);
+	$.ajax({
+		url:"http://192.168.10.172/auth/login",
+		type:"post",
+		data:{
+			username:"test1",
+			password:"1234567"
+		},
+		success:function(r){
+			console.log(r)
+		},
+		error:function(XMLHttpRequest){
+			console.log(XMLHttpRequest)
+		}
+	})
 </script>
 </body>
 </html>

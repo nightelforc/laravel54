@@ -44,7 +44,8 @@ class AdminModel
      * @return array
      */
     public function info($where=[]){
-        return get_object_vars(DB::table($this->table)->where($where)->select(['id','username','name','projectId','phone','lastLoginTime','status'])->first());
+        $result = DB::table($this->table)->where($where)->select(['id','username','name','projectId','phone','lastLoginTime','status'])->first();
+        return empty($result) ? [] : get_object_vars($result);
     }
 
     /**

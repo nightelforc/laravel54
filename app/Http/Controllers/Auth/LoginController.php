@@ -61,7 +61,7 @@ class LoginController extends Controller
         if ($validator->passes()) {
             $adminModel = new AdminModel();
             $result = $adminModel->login($request->all());
-            if ($result != null) {
+            if (!empty($result)) {
                 if ($result['status'] == 1){
                     unset($result->password);
                     $request->session()->put(parent::pasn, $result);

@@ -54,15 +54,16 @@ class WarehouseModel
     }
 
     /**
-     * @param $pk
+     * @param $id
      * @param array $data
      * @return mixed
      */
     public function update($id, array $data)
     {
-        return DB::table($this->table)->where('id',$id);
+        return DB::table($this->table)->where('id',$id)->update($data);
     }
 
-
-
+    public function insert(array $data){
+        return DB::table($this->table)->insert($data);
+    }
 }

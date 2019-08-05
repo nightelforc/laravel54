@@ -32,7 +32,7 @@ class SupplierModel
      * @param array $data
      * @return mixed
      */
-    public function add(array $data)
+    public function insert(array $data)
     {
         $data['createTime'] = date('Y-m-d H:i:s');
         return DB::table($this->table)->insertGetId($data);

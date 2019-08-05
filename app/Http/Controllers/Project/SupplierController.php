@@ -61,7 +61,7 @@ class SupplierController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $supplierModel = new SupplierModel();
-            $supplierModel->add($input);
+            $supplierModel->insert($input);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'name') {

@@ -151,6 +151,11 @@ Route::group([
         Route::post('/warehouse/info', 'WarehouseController@info');
         Route::post('/warehouse/setSalePrice', 'WarehouseController@setSalePrice');
         Route::post('/warehouse/consume', 'WarehouseController@consume');
+        Route::post('/warehouse/expend', 'WarehouseController@expend');
+        Route::post('/warehouse/breakdown', 'WarehouseController@breakdown');
+        Route::post('/warehouse/allot', 'WarehouseController@allot');
+        Route::post('/warehouse/purchase', 'WarehouseController@purchase');
+        Route::post('/warehouse/receipt', 'WarehouseController@receipt');
     });
 
     //系统设置

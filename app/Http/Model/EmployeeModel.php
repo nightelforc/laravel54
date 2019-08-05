@@ -41,7 +41,7 @@ class EmployeeModel extends Model
                     $query->whereIn($this->table.'.status', [1, 3, 4]);
                 }
                 if (isset($input['search']) && !is_null($input['search'])) {
-                    $query->where(function ($query1) use ($input) {
+                    $query->where(function ($query1) use ($input) {var_dump($input);die;
                         $query1->where('name', 'like', '%' . $input['search'] . '%')->orWhere('jobNumber', 'like', '%' . $input['search'] . '%');
                     });
                 }

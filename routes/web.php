@@ -160,6 +160,10 @@ Route::group([
         Route::post('/warehouse/logLists', 'WarehouseController@logLists');
         Route::post('/warehouse/breakdownLists', 'WarehouseController@breakdownLists');
         Route::post('/warehouse/consumeLists', 'WarehouseController@consumeLists');
+
+        //-------------------财务管理-------------------//
+        Route::post('/finance/wageLists', 'FinanceController@wageLists');
+        Route::post('/finance/supplierOrder', 'FinanceController@supplierOrder');
     });
 
     //系统设置
@@ -171,7 +175,7 @@ Route::group([
         Route::post('/year/info', 'YearController@info');
         Route::post('/year/add', 'YearController@add');
         Route::post('/year/edit', 'YearController@edit');
-        Route::post('/year/del', 'YearController@delete');
+        Route::post('/year/delete', 'YearController@delete');
 
         Route::post('/unit/lists', 'UnitController@lists');
         Route::post('/unit/info', 'UnitController@info');

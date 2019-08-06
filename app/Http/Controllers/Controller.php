@@ -47,6 +47,7 @@ class Controller extends BaseController
             'supplier' => 44,
             'material' => 45,
             'warehouse' => 46,
+            'finance' => 47,
         ],
     ];
 

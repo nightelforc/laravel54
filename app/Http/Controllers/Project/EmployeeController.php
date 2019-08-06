@@ -33,7 +33,7 @@ class EmployeeController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeModel = new EmployeeModel();
-            $this->data = $employeeModel->searchEmployee($input);var_dump($this->data);
+            $this->data = $employeeModel->searchEmployee($input);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'search') {
@@ -85,11 +85,12 @@ class EmployeeController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeModel = new EmployeeModel();
+            $lists = $employeeModel->lists($input);
             $this->data = [
                 "draw"=>$input['draw'],
-                "data"=>$employeeModel->lists($input),
-                "recordsFiltered"=>count($employeeModel->lists($input)),
-                "recordsTotal"=>count($employeeModel->lists($input)),
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
             ];
         } else {
             $failed = $validator->failed();

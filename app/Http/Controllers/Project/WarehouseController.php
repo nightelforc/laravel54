@@ -11,6 +11,8 @@ namespace App\Http\Controllers\Project;
 
 use App\Http\Controllers\Auth\ApprovalController;
 use App\Http\Controllers\Controller;
+use App\Http\Model\EmployeeMaterialOrderInfoModel;
+use App\Http\Model\WarehouseLogInfoModel;
 use App\Http\Model\WarehouseLogModel;
 use App\Http\Model\WarehouseModel;
 use Illuminate\Http\Request;
@@ -1369,7 +1371,7 @@ class WarehouseController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function logLists(Request $request){
+    public function logLists(Request $request,$type = 0){
         $rules = [
             'projectId' => 'required|integer',
             'startTime' => 'nullable|date_format:Y-m-d',
@@ -1397,14 +1399,18 @@ class WarehouseController extends Controller
             'start.min' => '页码参数值不小于:min',
         ];
         $input = $request->all();
+        if ($type != 0){
+            $input['type'] = $type;
+        }
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            $warehouseLogModel = new WarehouseLogModel();
+            $warehouseLogInfoModel = new WarehouseLogInfoModel();
+            $lists = $warehouseLogInfoModel->lists($input);
             $this->data = [
                 "draw"=>$input['draw'],
-                "data"=>$warehouseLogModel->lists($input),
-                "recordsFiltered"=>count($warehouseLogModel->lists($input)),
-                "recordsTotal"=>count($warehouseLogModel->lists($input)),
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
             ];
         }else{
             $failed = $validator->failed();
@@ -1478,6 +1484,119 @@ class WarehouseController extends Controller
                 }
                 if (key($failed['start']) == 'Min') {
                     $this->code = 461016;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+
+    /**
+     * @param Request $request
+     */
+    public function breakdownLists(Request $request){
+        $this->logLists($request,self::BREAKDOWN);
+    }
+
+    public function consumeLists(Request $request){
+        $rules = [
+            'projectId' => 'required|integer',
+            'startTime' => 'nullable|date_format:Y-m-d',
+            'endTime' => 'nullable|date_format:Y-m-d',
+            'status' => 'nullable|integer|in:0,1',
+            'draw' => 'required|integer',
+            'length' => 'required|integer|in:10,20,50',
+            'start' => 'required|integer|min:0',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型不正确',
+            'startTime.date_format' => '起始时间格式不正确',
+            'endTime.date_format' => '起始时间格式不正确',
+            'status.integer' => '记录条数参数类型错误',
+            'status.in' => '记录条数参数值不正确',
+            'length.required' => '获取记录条数失败',
+            'length.integer' => '记录条数参数类型错误',
+            'length.in' => '记录条数参数值不正确',
+            'start.required' => '获取起始记录位置失败',
+            'start.integer' => '页码参数类型错误',
+            'start.min' => '页码参数值不小于:min',
+        ];
+        $input = $request->all();
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $employeeMaterialOrderInfoModel = new EmployeeMaterialOrderInfoModel();
+            $lists = $employeeMaterialOrderInfoModel->lists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
+            ];
+        }else{
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 461101;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 461102;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'startTime') {
+                if (key($failed['startTime']) == 'DateFormat') {
+                    $this->code = 461103;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'endTime') {
+                if (key($failed['endTime']) == 'DateFormat') {
+                    $this->code = 461104;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'status') {
+                if (key($failed['status']) == 'Integer') {
+                    $this->code = 461105;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['status']) == 'In') {
+                    $this->code = 461106;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
+                    $this->code = 461107;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['draw']) == 'Integer') {
+                    $this->code = 461108;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'length') {
+                if (key($failed['length']) == 'Required') {
+                    $this->code = 461109;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'Integer') {
+                    $this->code = 461110;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'In') {
+                    $this->code = 461111;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Required') {
+                    $this->code = 461112;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Integer') {
+                    $this->code = 461113;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Min') {
+                    $this->code = 461114;
                     $this->msg = $validator->errors()->first();
                 }
             }

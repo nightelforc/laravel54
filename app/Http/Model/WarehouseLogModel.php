@@ -360,40 +360,5 @@ class WarehouseLogModel
         }
     }
 
-    /**
-     * @param array $input
-     * @return mixed
-     */
-    public function lists(array $input)
-    {
-        $limit = config('yucheng.limit');
-        $start = is_null($input['start'])?0:$input['start'];
 
-        if (isset($input['length']) && !is_null($input['length'])) {
-            $limit = $input['length'];
-        }
-
-        return DB::table($this->table)
-            ->where(function ($query) use ($input) {
-                $query->where('projectId', $input['projectId']);
-                if (isset($input['professionId']) && !is_null($input['professionId'])) {
-                    $query->where('professionId', $input['professionId']);
-                }
-                if (isset($input['type']) && !is_null($input['type'])) {
-                    $query->where($this->table.'.type', $input['type']);
-                }
-                if (isset($input['status']) && !is_null($input['status'])) {
-                    $query->where($this->table.'.status', $input['status']);
-                }
-                if (isset($input['startTime']) && !is_null($input['status'])) {
-                    $query->where($this->table.'.time', '>=',$input['startTime']." 00:00:00");
-                }
-                if (isset($input['endTime']) && !is_null($input['endTime'])) {
-                    $query->where($this->table.'.time', '<=',$input['endTime']." 23:59:59");
-                }
-            })
-            ->offset($start)->limit($limit)
-            ->select($this->table.'.*','p.name as professionName')
-            ->get()->toArray();
-    }
 }

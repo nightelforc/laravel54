@@ -23,4 +23,51 @@ class WarehouseLogInfoModel
     {
         return DB::table($this->table)->insert($data);
     }
+
+    /**
+     * @param array $input
+     * @return mixed
+     */
+    public function lists(array $input)
+    {
+        $limit = config('yucheng.limit');
+        $start = is_null($input['start']) ? 0 : $input['start'];
+
+        if (isset($input['length']) && !is_null($input['length'])) {
+            $limit = $input['length'];
+        }
+
+        return DB::table($this->table)
+            ->leftJoin('warehouse_log as wl', 'wl.id', '=', $this->table . '.logId')
+            ->leftJoin('material as m', 'm.id', '=', $this->table . '.materialId')
+            ->leftJoin('material_spec as spec', 'spec.id', '=', $this->table . '.specId')
+            ->leftJoin('supplier as s', 's.id', '=', $this->table . '.supplierId')
+            ->leftJoin('project as p', 'p.id', '=', 'wl.projectId')
+            ->leftJoin('project as p1', 'p1.id', '=', 'wl.sourceProjectId')
+            ->leftJoin('employee as e', 'e.id', '=', 'wl.sourceEmployeeId')
+            ->where(function ($query) use ($input) {
+                $query->where('wl.projectId', $input['projectId']);
+                if (isset($input['type']) && !is_null($input['type']) && $input['type'] != 0) {
+                    $query->where('wl.type', $input['type']);
+                }
+                if (isset($input['status']) && !is_null($input['status'])) {
+                    $query->where('wl.status', $input['status']);
+                }
+                if (isset($input['startTime']) && !is_null($input['status'])) {
+                    $query->where('wl.time', '>=', $input['startTime'] . " 00:00:00");
+                }
+                if (isset($input['endTime']) && !is_null($input['endTime'])) {
+                    $query->where('wl.time', '<=', $input['endTime'] . " 23:59:59");
+                }
+                if (isset($input['search']) && !is_null($input['search'])) {
+                    $query->where('m.name', 'like', '%' . $input['search'] . '%');
+                }
+            })
+            ->offset($start)->limit($limit)
+            ->select($this->table . '.*',
+                'm.name as materialName', 'spec.spec', 'spec.brand', 's.name as supplierName',
+                'p.name as projectName', 'p1.name as sourceProjectName', 'e.name as employeeName',
+                'wl.projectId', 'wl.price', 'wl.type', 'wl.sourceEmployeeId', 'wl.sourceProjectId', 'wl.time', 'wl.status', 'wl.remark', 'wl.recoveryFunds')
+            ->get()->toArray();
+    }
 }

@@ -20,7 +20,11 @@ class AssignmentModel
      */
     public function lists($data=[])
     {
-        return DB::table($this->table)->where($data)->get()->toArray();
+        return DB::table($this->table)
+            ->leftJoin('unit as u','u.id','=',$this->table.'.unitId')
+            ->where($data)
+            ->select($this->table.'.*','u.name as unitName')
+            ->get()->toArray();
     }
 
     /**

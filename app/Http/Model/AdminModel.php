@@ -94,15 +94,12 @@ class AdminModel
     public function lists(array $input)
     {
         $limit = config('yucheng.limit');
-        $start = 0;
+        $start = is_null($input['start']) ? 0 : $input['start'];
 
-        if (isset($input['limit']) && !is_null($input['limit'])) {
-            $limit = $input['limit'];
+        if (isset($input['length']) && !is_null($input['length'])) {
+            $limit = $input['length'];
         }
 
-        if (isset($input['page']) && !is_null($input['page'])) {
-            $start = ($input['page'] - 1) * $limit;
-        }
         return DB::table($this->table)
             ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
             ->leftJoin('admin_role as ar','ar.adminId','=',$this->table.'.id')

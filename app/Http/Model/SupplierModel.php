@@ -21,10 +21,19 @@ class SupplierModel
      */
     public function lists(array $data)
     {
+        $limit = config('yucheng.limit');
+        $start = is_null($data['start']) ? 0 : $data['start'];
+
+        if (isset($data['length']) && !is_null($data['length'])) {
+            $limit = $data['length'];
+        }
         return DB::table($this->table)
             ->where(function($query) use ($data){
-                $query->where('name', 'like', '%' . $data['search'] . '%');
+                if (isset($data['search']) && !is_null($data['search'])) {
+                    $query->where('name', 'like', '%' . $data['search'] . '%');
+                }
             })
+            ->offset($start)->limit($limit)
             ->get()->toArray();
     }
 

@@ -25,9 +25,69 @@ class SupplierController extends Controller
      */
     public function lists(Request $request)
     {
-        $input = $request->only('search');
-        $supplierModel = new SupplierModel();
-        $this->data = $supplierModel->lists($input);
+        $rules = [
+            'draw' => 'required|integer',
+            'length' => 'required|integer|in:10,20,50',
+            'start' => 'required|integer|min:0',
+        ];
+        $message = [
+            'length.required' => '获取记录条数失败',
+            'length.integer' => '记录条数参数类型错误',
+            'length.in' => '记录条数参数值不正确',
+            'start.required' => '获取起始记录位置失败',
+            'start.integer' => '页码参数类型错误',
+            'start.min' => '页码参数值不小于:min',
+        ];
+        $input = $request->all();
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $supplierModel = new SupplierModel();
+            $lists = $supplierModel->lists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
+            ];
+        } else {
+            $failed = $validator->failed();
+            if  (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
+                    $this->code = 440901;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['draw']) == 'Integer') {
+                    $this->code = 440902;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'length') {
+                if (key($failed['length']) == 'Required') {
+                    $this->code = 440903;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'Integer') {
+                    $this->code = 440904;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'In') {
+                    $this->code = 440905;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Required') {
+                    $this->code = 440906;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Integer') {
+                    $this->code = 440907;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Min') {
+                    $this->code = 440908;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
 

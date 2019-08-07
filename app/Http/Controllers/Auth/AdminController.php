@@ -24,16 +24,16 @@ class AdminController extends Controller
     {
         $rules = [
 //            'projectId' => 'required|integer',
-            'limit' => 'nullable|integer|in:10,20,50',
-            'page' => 'nullable|integer|min:1',
+            'length' => 'nullable|integer|in:10,20,50',
+            'length' => 'nullable|integer|min:1',
         ];
         $message = [
 //            'projectId.required' => '获取项目参数失败',
 //            'projectId.integer' => '项目参数类型错误',
-            'limit.integer' => '记录条数参数类型错误',
-            'limit.in' => '记录条数参数值不正确',
-            'page.integer' => '页码参数类型错误',
-            'page.min' => '页码参数值不小于:min',
+            'length.integer' => '记录条数参数类型错误',
+            'length.in' => '记录条数参数值不正确',
+            'start.integer' => '页码参数类型错误',
+            'start.min' => '页码参数值不小于:min',
         ];
         $input = $request->all();
         $validator = Validator::make($input, $rules, $message);
@@ -51,21 +51,21 @@ class AdminController extends Controller
                     $this->code = 120102;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'limit') {
-                if (key($failed['limit']) == 'Integer') {
+            } elseif (key($failed) == 'length') {
+                if (key($failed['length']) == 'Integer') {
                     $this->code = 120103;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['limit']) == 'In') {
+                if (key($failed['length']) == 'In') {
                     $this->code = 120104;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'page') {
-                if (key($failed['page']) == 'Integer') {
+            } elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Integer') {
                     $this->code = 120105;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['page']) == 'Min') {
+                if (key($failed['start']) == 'Min') {
                     $this->code = 120106;
                     $this->msg = $validator->errors()->first();
                 }

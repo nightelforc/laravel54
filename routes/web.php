@@ -46,7 +46,9 @@ Route::group([
         Route::post('/workflowNode/add', 'WorkflowController@nodeAdd');
         Route::post('/workflowNode/del', 'WorkflowController@nodeDel');
 
-        Route::post('/workflow/test', 'ApprovalController@test');
+        Route::post('/approval/lists', 'ApprovalController@lists');
+        Route::post('/approval/accept', 'ApprovalController@accept');
+        Route::post('/approval/reject', 'ApprovalController@reject');
     });
 
     //公司主要业务
@@ -164,6 +166,8 @@ Route::group([
         //-------------------财务管理-------------------//
         Route::post('/finance/wageLists', 'FinanceController@wageLists');
         Route::post('/finance/supplierOrder', 'FinanceController@supplierOrder');
+        Route::post('/finance/loanLists', 'FinanceController@loanLists');
+        Route::post('/finance/livingLists', 'FinanceController@livingLists');
     });
 
     //系统设置

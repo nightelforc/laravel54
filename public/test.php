@@ -1,25 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title></title>
-	<script type="text/javascript" src="jquery-3.2.1.min.js"></script>
-</head>
-<body>
-<script type="text/javascript">
-	$.ajax({
-		url:"http://192.168.10.172/auth/login",
-		type:"post",
-		data:{
-			username:"test1",
-			password:"1234567"
-		},
-		success:function(r){
-			console.log(r)
-		},
-		error:function(XMLHttpRequest){
-			console.log(XMLHttpRequest)
-		}
-	})
-</script>
-</body>
-</html>
+<?php 
+$a = [1,2,3,4,5,6];
+echo array_search(2, $a);

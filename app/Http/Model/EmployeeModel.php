@@ -181,6 +181,9 @@ class EmployeeModel extends Model
      */
     public function batchUpdateStatus($pk, $data, $approvalResult)
     {
+        if ($approvalResult != 1){
+            return true;
+        }
         $employeeExperienceModel = new EmployeeExperienceModel();
         foreach ($data['ids'] as $id) {
             $this->updateStatus(['id' => $id, 'status' => $data['status']]);
@@ -202,6 +205,9 @@ class EmployeeModel extends Model
      */
     public function batchUpdateProject($pk, $data, $approvalResult)
     {
+        if ($approvalResult != 1){
+            return true;
+        }
         $employeeExperienceModel = new EmployeeExperienceModel();
         try {
             foreach ($data['ids'] as $id) {

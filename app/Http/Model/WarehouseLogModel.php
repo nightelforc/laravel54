@@ -55,8 +55,9 @@ class WarehouseLogModel
      * @param $data
      * @return mixed
      */
-    public function update($id,$data){
-        return DB::table($this->table)->where('id',$id)->update($data);
+    public function update($id, $data)
+    {
+        return DB::table($this->table)->where('id', $id)->update($data);
     }
 
     /**
@@ -66,72 +67,132 @@ class WarehouseLogModel
      */
     public function consumeApproval($pk, $data, $approvalResult)
     {
-        try {
-            $warehouseModel = new WarehouseModel();
-            //检查库存
-            foreach ($data['data'] as $d) {
-                $warehouseInfo = $warehouseModel->info([
-                    'projectId' => $data['projectId'],
-                    'materialId' => $d['materialId'],
-                    'specId' => $d['specId'],
-                    'supplierId' => $d['supplierId'],
-                ]);
-                if (empty($warehouseInfo) || $warehouseInfo['amount'] < $d['amount']) {
-                    throw new \Exception('库存不足', 'consume1');
-                }
-            }
-
-            DB::transaction(function () use ($data, $warehouseModel,$pk,$approvalResult) {
-
-                //扣除库存
-                foreach ($data['data'] as $key => $d) {
+        if ($approvalResult != 1) {
+            $this->update($pk, ['status' => $approvalResult]);
+        } else {
+            try {
+                $warehouseModel = new WarehouseModel();
+                //检查库存
+                foreach ($data['data'] as $d) {
                     $warehouseInfo = $warehouseModel->info([
                         'projectId' => $data['projectId'],
                         'materialId' => $d['materialId'],
                         'specId' => $d['specId'],
                         'supplierId' => $d['supplierId'],
                     ]);
-                    $newAmount = $warehouseInfo['amount']-$d['amount'];
-                    $data['data'][$key]['purchasePrice'] = $warehouseInfo['purchasePrice'];
-                    $data['data'][$key]['salePrice'] = $warehouseInfo['salePrice'];
-                    $warehouseModel->update($warehouseInfo['id'],['amount'=>$newAmount,'updateTime'=>date('Y-m-d H:i:s')]);
+                    if (empty($warehouseInfo) || $warehouseInfo['amount'] < $d['amount']) {
+                        throw new \Exception('库存不足', 'consume1');
+                    }
                 }
-                //修改出入库记录审批状态
-                $this->update($pk,['status'=>$approvalResult]);
-                //添加员工材料费
-                $materialOrder = [
-                    'employeeId'=>$data['sourceEmployeeId'],
-                    'projectId'=>$data['projectId'],
-                    'account'=>$data['price'],
-                    'logId'=>$pk
-                ];
-                $insertId = (new EmployeeMaterialOrderModel())->insert($materialOrder);
 
-                $materialOrderInfo = [];
-                foreach ($data['data'] as $key => $d) {
-                    $materialOrderInfo[] = [
-                        'projectId'=>$data['projectId'],
-                        'orderId'=>$insertId,
-                        'materialId' => $d['materialId'],
-                        'specId' => $d['specId'],
-                        'supplierId' => $d['supplierId'],
-                        'amount'=>$d['amount'],
-                        'purchasePrice'=>$d['purchasePrice'],
-                        'salePrice'=>$d['salePrice'],
-                        'totalPrice'=>$d['price'],
-                        'saleTime'=>$data['time'],
+                DB::transaction(function () use ($data, $warehouseModel, $pk, $approvalResult) {
+
+                    //扣除库存
+                    foreach ($data['data'] as $key => $d) {
+                        $warehouseInfo = $warehouseModel->info([
+                            'projectId' => $data['projectId'],
+                            'materialId' => $d['materialId'],
+                            'specId' => $d['specId'],
+                            'supplierId' => $d['supplierId'],
+                        ]);
+                        $newAmount = $warehouseInfo['amount'] - $d['amount'];
+                        $data['data'][$key]['purchasePrice'] = $warehouseInfo['purchasePrice'];
+                        $data['data'][$key]['salePrice'] = $warehouseInfo['salePrice'];
+                        $warehouseModel->update($warehouseInfo['id'], ['amount' => $newAmount, 'updateTime' => date('Y-m-d H:i:s')]);
+                    }
+                    //修改出入库记录审批状态
+                    $this->update($pk, ['status' => $approvalResult]);
+                    //添加员工材料费
+                    $materialOrder = [
+                        'employeeId' => $data['sourceEmployeeId'],
+                        'projectId' => $data['projectId'],
+                        'account' => $data['price'],
+                        'logId' => $pk
                     ];
+                    $insertId = (new EmployeeMaterialOrderModel())->insert($materialOrder);
+
+                    $materialOrderInfo = [];
+                    foreach ($data['data'] as $key => $d) {
+                        $materialOrderInfo[] = [
+                            'projectId' => $data['projectId'],
+                            'orderId' => $insertId,
+                            'materialId' => $d['materialId'],
+                            'specId' => $d['specId'],
+                            'supplierId' => $d['supplierId'],
+                            'amount' => $d['amount'],
+                            'purchasePrice' => $d['purchasePrice'],
+                            'salePrice' => $d['salePrice'],
+                            'totalPrice' => $d['price'],
+                            'saleTime' => $data['time'],
+                        ];
+                    }
+
+                    (new EmployeeMaterialOrderInfoModel())->insert($materialOrderInfo);
+                });
+            } catch (\Exception $e) {
+                $logFile = fopen(
+                    storage_path('warehouse_consume.log'),
+                    'a+'
+                );
+                fwrite($logFile, 'approval ' . $pk . ' [' . $e->getCode() . ']' . $e->getMessage());
+                fclose($logFile);
+            }
+        }
+
+    }
+
+    /**
+     * @param $pk
+     * @param $data
+     * @param $approvalResult
+     */
+    public function expendApproval($pk, $data, $approvalResult)
+    {
+        if ($approvalResult != 1) {
+            $this->update($pk, ['status' => $approvalResult]);
+        } else {
+            try {
+                $warehouseModel = new WarehouseModel();
+                //检查库存
+                foreach ($data['data'] as $d) {
+                    $warehouseInfo = $warehouseModel->info([
+                        'projectId' => $data['projectId'],
+                        'materialId' => $d['materialId'],
+                        'specId' => $d['specId'],
+                        'supplierId' => $d['supplierId'],
+                    ]);
+                    if (empty($warehouseInfo) || $warehouseInfo['amount'] < $d['amount']) {
+                        throw new \Exception('库存不足', 'consume1');
+                    }
                 }
 
-                (new EmployeeMaterialOrderInfoModel())->insert($materialOrderInfo);
-            });
-        } catch (\Exception $e) {
-            $logFile = fopen(
-                storage_path('warehouse_consume.log'),
-                'a+'
-            );
-            fwrite($logFile, 'approval ' . $pk . ' [' . $e->getCode() . ']' . $e->getMessage());
-            fclose($logFile);
+                DB::transaction(function () use ($data, $warehouseModel, $pk, $approvalResult) {
+
+                    //扣除库存
+                    foreach ($data['data'] as $key => $d) {
+                        $warehouseInfo = $warehouseModel->info([
+                            'projectId' => $data['projectId'],
+                            'materialId' => $d['materialId'],
+                            'specId' => $d['specId'],
+                            'supplierId' => $d['supplierId'],
+                        ]);
+                        $newAmount = $warehouseInfo['amount'] - $d['amount'];
+                        $data['data'][$key]['purchasePrice'] = $warehouseInfo['purchasePrice'];
+                        $data['data'][$key]['salePrice'] = $warehouseInfo['salePrice'];
+                        $warehouseModel->update($warehouseInfo['id'], ['amount' => $newAmount, 'updateTime' => date('Y-m-d H:i:s')]);
+                    }
+                    //修改出入库记录审批状态
+                    $this->update($pk, ['status' => $approvalResult]);
+
+                });
+            } catch (\Exception $e) {
+                $logFile = fopen(
+                    storage_path('warehouse_consume.log'),
+                    'a+'
+                );
+                fwrite($logFile, 'approval ' . $pk . ' [' . $e->getCode() . ']' . $e->getMessage());
+                fclose($logFile);
+            }
         }
     }
 
@@ -140,48 +201,53 @@ class WarehouseLogModel
      * @param $data
      * @param $approvalResult
      */
-    public function expendApproval($pk, $data, $approvalResult){
-        try {
-            $warehouseModel = new WarehouseModel();
-            //检查库存
-            foreach ($data['data'] as $d) {
-                $warehouseInfo = $warehouseModel->info([
-                    'projectId' => $data['projectId'],
-                    'materialId' => $d['materialId'],
-                    'specId' => $d['specId'],
-                    'supplierId' => $d['supplierId'],
-                ]);
-                if (empty($warehouseInfo) || $warehouseInfo['amount'] < $d['amount']) {
-                    throw new \Exception('库存不足', 'consume1');
-                }
-            }
-
-            DB::transaction(function () use ($data, $warehouseModel,$pk,$approvalResult) {
-
-                //扣除库存
-                foreach ($data['data'] as $key => $d) {
+    public function breakdownApproval($pk, $data, $approvalResult)
+    {
+        if ($approvalResult != 1) {
+            $this->update($pk, ['status' => $approvalResult]);
+        } else {
+            try {
+                $warehouseModel = new WarehouseModel();
+                //检查库存
+                foreach ($data['data'] as $d) {
                     $warehouseInfo = $warehouseModel->info([
                         'projectId' => $data['projectId'],
                         'materialId' => $d['materialId'],
                         'specId' => $d['specId'],
                         'supplierId' => $d['supplierId'],
                     ]);
-                    $newAmount = $warehouseInfo['amount']-$d['amount'];
-                    $data['data'][$key]['purchasePrice'] = $warehouseInfo['purchasePrice'];
-                    $data['data'][$key]['salePrice'] = $warehouseInfo['salePrice'];
-                    $warehouseModel->update($warehouseInfo['id'],['amount'=>$newAmount,'updateTime'=>date('Y-m-d H:i:s')]);
+                    if (empty($warehouseInfo) || $warehouseInfo['amount'] < $d['amount']) {
+                        throw new \Exception('库存不足', 'consume1');
+                    }
                 }
-                //修改出入库记录审批状态
-                $this->update($pk,['status'=>$approvalResult]);
 
-            });
-        } catch (\Exception $e) {
-            $logFile = fopen(
-                storage_path('warehouse_consume.log'),
-                'a+'
-            );
-            fwrite($logFile, 'approval ' . $pk . ' [' . $e->getCode() . ']' . $e->getMessage());
-            fclose($logFile);
+                DB::transaction(function () use ($data, $warehouseModel, $pk, $approvalResult) {
+
+                    //扣除库存
+                    foreach ($data['data'] as $key => $d) {
+                        $warehouseInfo = $warehouseModel->info([
+                            'projectId' => $data['projectId'],
+                            'materialId' => $d['materialId'],
+                            'specId' => $d['specId'],
+                            'supplierId' => $d['supplierId'],
+                        ]);
+                        $newAmount = $warehouseInfo['amount'] - $d['amount'];
+                        $data['data'][$key]['purchasePrice'] = $warehouseInfo['purchasePrice'];
+                        $data['data'][$key]['salePrice'] = $warehouseInfo['salePrice'];
+                        $warehouseModel->update($warehouseInfo['id'], ['amount' => $newAmount, 'updateTime' => date('Y-m-d H:i:s')]);
+                    }
+                    //修改出入库记录审批状态
+                    $this->update($pk, ['status' => $approvalResult]);
+
+                });
+            } catch (\Exception $e) {
+                $logFile = fopen(
+                    storage_path('warehouse_consume.log'),
+                    'a+'
+                );
+                fwrite($logFile, 'approval ' . $pk . ' [' . $e->getCode() . ']' . $e->getMessage());
+                fclose($logFile);
+            }
         }
     }
 
@@ -190,48 +256,52 @@ class WarehouseLogModel
      * @param $data
      * @param $approvalResult
      */
-    public function breakdownApproval($pk, $data, $approvalResult){
-        try {
-            $warehouseModel = new WarehouseModel();
-            //检查库存
-            foreach ($data['data'] as $d) {
-                $warehouseInfo = $warehouseModel->info([
-                    'projectId' => $data['projectId'],
-                    'materialId' => $d['materialId'],
-                    'specId' => $d['specId'],
-                    'supplierId' => $d['supplierId'],
-                ]);
-                if (empty($warehouseInfo) || $warehouseInfo['amount'] < $d['amount']) {
-                    throw new \Exception('库存不足', 'consume1');
-                }
-            }
-
-            DB::transaction(function () use ($data, $warehouseModel,$pk,$approvalResult) {
-
-                //扣除库存
-                foreach ($data['data'] as $key => $d) {
+    public function allotApproval($pk, $data, $approvalResult)
+    {
+        if ($approvalResult != 1) {
+            $this->update($pk, ['status' => $approvalResult]);
+        } else {
+            try {
+                $warehouseModel = new WarehouseModel();
+                //检查库存
+                foreach ($data['data'] as $d) {
                     $warehouseInfo = $warehouseModel->info([
                         'projectId' => $data['projectId'],
                         'materialId' => $d['materialId'],
                         'specId' => $d['specId'],
                         'supplierId' => $d['supplierId'],
                     ]);
-                    $newAmount = $warehouseInfo['amount']-$d['amount'];
-                    $data['data'][$key]['purchasePrice'] = $warehouseInfo['purchasePrice'];
-                    $data['data'][$key]['salePrice'] = $warehouseInfo['salePrice'];
-                    $warehouseModel->update($warehouseInfo['id'],['amount'=>$newAmount,'updateTime'=>date('Y-m-d H:i:s')]);
+                    if (empty($warehouseInfo) || $warehouseInfo['amount'] < $d['amount']) {
+                        throw new \Exception('库存不足', 'consume1');
+                    }
                 }
-                //修改出入库记录审批状态
-                $this->update($pk,['status'=>$approvalResult]);
 
-            });
-        } catch (\Exception $e) {
-            $logFile = fopen(
-                storage_path('warehouse_consume.log'),
-                'a+'
-            );
-            fwrite($logFile, 'approval ' . $pk . ' [' . $e->getCode() . ']' . $e->getMessage());
-            fclose($logFile);
+                DB::transaction(function () use ($data, $warehouseModel, $pk, $approvalResult) {
+
+                    //扣除库存
+                    foreach ($data['data'] as $key => $d) {
+                        $warehouseInfo = $warehouseModel->info([
+                            'projectId' => $data['projectId'],
+                            'materialId' => $d['materialId'],
+                            'specId' => $d['specId'],
+                            'supplierId' => $d['supplierId'],
+                        ]);
+                        $newAmount = $warehouseInfo['amount'] - $d['amount'];
+                        $data['data'][$key]['purchasePrice'] = $warehouseInfo['purchasePrice'];
+                        $data['data'][$key]['salePrice'] = $warehouseInfo['salePrice'];
+                        $warehouseModel->update($warehouseInfo['id'], ['amount' => $newAmount, 'updateTime' => date('Y-m-d H:i:s')]);
+                    }
+                    //修改出入库记录审批状态
+                    $this->update($pk, ['status' => $approvalResult]);
+                });
+            } catch (\Exception $e) {
+                $logFile = fopen(
+                    storage_path('warehouse_consume.log'),
+                    'a+'
+                );
+                fwrite($logFile, 'approval ' . $pk . ' [' . $e->getCode() . ']' . $e->getMessage());
+                fclose($logFile);
+            }
         }
     }
 
@@ -242,14 +312,14 @@ class WarehouseLogModel
     public function purchase(array $data)
     {
         try {
-            DB::transaction(function() use ($data){
+            DB::transaction(function () use ($data) {
                 $supplierModel = new SupplierModel();
                 $supplierOrdersModel = new SupplierOrdersModel();
                 $supplierOrdersInfoModel = new SupplierOrdersInfoModel();
                 $warehouseModel = new WarehouseModel();
-                foreach ($data['data'] as $key => $d){
+                foreach ($data['data'] as $key => $d) {
                     //检查供应商
-                    if ($d['supplierId'] == 0){
+                    if ($d['supplierId'] == 0) {
                         $newSupplier = [
                             'name' => $d['name'],
                             'phone' => $d['phone'],
@@ -285,7 +355,7 @@ class WarehouseLogModel
                         'supplierId' => $d['supplierId'],
                     ];
                     $materialInfo = $warehouseModel->info($warehouseData);
-                    if (empty($materialInfo)){
+                    if (empty($materialInfo)) {
                         //创建仓库新的材料库存
                         $warehouseData = [
                             'projectId' => $data['projectId'],
@@ -297,9 +367,9 @@ class WarehouseLogModel
                             'updateTime' => date('Y-m-d H:i:s')
                         ];
                         $warehouseModel->insert($warehouseData);
-                    }else{
+                    } else {
                         //更新库存
-                        $warehouseModel->update($materialInfo['id'],['amount'=>$d['amount'],'updateTime' => date('Y-m-d H:i:s')]);
+                        $warehouseModel->update($materialInfo['id'], ['amount' => $d['amount'], 'updateTime' => date('Y-m-d H:i:s')]);
                     }
 
                     unset($data['data'][$key]['name']);
@@ -311,7 +381,7 @@ class WarehouseLogModel
                 $this->addLog($data);
                 return true;
             });
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return false;
         }
     }
@@ -323,9 +393,9 @@ class WarehouseLogModel
     public function receipt(array $data)
     {
         try {
-            DB::transaction(function() use ($data){
+            DB::transaction(function () use ($data) {
                 $warehouseModel = new WarehouseModel();
-                foreach ($data['data'] as $key => $d){
+                foreach ($data['data'] as $key => $d) {
                     //增加库存，检查仓库中是否有材料，增加库存
                     $warehouseData = [
                         'projectId' => $data['projectId'],
@@ -334,7 +404,7 @@ class WarehouseLogModel
                         'supplierId' => $d['supplierId'],
                     ];
                     $materialInfo = $warehouseModel->info($warehouseData);
-                    if (empty($materialInfo)){
+                    if (empty($materialInfo)) {
                         //创建仓库新的材料库存
                         $warehouseData = [
                             'projectId' => $data['projectId'],
@@ -346,16 +416,16 @@ class WarehouseLogModel
                             'updateTime' => date('Y-m-d H:i:s')
                         ];
                         $warehouseModel->insert($warehouseData);
-                    }else{
+                    } else {
                         //更新库存
-                        $warehouseModel->update($materialInfo['id'],['amount'=>$d['amount'],'updateTime' => date('Y-m-d H:i:s')]);
+                        $warehouseModel->update($materialInfo['id'], ['amount' => $d['amount'], 'updateTime' => date('Y-m-d H:i:s')]);
                     }
                 }
                 //增加入库记录
                 $this->addLog($data);
                 return true;
             });
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return false;
         }
     }

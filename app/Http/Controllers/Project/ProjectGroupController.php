@@ -132,7 +132,7 @@ class ProjectGroupController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();
-            $projectGroupModel->info($input);
+            $this->data = $projectGroupModel->info($input);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
@@ -267,7 +267,7 @@ class ProjectGroupController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupMembersModel = new ProjectGroupMembersModel();
-            $projectGroupMembersModel->lists($input);
+            $this->data = $projectGroupMembersModel->lists($input);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'groupId') {

@@ -22,7 +22,7 @@ class ProjectGroupMembersModel
     {
         return DB::table($this->table)
             ->leftJoin('employee as e','e.id','=',$this->table.'.employeeId')
-            ->where($data)
+            ->where($this->table.'.groupId',$data['groupId'])
             ->where('isDel',0)
             ->get([$this->table.'.*','e.jobNumber','e.status'])->toArray();
     }

@@ -30,18 +30,21 @@ class ProjectController extends Controller
     {
         $rules = [
             'projectId' => 'required|integer',
-            'limit' => 'nullable|integer|in:10,20,50',
-            'page' => 'nullable|integer|min:1',
+            'draw'=> 'required|integer',
+            'length' => 'required|integer|in:10,20,50',
+            'start' => 'required|integer|min:0',
         ];
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型错误',
-            'limit.integer' => '记录条数参数类型错误',
-            'limit.in' => '记录条数参数值不正确',
-            'page.integer' => '页码参数类型错误',
-            'page.min' => '页码参数值不小于:min',
+            'length.required' => '获取每页记录数参数失败',
+            'length.integer' => '每页记录数参数类型错误',
+            'length.in' => '每页记录数参数值不正确',
+            'start.required' => '获取起始记录参数失败',
+            'start.integer' => '起始记录参数类型错误',
+            'start.min' => '起始记录参数值不小于:min',
         ];
-        $input = $request->only(['projectId', 'search', 'limit', 'page']);
+        $input = $request->only(['projectId', 'search', 'draw','length', 'start']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectAreaModel = new ProjectAreaModel();
@@ -57,22 +60,39 @@ class ProjectController extends Controller
                     $this->code = 420202;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'limit') {
-                if (key($failed['limit']) == 'Integer') {
+            } elseif (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
                     $this->code = 420203;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['limit']) == 'In') {
+                if (key($failed['draw']) == 'Integer') {
                     $this->code = 420204;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'page') {
-                if (key($failed['page']) == 'Integer') {
+            } elseif (key($failed) == 'length') {
+                if (key($failed['length']) == 'Required') {
                     $this->code = 420205;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['page']) == 'Min') {
-                    $this->code = 410106;
+                if (key($failed['length']) == 'Integer') {
+                    $this->code = 420206;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'In') {
+                    $this->code = 420207;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Required') {
+                    $this->code = 420208;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Integer') {
+                    $this->code = 420209;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Min') {
+                    $this->code = 410210;
                     $this->msg = $validator->errors()->first();
                 }
             }

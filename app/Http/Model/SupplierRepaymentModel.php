@@ -29,14 +29,10 @@ class SupplierRepaymentModel
     public function lists(array $data)
     {
         $limit = config('yucheng.limit');
-        $start = 0;
+        $start = is_null($data['start']) ? 0 : $data['start'];
 
         if (isset($input['limit']) && !is_null($data['limit'])) {
             $limit = $data['limit'];
-        }
-
-        if (isset($data['page']) && !is_null($data['page'])) {
-            $start = ($data['page'] - 1) * $limit;
         }
 
         if (empty($data['month'])){
@@ -44,7 +40,7 @@ class SupplierRepaymentModel
             $endTime = date('Y-12-31 23:59:59');
         }else{
             $startTime = $data['month'].'-01 00:00:00';
-            $endTime = $data['month'].'-'.date('t 23:59:59');
+            $endTime = (new \DateTime($data['month']))->format('Y-m-t 23:59:59');
         }
         return DB::table($this->table)
             ->where('supplierId',$data['supplierId'])

@@ -22,14 +22,10 @@ class SupplierOrdersModel
     public function lists(array $input)
     {
         $limit = config('yucheng.limit');
-        $start = 0;
+        $start = is_null($input['start']) ? 0 : $input['start'];
 
         if (isset($input['limit']) && !is_null($input['limit'])) {
             $limit = $input['limit'];
-        }
-
-        if (isset($input['page']) && !is_null($input['page'])) {
-            $start = ($input['page'] - 1) * $limit;
         }
 
         return DB::table($this->table)
@@ -93,5 +89,13 @@ class SupplierOrdersModel
      */
     public function update($pk,$data){
         return DB::table($this->table)->where('id',$pk)->update($data);
+    }
+
+    /**
+     * @param $supplierId
+     * @return mixed
+     */
+    public function countSupplierOrders($supplierId){
+        return DB::table($this->table)->where('supplierId',$supplierId)->count();
     }
 }

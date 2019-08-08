@@ -130,6 +130,7 @@ Route::group([
         Route::post('/supplier/add', 'SupplierController@add');
         Route::post('/supplier/info', 'SupplierController@info');
         Route::post('/supplier/edit', 'SupplierController@edit');
+        Route::post('/supplier/delete', 'SupplierController@delete');
         Route::post('/supplier/orderLists', 'SupplierController@orderLists');
         Route::post('/supplier/orderInfo', 'SupplierController@orderInfo');
         Route::post('/supplier/addOrder', 'SupplierController@addOrder');

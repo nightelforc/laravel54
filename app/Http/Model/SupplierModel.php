@@ -67,4 +67,31 @@ class SupplierModel
         unset($data['id']);
         return DB::table($this->table)->where('id',$id)->update($data);
     }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    private function delete(array $data)
+    {
+        return DB::table($this->table)->where($data)->delete();
+    }
+
+    /**
+     * @param array $data
+     * @return bool
+     */
+    public function deleteSupplier(array $data)
+    {
+        $supplierOrdersModel = new SupplierOrdersModel();
+        $count = $supplierOrdersModel->countSupplierOrders($data['id']);
+        if ($count== 0){
+            $this->delete($data);
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+
 }

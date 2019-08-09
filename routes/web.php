@@ -103,9 +103,9 @@ Route::group([
         Route::post('/project/delSection', 'ProjectController@delSection');
         //预算
         Route::post('/project/budgetLists', 'ProjectController@budgetLists');
+        Route::post('/project/costLists', 'ProjectController@costLists');
         //分账
-        Route::post('/projectSeparate/costLists', 'ProjectController@costLists');
-        Route::post('/projectSeparate/sectionLists', 'ProjectController@sectionListsWithGroup');
+        Route::post('/projectSeparate/sectionListsWithGroup', 'ProjectController@sectionListsWithGroup');
         Route::post('/projectSeparate/separateLog', 'ProjectController@separateLog');
         Route::post('/projectSeparate/addAssignment', 'ProjectController@addAssignment');
         Route::post('/projectSeparate/addSeparate', 'ProjectController@addSeparate');

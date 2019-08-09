@@ -48,7 +48,13 @@ class ProjectController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectAreaModel = new ProjectAreaModel();
-            $this->data = $projectAreaModel->lists($input);
+            $lists = $projectAreaModel->lists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
+            ];
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {
@@ -154,7 +160,8 @@ class ProjectController extends Controller
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型错误',
-            'amount.required' => '获取项目参数失败',
+            'amount.required' => '获取批量生成数量失败',
+            'amount.integer' => '批量生成参数类型错误',
         ];
         $input = $request->only(['projectId', 'amount']);
         $validator = Validator::make($input, $rules, $message);
@@ -304,26 +311,35 @@ class ProjectController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function sectionList(Request $request)
+    public function sectionLists(Request $request)
     {
         $rules = [
             'areaId' => 'required|integer',
-            'limit' => 'nullable|integer|in:10,20,50',
-            'page' => 'nullable|integer|min:1',
+            'draw' => 'required|integer',
+            'length' => 'required|integer|in:10,20,50',
+            'start' => 'required|integer|min:0',
         ];
         $message = [
             'areaId.required' => '获取施工区参数失败',
             'areaId.integer' => '施工区参数类型错误',
-            'limit.integer' => '记录条数参数类型错误',
-            'limit.in' => '记录条数参数值不正确',
-            'page.integer' => '页码参数类型错误',
-            'page.min' => '页码参数值不小于:min',
+            'length.required' => '获取记录条数失败',
+            'length.integer' => '记录条数参数类型错误',
+            'length.in' => '记录条数参数值不正确',
+            'start.required' => '获取起始记录位置失败',
+            'start.integer' => '起始记录参数类型错误',
+            'start.min' => '起始记录值不小于:min',
         ];
-        $input = $request->only(['areaId', 'search', 'limit', 'page']);
+        $input = $request->only(['areaId', 'search', 'draw', 'length', 'start']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectSectionModel = new ProjectSectionModel();
-            $this->data = $projectSectionModel->lists($input);
+            $lists = $projectSectionModel->lists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
+            ];
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'areaId') {
@@ -335,22 +351,39 @@ class ProjectController extends Controller
                     $this->code = 420802;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'limit') {
-                if (key($failed['limit']) == 'Integer') {
+            } elseif (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
                     $this->code = 420803;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['limit']) == 'In') {
+                if (key($failed['draw']) == 'Integer') {
                     $this->code = 420804;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'page') {
-                if (key($failed['page']) == 'Integer') {
+            }elseif (key($failed) == 'length') {
+                if (key($failed['length']) == 'Required') {
                     $this->code = 420805;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['page']) == 'Min') {
+                if (key($failed['length']) == 'Integer') {
                     $this->code = 420806;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'In') {
+                    $this->code = 420807;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Required') {
+                    $this->code = 420808;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Integer') {
+                    $this->code = 420809;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Min') {
+                    $this->code = 420810;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -365,33 +398,45 @@ class ProjectController extends Controller
     public function addSection(Request $request)
     {
         $rules = [
+            'projectId' => 'required|integer',
             'areaId' => 'required|integer',
             'name' => 'required',
         ];
         $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型错误',
             'areaId.required' => '获取施工区参数失败',
             'areaId.integer' => '施工区参数类型错误',
             'name.required' => '请填写项目名称',
         ];
-        $input = $request->only(['areaId', 'name', 'remark']);
+        $input = $request->only(['projectId','areaId', 'name', 'remark']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectSectionModel = new ProjectSectionModel();
             $projectSectionModel->insert($input);
         } else {
             $failed = $validator->failed();
-            if (key($failed) == 'areaId') {
-                if (key($failed['areaId']) == 'Required') {
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
                     $this->code = 420901;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['areaId']) == 'Integer') {
+                if (key($failed['projectId']) == 'Integer') {
                     $this->code = 420902;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'name') {
-                if (key($failed['name']) == 'Required') {
+            } elseif (key($failed) == 'areaId') {
+                if (key($failed['areaId']) == 'Required') {
                     $this->code = 420903;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['areaId']) == 'Integer') {
+                    $this->code = 420904;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'name') {
+                if (key($failed['name']) == 'Required') {
+                    $this->code = 420905;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -406,15 +451,18 @@ class ProjectController extends Controller
     public function batchAddSection(Request $request)
     {
         $rules = [
+            'projectId' => 'required|integer',
             'areaId' => 'required|integer',
             'amount' => 'required|integer',
         ];
         $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型错误',
             'areaId.required' => '获取施工区参数失败',
             'areaId.integer' => '施工区参数类型错误',
             'amount.required' => '获取项目参数失败',
         ];
-        $input = $request->only(['areaId', 'amount']);
+        $input = $request->only(['projectId','areaId', 'amount']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectSectionModel = new ProjectSectionModel();
@@ -423,22 +471,31 @@ class ProjectController extends Controller
             }
         } else {
             $failed = $validator->failed();
-            if (key($failed) == 'areaId') {
-                if (key($failed['areaId']) == 'Required') {
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
                     $this->code = 421001;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['areaId']) == 'Integer') {
+                if (key($failed['projectId']) == 'Integer') {
                     $this->code = 421002;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'areaId') {
+                if (key($failed['areaId']) == 'Required') {
+                    $this->code = 421003;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['areaId']) == 'Integer') {
+                    $this->code = 421004;
                     $this->msg = $validator->errors()->first();
                 }
             } elseif (key($failed) == 'amount') {
                 if (key($failed['amount']) == 'Required') {
-                    $this->code = 421003;
+                    $this->code = 421005;
                     $this->msg = $validator->errors()->first();
                 }
                 if (key($failed['amount']) == 'Integer') {
-                    $this->code = 421004;
+                    $this->code = 421006;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -568,8 +625,8 @@ class ProjectController extends Controller
             'sectionId' => 'required|integer',
         ];
         $message = [
-            'sectionId.required' => '获取施工区参数失败',
-            'sectionId.integer' => '施工区参数类型错误',
+            'sectionId.required' => '获取施工段参数失败',
+            'sectionId.integer' => '施工段参数类型错误',
         ];
         $input = $request->only(['sectionId']);
         $validator = Validator::make($input, $rules, $message);
@@ -602,8 +659,8 @@ class ProjectController extends Controller
             'sectionId' => 'required|integer',
         ];
         $message = [
-            'sectionId.required' => '获取施工区参数失败',
-            'sectionId.integer' => '施工区参数类型错误',
+            'sectionId.required' => '获取施工段参数失败',
+            'sectionId.integer' => '施工段参数类型错误',
         ];
         $input = $request->only(['sectionId']);
         $validator = Validator::make($input, $rules, $message);
@@ -634,26 +691,35 @@ class ProjectController extends Controller
     {
         $rules = [
             'areaId' => 'required|integer',
-            'limit' => 'nullable|integer|in:10,20,50',
-            'page' => 'nullable|integer|min:1',
+            'draw' => 'required|integer',
+            'length' => 'required|integer|in:10,20,50',
+            'start' => 'required|integer|min:0',
         ];
         $message = [
             'areaId.required' => '获取施工区参数失败',
             'areaId.integer' => '施工区参数类型错误',
-            'limit.integer' => '记录条数参数类型错误',
-            'limit.in' => '记录条数参数值不正确',
-            'page.integer' => '页码参数类型错误',
-            'page.min' => '页码参数值不小于:min',
+            'length.required' => '获取每页记录参数失败',
+            'length.integer' => '每页记录参数类型错误',
+            'length.in' => '每页记录参数值不正确',
+            'start.required' => '获取起始记录参数失败',
+            'start.integer' => '起始记录参数类型错误',
+            'start.min' => '起始记录参数值不小于:min',
         ];
-        $input = $request->only(['areaId', 'search', 'limit', 'page']);
+        $input = $request->only(['areaId', 'search', 'draw', 'length', 'start']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectSectionModel = new ProjectSectionModel();
-            $this->data = $projectSectionModel->lists($input);
+            $lists = $projectSectionModel->lists($input);
             $projectGroupAssignmentModel = new ProjectGroupAssignmentModel();
-            foreach ($this->data as $key => $r) {
-                $this->data[$key]->group = $projectGroupAssignmentModel->sectionLists(['sectionId' => $r->id]);
+            foreach ($lists as $key => $r) {
+                $lists[$key]->group = $projectGroupAssignmentModel->sectionLists(['sectionId' => $r->id]);
             }
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
+            ];
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'areaId') {
@@ -665,22 +731,39 @@ class ProjectController extends Controller
                     $this->code = 421602;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'limit') {
-                if (key($failed['limit']) == 'Integer') {
+            } elseif (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
                     $this->code = 421603;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['limit']) == 'In') {
+                if (key($failed['draw']) == 'Integer') {
                     $this->code = 421604;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'page') {
-                if (key($failed['page']) == 'Integer') {
+            } elseif (key($failed) == 'limit') {
+                if (key($failed['length']) == 'Required') {
                     $this->code = 421605;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['page']) == 'Min') {
+                if (key($failed['length']) == 'Integer') {
+                    $this->code = 421605;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'In') {
                     $this->code = 421606;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Required') {
+                    $this->code = 421607;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Integer') {
+                    $this->code = 421607;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Min') {
+                    $this->code = 421608;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -1091,22 +1174,31 @@ class ProjectController extends Controller
     {
         $rules = [
             'projectId' => 'required|integer',
-            'limit' => 'nullable|integer|in:10,20,50',
-            'page' => 'nullable|integer|min:1',
+            'draw' => 'required|integer',
+            'length' => 'required|integer|in:10,20,50',
+            'start' => 'required|integer|min:0',
         ];
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型错误',
-            'limit.integer' => '记录条数参数类型错误',
-            'limit.in' => '记录条数参数值不正确',
-            'page.integer' => '页码参数类型错误',
-            'page.min' => '页码参数值不小于:min',
+            'length.required' => '获取项目参数失败',
+            'length.integer' => '记录条数参数类型错误',
+            'length.in' => '记录条数参数值不正确',
+            'start.required' => '获取起始记录参数失败',
+            'start.integer' => '起始记录参数类型错误',
+            'start.min' => '起始记录参数值不小于:min',
         ];
-        $input = $request->only(['projectId', 'limit', 'page']);
+        $input = $request->only(['projectId', 'draw', 'length', 'start']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectOtherSeparateAccountsModel = new ProjectOtherSeparateAccountsModel();
-            $this->data = $projectOtherSeparateAccountsModel->lists($input);
+            $lists = $projectOtherSeparateAccountsModel->lists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
+            ];
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {
@@ -1118,22 +1210,39 @@ class ProjectController extends Controller
                     $this->code = 422002;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'limit') {
-                if (key($failed['limit']) == 'Integer') {
+            } elseif (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
                     $this->code = 422003;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['limit']) == 'In') {
+                if (key($failed['draw']) == 'Integer') {
                     $this->code = 422004;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'page') {
-                if (key($failed['page']) == 'Integer') {
+            } elseif (key($failed) == 'length') {
+                if (key($failed['length']) == 'Required') {
                     $this->code = 422005;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['page']) == 'Min') {
+                if (key($failed['length']) == 'Integer') {
                     $this->code = 422006;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'In') {
+                    $this->code = 422007;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Required') {
+                    $this->code = 422008;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Integer') {
+                    $this->code = 422009;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Min') {
+                    $this->code = 422010;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -1305,6 +1414,10 @@ class ProjectController extends Controller
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function delOtherSeparate(Request $request)
     {
         $rules = [

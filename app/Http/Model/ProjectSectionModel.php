@@ -21,14 +21,10 @@ class ProjectSectionModel
     public function lists(array $data)
     {
         $limit = config('yucheng.limit');
-        $start = 0;
+        $start = is_null($data['start']) ? 0 : $data['start'];
 
         if (isset($data['limit']) && !is_null($data['limit'])) {
             $limit = $data['limit'];
-        }
-
-        if (isset($data['page']) && !is_null($data['page'])) {
-            $start = ($data['page'] - 1) * $limit;
         }
 
         return DB::table($this->table)
@@ -38,7 +34,8 @@ class ProjectSectionModel
                     $query->where('name', 'like', '%' . $data['search'] . '%');
                 }
             })
-            ->offset($start)->limit($limit)->get()->toArray();
+            ->offset($start)->limit($limit)
+            ->get()->toArray();
     }
 
     /**

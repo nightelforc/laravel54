@@ -31,7 +31,7 @@ class ProjectGroupAssignmentModel
         return DB::table($this->table)
             ->leftJoin('profession as p','p.id','=',$this->table.'.professionId')
             ->where($data)
-            ->where('status',1)
+            ->where($this->table.'.status',1)
             ->groupBy('professionId')
             ->select('p.id','projectId','areaId','sectionId','professionId','p.name as professionName',DB::raw('sum(totalPrice) as totalPrice'),DB::raw('sum(amount) as amount'))
             ->get()->toArray();

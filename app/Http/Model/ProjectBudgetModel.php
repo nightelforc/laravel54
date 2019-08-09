@@ -24,6 +24,6 @@ class ProjectBudgetModel
         return DB::table($this->table)
             ->leftJoin('profession as p','p.id','=',$this->table.'.professionId')
             ->where('sectionId', $data['sectionId'])
-            ->get([$this->table.'.*','p.name'])->toArray();
+            ->get([$this->table.'.*','p.name as professionName'])->toArray();
     }
 }

@@ -172,8 +172,13 @@ class FinanceController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $supplierOrdersModel = new SupplierOrdersModel();
-            $this->data = $supplierOrdersModel->lists($input);
-
+            $lists = $supplierOrdersModel->lists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
+            ];
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {
@@ -263,7 +268,13 @@ class FinanceController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeLoanModel = new EmployeeLoanModel();
-            $this->data = $employeeLoanModel->lists($input);
+            $lists = $employeeLoanModel->lists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
+            ];
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {
@@ -358,7 +369,13 @@ class FinanceController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeLivingModel = new EmployeeLivingModel();
-            $this->data = $employeeLivingModel->lists($input);
+            $lists = $employeeLivingModel->lists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
+            ];
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {

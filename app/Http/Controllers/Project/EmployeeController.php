@@ -628,16 +628,16 @@ class EmployeeController extends Controller
             'length.required' => '请填写工作时长',
             'length.numeric' => '工作时长类型错误',
         ];
-        $data = $request->only('data');
+        $data = $request->only(['data']);
         $return = false;
-        foreach ($data as $key => $d) {
+        foreach ($data['data'] as $key => $d) {
             $validator = Validator::make($d, $rules, $message);
             if ($validator->fails()) {
                 $failed = $validator->failed();
                 if (key($failed) == 'employeeId') {
                     if (key($failed['employeeId']) == 'Required') {
                         $this->code = 410901;
-                        $this->msg = $validator->errors()->first();
+                        $this->msg = '第'.$key.'条'.$validator->errors()->first();
                     }
                     if (key($failed['employeeId']) == 'Integer') {
                         $this->code = 410902;

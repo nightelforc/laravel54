@@ -238,10 +238,12 @@ class EmployeeModel extends Model
     {
         //获取考勤人员的列表
         $lists = DB::table($this->table)
+            ->leftJoin('profession as p','p.id','=',$this->table.'.professionId')
             ->where('projectId', $input['projectId'])
             ->where('hasAttendance', 1)
             ->where('isFinish', 0)
             ->orderBy('status', 'asc')
+            ->select($this->table.'.*','p.name as professionName')
             ->get()->toArray();
         if (count($lists) == 0) {
             return $lists;

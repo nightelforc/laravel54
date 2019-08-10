@@ -15,6 +15,7 @@ use App\Http\Model\ProjectBudgetModel;
 use App\Http\Model\ProjectGroupAssignmentModel;
 use App\Http\Model\ProjectGroupModel;
 use App\Http\Model\ProjectGroupSeparateAccountsModel;
+use App\Http\Model\ProjectModel;
 use App\Http\Model\ProjectOtherSeparateAccountsModel;
 use App\Http\Model\ProjectSectionModel;
 use Illuminate\Http\Request;
@@ -22,6 +23,16 @@ use Illuminate\Support\Facades\Validator;
 
 class ProjectController extends Controller
 {
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function selectLists(){
+        $projectModel = new ProjectModel();
+        $this->data = $projectModel->lists();
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
     /**
      * @param Request $request
      * @return \Illuminate\Http\Response

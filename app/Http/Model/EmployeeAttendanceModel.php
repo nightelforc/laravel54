@@ -55,11 +55,11 @@ class EmployeeAttendanceModel
         if (count($data) == count($data,1)){
             $data['createTime'] = date('Y-m-d H:i:s');
         }else{
-            foreach ($data as $key => $d){
-                $data[$key]['createTime'] = date('Y-m-d H:i:s');
+            foreach ($data['data'] as $key => $d){
+                $data['data'][$key]['createTime'] = date('Y-m-d H:i:s');
             }
         }
-        return DB::table($this->table)->insert($data);
+        return DB::table($this->table)->insert($data['data']);
     }
 
 }

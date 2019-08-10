@@ -22,16 +22,17 @@ class MaterialSpecModel
     public function lists(array $data)
     {
         $limit = config('yucheng.limit');
-        $start = 0;
+        $start = is_null($data['start']) ? 0 : $data['start'];
 
         if (isset($data['limit']) && !is_null($data['limit'])) {
             $limit = $data['limit'];
         }
 
-        if (isset($data['page']) && !is_null($data['page'])) {
-            $start = ($data['page'] - 1) * $limit;
-        }
-        return DB::table($this->table)->where($data)->where('isDel',0)->offset($start)->limit($limit)->get()->toArray();
+        return DB::table($this->table)
+            ->where(function ($query) use($data){
+                $query->where('materialId',$data['materialId'])->where('isDel',0);
+            })
+            ->offset($start)->limit($limit)->get()->toArray();
     }
 
     /**
@@ -61,5 +62,15 @@ class MaterialSpecModel
     public function delete(array $data)
     {
         return DB::table($this->table)->where($data)->update(['isDel'=>1]);
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function info(array $data)
+    {
+        $result = DB::table($this->table)->where($data)->first();
+        return empty($result) ? [] : get_object_vars($result);
     }
 }

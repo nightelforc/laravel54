@@ -35,22 +35,31 @@ class WarehouseController extends Controller
     {
         $rules = [
             'projectId' => 'required|integer',
-            'limit' => 'nullable|integer|in:10,20,50',
-            'page' => 'nullable|integer|min:1',
+            'draw' => 'required|integer',
+            'length' => 'required|integer|in:10,20,50',
+            'start' => 'required|integer|min:0',
         ];
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型不正确',
-            'limit.integer' => '记录条数参数类型错误',
-            'limit.in' => '记录条数参数值不正确',
-            'page.integer' => '页码参数类型错误',
-            'page.min' => '页码参数值不小于:min',
+            'length.required' => '获取每页记录参数失败',
+            'length.integer' => '每页记录条数参数类型错误',
+            'length.in' => '每页记录参数值不正确',
+            'start.required' => '获取起始记录参数失败',
+            'start.integer' => '起始记录参数类型错误',
+            'start.min' => '起始记录参数值不小于:min',
         ];
-        $input = $request->only(['projectId', 'search', 'limit', 'page']);
+        $input = $request->only(['projectId', 'search', 'draw', 'length', 'start']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $warehouseModel = new WarehouseModel();
-            $warehouseModel->lists($input);
+            $lists = $warehouseModel->lists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
+            ];
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {
@@ -62,22 +71,39 @@ class WarehouseController extends Controller
                     $this->code = 460102;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'limit') {
-                if (key($failed['limit']) == 'Integer') {
+            } elseif (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
                     $this->code = 460103;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['limit']) == 'In') {
+                if (key($failed['draw']) == 'Integer') {
                     $this->code = 460104;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'page') {
-                if (key($failed['page']) == 'Integer') {
+            } elseif (key($failed) == 'length') {
+                if (key($failed['length']) == 'Required') {
                     $this->code = 460105;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['page']) == 'Min') {
+                if (key($failed['length']) == 'Integer') {
                     $this->code = 460106;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'In') {
+                    $this->code = 460107;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Required') {
+                    $this->code = 460108;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Integer') {
+                    $this->code = 460109;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Min') {
+                    $this->code = 460110;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -102,7 +128,7 @@ class WarehouseController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $warehouseModel = new WarehouseModel();
-            $warehouseModel->info($input);
+            $this->data = $warehouseModel->info($input);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
@@ -996,7 +1022,7 @@ class WarehouseController extends Controller
             'data.required' => '请填写材料具体信息',
             'data.array' => '材料具体信息类型不正确',
         ];
-        $input = $request->only(['projectId', 'time', 'data', 'remark']);
+        $input = $request->only(['projectId', 'time', 'price','data', 'remark']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $rules1 = [
@@ -1215,7 +1241,7 @@ class WarehouseController extends Controller
             'data.required' => '请填写材料具体信息',
             'data.array' => '材料具体信息类型不正确',
         ];
-        $input = $request->only(['projectId', 'time', 'data', 'remark']);
+        $input = $request->only(['projectId', 'price', 'time', 'data', 'remark']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $rules1 = [

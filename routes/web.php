@@ -87,6 +87,7 @@ Route::group([
         Route::post('/employee/addLeave', 'EmployeeController@addLeave');
 
         //-------------------项目管理-------------------//
+        Route::post('/project/selectLists', 'ProjectController@selectLists');
         //楼栋
         Route::post('/project/areaLists', 'ProjectController@areaLists');
         Route::post('/project/addArea', 'ProjectController@addArea');
@@ -147,6 +148,7 @@ Route::group([
         Route::post('/material/specLists', 'MaterialController@specLists');
         Route::post('/material/addSpec', 'MaterialController@addSpec');
         Route::post('/material/editSpec', 'MaterialController@editSpec');
+        Route::post('/material/specInfo', 'MaterialController@specInfo');
         Route::post('/material/delSpec', 'MaterialController@delSpec');
 
         //-------------------仓库管理-------------------//

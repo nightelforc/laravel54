@@ -23,38 +23,64 @@ class MaterialController extends Controller
      */
     public function lists(Request $request){
         $rules = [
-            'limit' => 'nullable|integer|in:10,20,50',
-            'page' => 'nullable|integer|min:1',
+            'draw' => 'required|integer',
+            'length' => 'required|integer|in:10,20,50',
+            'start' => 'required|integer|min:0',
         ];
         $message = [
-            'limit.integer' => '记录条数参数类型错误',
-            'limit.in' => '记录条数参数值不正确',
-            'page.integer' => '页码参数类型错误',
-            'page.min' => '页码参数值不小于:min',
+            'length.required'=>'获取每页记录数失败',
+            'length.integer' => '每页记录参数类型错误',
+            'length.in' => '每页记录参数值不正确',
+            'start.required'=>'获取起始记录失败',
+            'start.integer' => '起始记录类型错误',
+            'start.min' => '起始记录参数值不小于:min',
         ];
-        $input = $request->only(['search','limit','page']);
+        $input = $request->only(['search','draw','length','start']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $materialModel = new MaterialModel();
-            $this->data = $materialModel->lists($input);
+            $lists = $materialModel->lists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
+            ];
         } else {
             $failed = $validator->failed();
-            if (key($failed) == 'limit') {
-                if (key($failed['limit']) == 'Integer') {
+            if (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
                     $this->code = 450101;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['limit']) == 'In') {
+                if (key($failed['draw']) == 'Integer') {
                     $this->code = 450102;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'page') {
-                if (key($failed['page']) == 'Integer') {
+            }elseif (key($failed) == 'length') {
+                if (key($failed['length']) == 'Required') {
                     $this->code = 450103;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['page']) == 'Min') {
+                if (key($failed['length']) == 'Integer') {
                     $this->code = 450104;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'In') {
+                    $this->code = 450105;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Required') {
+                    $this->code = 450106;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Integer') {
+                    $this->code = 450107;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Min') {
+                    $this->code = 450108;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -107,7 +133,7 @@ class MaterialController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $materialModel = new MaterialModel();
-            $materialModel->info($input);
+            $this->data = $materialModel->info($input);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
@@ -226,31 +252,75 @@ class MaterialController extends Controller
     public function specLists(Request $request){
         $rules = [
             'materialId' => 'required|integer',
-            'limit' => 'nullable|integer|in:10,20,50',
-            'page' => 'nullable|integer|min:1',
+            'draw' => 'required|integer',
+            'length' => 'required|integer|in:10,20,50',
+            'start' => 'required|integer|min:0',
         ];
         $message = [
             'materialId.required' => '获取材料参数失败',
             'materialId.integer' => '材料参数类型错误',
-            'limit.integer' => '记录条数参数类型错误',
-            'limit.in' => '记录条数参数值不正确',
-            'page.integer' => '页码参数类型错误',
-            'page.min' => '页码参数值不小于:min',
+            'length.required' => '获取每页记录参数失败',
+            'length.integer' => '每页记录参数类型错误',
+            'length.in' => '每页记录参数值不正确',
+            'start.required' => '获取起始记录参数失败',
+            'start.integer' => '起始记录参数类型错误',
+            'start.min' => '起始记录参数值不小于:min',
         ];
-        $input = $request->only(['materialId','limit','page']);
+        $input = $request->only(['materialId','draw','length','start']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $materialSpecModel = new MaterialSpecModel();
-            $this->data = $materialSpecModel->lists($input);
+            $lists = $materialSpecModel->lists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
+            ];
         } else {
             $failed = $validator->failed();
-            if (key($failed) == 'id') {
-                if (key($failed['id']) == 'Required') {
+            if (key($failed) == 'materialId') {
+                if (key($failed['materialId']) == 'Required') {
                     $this->code = 450601;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['id']) == 'Integer') {
+                if (key($failed['materialId']) == 'Integer') {
                     $this->code = 450602;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
+                    $this->code = 450603;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['draw']) == 'Integer') {
+                    $this->code = 450604;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'length') {
+                if (key($failed['length']) == 'Required') {
+                    $this->code = 450605;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'Integer') {
+                    $this->code = 450606;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'In') {
+                    $this->code = 450607;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Required') {
+                    $this->code = 450608;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Integer') {
+                    $this->code = 450608;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'In') {
+                    $this->code = 450610;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -265,28 +335,40 @@ class MaterialController extends Controller
      */
     public function addSpec(Request $request){
         $rules = [
+            'materialId' => 'required|integer',
             'spec' => 'required',
             'brand' => 'required',
         ];
         $message = [
+            'materialId.required' => '获取材料参数失败',
+            'materialId.integer' => '材料参数类型错误',
             'spec.required' => '请填写规格',
             'brand.integer' => '请填写品牌',
         ];
-        $input = $request->only(['spec','brand']);
+        $input = $request->only(['materialId','spec','brand']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $materialSpecModel = new MaterialSpecModel();
             $materialSpecModel->add($input);
         } else {
             $failed = $validator->failed();
-            if (key($failed) == 'spec') {
-                if (key($failed['spec']) == 'Required') {
+            if (key($failed) == 'materialId') {
+                if (key($failed['materialId']) == 'Required') {
                     $this->code = 450701;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['materialId']) == 'Integer') {
+                    $this->code = 450702;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'spec') {
+                if (key($failed['spec']) == 'Required') {
+                    $this->code = 450703;
                     $this->msg = $validator->errors()->first();
                 }
             } elseif (key($failed) == 'brand') {
                 if (key($failed['brand']) == 'Required') {
-                    $this->code = 450702;
+                    $this->code = 450704;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -347,6 +429,39 @@ class MaterialController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
+    public function specInfo(Request $request){
+        $rules = [
+            'id'=>'required|integer',
+        ];
+        $message = [
+            'id.required' => '获取规格参数失败',
+            'id.integer' => '规格参数类型错误',
+        ];
+        $input = $request->only(['id']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $materialSpecModel = new MaterialSpecModel();
+            $this->data = $materialSpecModel->info($input);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'id') {
+                if (key($failed['id']) == 'Required') {
+                    $this->code = 450901;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['id']) == 'Integer') {
+                    $this->code = 450902;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function delSpec(Request $request){
         $rules = [
             'id'=>'required|integer',
@@ -364,11 +479,11 @@ class MaterialController extends Controller
             $failed = $validator->failed();
             if (key($failed) == 'id') {
                 if (key($failed['id']) == 'Required') {
-                    $this->code = 450901;
+                    $this->code = 451001;
                     $this->msg = $validator->errors()->first();
                 }
                 if (key($failed['id']) == 'Integer') {
-                    $this->code = 450902;
+                    $this->code = 451002;
                     $this->msg = $validator->errors()->first();
                 }
             }

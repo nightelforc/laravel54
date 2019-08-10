@@ -20,7 +20,7 @@ class ProjectModel
      */
     public function lists()
     {
-        return DB::table($this->table)->get()->toArray();
+        return DB::table($this->table)->where('id','!=',1)->get()->toArray();
     }
 
     public function insert(array $data)

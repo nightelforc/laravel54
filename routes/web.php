@@ -45,8 +45,7 @@ Route::group([
         Route::post('/role/setPermission', 'RoleController@setPermission');
         //-------------------权限管理-------------------//
         Route::post('/permission/lists', 'PermissionController@lists');
-        //保存权限 TODO
-
+        //-------------------审批流程管理-------------------//
         Route::post('/workflow/lists', 'WorkflowController@lists');
         Route::post('/workflow/info', 'WorkflowController@info');
         //不开放审批流程的添加

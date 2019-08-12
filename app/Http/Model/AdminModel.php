@@ -23,7 +23,8 @@ class AdminModel
     public function login($data)
     {
         $where = $this->encrypt($data);
-        return $this->info($where);
+        $info = $this->info($where);
+        return $info;
     }
 
     /**

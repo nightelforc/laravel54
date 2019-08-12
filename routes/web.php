@@ -34,6 +34,18 @@ Route::group([
         Route::post('/admin/info', 'AdminController@info');
         Route::post('/admin/edit', 'AdminController@edit');
         Route::post('/admin/editStatus', 'AdminController@editStatus');
+        Route::post('/admin/setPermission', 'AdminController@setPermission');
+        //-------------------角色管理-------------------//
+        Route::post('/role/lists', 'RoleController@lists');
+        Route::post('/role/add', 'RoleController@add');
+        Route::post('/role/info', 'RoleController@info');
+        Route::post('/role/edit', 'RoleController@edit');
+        Route::post('/role/editStatus', 'RoleController@editStatus');
+        Route::post('/role/delete', 'RoleController@delete');
+        Route::post('/role/setPermission', 'RoleController@setPermission');
+        //-------------------权限管理-------------------//
+        Route::post('/permission/lists', 'PermissionController@lists');
+        //保存权限 TODO
 
         Route::post('/workflow/lists', 'WorkflowController@lists');
         Route::post('/workflow/info', 'WorkflowController@info');

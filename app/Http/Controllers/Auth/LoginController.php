@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Model\AdminModel;
+use App\Http\Model\AdminPermissionModel;
+use App\Http\Model\AdminRoleModel;
+use App\Http\Model\RolePermissionModel;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -63,7 +66,11 @@ class LoginController extends Controller
             $result = $adminModel->login($request->all());
             if (!empty($result)) {
                 if ($result['status'] == 1){
-                    unset($result->password);
+                    $result['role'] = (new AdminController())->getRole($result['id']);
+                    //获取用户权限
+                    $roleId = isset($result['role']['roleId'])?$result['role']['roleId']:0;
+                    $result['permission'] = (new AdminController())->getPermission($result['id'],$roleId);
+
                     $request->session()->put(parent::pasn, $result);
                     $this->data = $result;
                 }else{

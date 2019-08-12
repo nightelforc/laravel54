@@ -11,6 +11,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Model\AdminModel;
+use App\Http\Model\AdminPermissionModel;
+use App\Http\Model\AdminRoleModel;
+use App\Http\Model\RolePermissionModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -279,11 +282,11 @@ class AdminController extends Controller
             'status.integer' => '管理员状态参数类型错误',
             'status.in' => '管理员状态参数不正确',
         ];
-        $input = $request->only(['id','status']);
+        $input = $request->only(['id', 'status']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $adminModel = new AdminModel();
-            $adminModel->updateStatus($input['id'],['status'=>$input['status']]);
+            $adminModel->updateStatus($input['id'], ['status' => $input['status']]);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
@@ -292,7 +295,77 @@ class AdminController extends Controller
                     $this->msg = $validator->errors()->first();
                 }
                 if (key($failed['id']) == 'Integer') {
-                    $this->code = 12052;
+                    $this->code = 120502;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param $adminId
+     * @return mixed
+     */
+    public function getRole($adminId)
+    {
+        $adminRoleModel = new AdminRoleModel();
+        $adminRole = $adminRoleModel->getAdminRole($adminId);
+        return $adminRole;
+    }
+
+    /**
+     * @param $adminId
+     * @param $roleId
+     * @return array
+     */
+    public function getPermission($adminId, $roleId = 0)
+    {
+        $rolePermission = [];
+        if ($roleId != 0) {
+            $rolePermissionModel = new RolePermissionModel();
+            $rolePermission = $rolePermissionModel->getPermission($roleId);
+        }
+        //获取用户特有权限
+        $adminPermissionModel = new AdminPermissionModel();
+        $adminPermission = $adminPermissionModel->getPermission($adminId);
+        return array_merge($rolePermission, $adminPermission);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function setPermission(Request $request){
+        $rules = [
+            'adminId' => 'required|integer',
+            'permissions' => 'array',
+        ];
+        $message = [
+            'adminId.required' => '获取管理员参数失败',
+            'adminId.integer' => '管理员参数类型错误',
+            'permissions.array' => '权限参数类型错误',
+        ];
+        $input = $request->only(['adminId','permissions']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $adminPermissionModel = new AdminPermissionModel();
+            $result = $adminPermissionModel->insert($input);
+            $this->msg = '成功设置 '.$result.' 条功能的权限';
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'adminId') {
+                if (key($failed['adminId']) == 'Required') {
+                    $this->code = 120601;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['adminId']) == 'Integer') {
+                    $this->code = 120602;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'permissions') {
+                if (key($failed['permissions']) == 'array') {
+                    $this->code = 120603;
                     $this->msg = $validator->errors()->first();
                 }
             }

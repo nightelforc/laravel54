@@ -31,4 +31,29 @@ class AdminRoleModel
     public function update($pk,$data){
         return DB::table($this->table)->where('adminId',$pk)->update($data);
     }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function info($data = [])
+    {
+        $result = DB::table($this->table)->where($data)->first();
+        return empty($result) ? [] : get_object_vars($result);
+    }
+
+    /**
+     * @param $id
+     * @return mixed
+     */
+    public function getAdminRole($id)
+    {
+        $result = DB::table($this->table)
+            ->leftJoin('role as r','r.id','=',$this->table.'.roleId')
+            ->where('r.status',1)
+            ->where('adminId',$id)
+            ->select('r.id as roleId','r.name as roleName')
+            ->first();
+        return empty($result) ? [] : get_object_vars($result);
+    }
 }

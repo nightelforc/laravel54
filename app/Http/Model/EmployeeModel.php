@@ -31,7 +31,10 @@ class EmployeeModel extends Model
         return DB::table($this->table)
             ->leftJoin('profession as p', 'p.id', '=', $this->table . '.professionId')
             ->where(function ($query) use ($input) {
-                $query->where('projectId', $input['projectId'])->where('isFinish', 0);
+                $query->where('isFinish', 0);
+                if (isset($input['projectId']) && !is_null($input['projectId'])) {
+                    $query->where('projectId', $input['projectId']);
+                }
                 if (isset($input['professionId']) && !is_null($input['professionId'])) {
                     $query->where('professionId', $input['professionId']);
                 }
@@ -67,12 +70,21 @@ class EmployeeModel extends Model
     }
 
     /**
+     * @param $pk
+     * @param array $data
+     * @return mixed
+     */
+    public function update($pk,array $data){
+        return DB::table($this->table)->where('id', $pk)->update($data);
+    }
+
+    /**
      * @param $data
      * @return mixed
      */
     public function updateStatus($data)
     {
-        return DB::table($this->table)->where('id', $data['id'])->update(['status' => $data['status']]);
+        return $this->update($data['id'],['status' => $data['status']]);
     }
 
     /**
@@ -230,6 +242,32 @@ class EmployeeModel extends Model
     }
 
     /**
+     * @param array $data
+     * @return mixed
+     */
+    public function attendanceEmployee(array $data){
+        return DB::table($this->table)
+            ->leftJoin('profession as p','p.id','=',$this->table.'.professionId')
+            ->where(function ($query) use ($data){
+                $query->where('hasAttendance', 1)->where('isFinish', 0);
+                if (isset($data['projectId']) && !empty($data['projectId'])){
+                    $query->where('projectId', $data['projectId']);
+                }
+                if (isset($data['professionId']) && !empty($data['professionId'])){
+                    $query->where('professionId', $data['professionId']);
+                }
+                if (isset($input['search']) && !is_null($data['search'])) {
+                    $query->where(function ($query1) use ($data) {
+                        $query1->where($this->table . '.name', 'like', '%' . $data['search'] . '%')->orWhere('jobNumber', 'like', '%' . $data['search'] . '%');
+                    });
+                }
+            })
+            ->orderBy('status', 'asc')
+            ->select($this->table.'.*','p.name as professionName')
+            ->get()->toArray();
+    }
+
+    /**
      * @param array $input
      * @return mixed
      * @throws \Exception
@@ -237,14 +275,7 @@ class EmployeeModel extends Model
     public function attendanceList(array $input)
     {
         //获取考勤人员的列表
-        $lists = DB::table($this->table)
-            ->leftJoin('profession as p','p.id','=',$this->table.'.professionId')
-            ->where('projectId', $input['projectId'])
-            ->where('hasAttendance', 1)
-            ->where('isFinish', 0)
-            ->orderBy('status', 'asc')
-            ->select($this->table.'.*','p.name as professionName')
-            ->get()->toArray();
+        $lists = $this->attendanceEmployee($input);
         if (count($lists) == 0) {
             return $lists;
         }
@@ -291,5 +322,36 @@ class EmployeeModel extends Model
             ->get()->toArray();
     }
 
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function dayValueLists(array $data){
+        $lists = $this->attendanceEmployee($data);
+        $employeeAttendanceModel = new EmployeeAttendanceModel();
 
+        $findYear = (new YearModel())->findYear(date('Y-m-d H:i:s', time()));
+        if (empty($findYear)) {
+            $findYear['startTime'] = date('Y-01-01 00:00:00');
+            $findYear['endTime'] = date('Y-12-31 23:59:59');
+        } else {
+            $findYear = get_object_vars($findYear);
+        }
+
+        foreach ($lists as $key => $l){
+            $attendance = $employeeAttendanceModel->getAttendancesSum($l->id,$findYear['startTime'],$findYear['endTime']);
+            $lists[$key]->attendance =$attendance->attendance;
+        }
+
+        return $lists;
+    }
+
+    /**
+     * @param array $input
+     * @return mixed
+     */
+    public function insert(array $input)
+    {
+        return DB::table($this->table)->insertGetId($input);
+    }
 }

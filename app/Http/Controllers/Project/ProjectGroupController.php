@@ -38,7 +38,7 @@ class ProjectGroupController extends Controller
             'professionId.required' => '获取工种参数失败',
             'professionId.integer' => '工种参数类型错误',
         ];
-        $input = $request->only(['projectId','professionId']);
+        $input = $request->only(['projectId','professionId','search']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();

@@ -41,6 +41,9 @@ class ProjectGroupModel
                 if (isset($data['professionId']) && !is_null($data['professionId'])) {
                     $query->where($this->table.'.professionId', $data['professionId']);
                 }
+                if (isset($data['search']) && !is_null($data['search'])) {
+                    $query->where($this->table.'.name','like','%'. $data['search'].'%');
+                }
             })
             ->get([$this->table.'.*','p.name as professionName','e.name as employeeName'])->toArray();
     }
@@ -93,6 +96,6 @@ class ProjectGroupModel
      */
     public function updateIsLeader($data)
     {
-        return DB::table($this->table)->where('id', $data['groupId'])->update(['groupLeader' => $data['employeeId']]);
+        return DB::table($this->table)->where('id', $data['groupId'])->update(['groupLeader' => $data['groupLeader']]);
     }
 }

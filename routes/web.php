@@ -56,6 +56,11 @@ Route::group([
         'namespace'=>'Company',
         'prefix'=>'company',
     ],function(){
+        //-------------------工人管理-------------------//
+        Route::post('/employee/add', 'EmployeeController@add');
+        Route::post('/employee/dayValueLists', 'EmployeeController@dayValueLists');
+        Route::post('/employee/editDayValue', 'EmployeeController@editDayValue');
+
         Route::post('/project/lists', 'ProjectController@lists');
         Route::post('/project/add', 'ProjectController@add');
         Route::post('/project/info', 'ProjectController@info');

@@ -21,7 +21,7 @@ class ProjectSectionModel
     public function lists(array $data)
     {
         $limit = config('yucheng.limit');
-        $start = is_null($data['start']) ? 0 : $data['start'];
+        $start =(!isset($data['start']) || is_null($data['start'])) ? 0 : $data['start'];
 
         if (isset($data['limit']) && !is_null($data['limit'])) {
             $limit = $data['limit'];
@@ -67,5 +67,13 @@ class ProjectSectionModel
         $id = $data['id'];
         unset($data['id']);
         return DB::table($this->table)->where('id', $id)->update($data);
+    }
+
+    /**
+     * @param $data
+     * @return mixed
+     */
+    public function delete($data){
+        return DB::table($this->table)->where($data)->delete();
     }
 }

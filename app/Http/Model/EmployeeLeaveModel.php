@@ -50,7 +50,7 @@ class EmployeeLeaveModel
             ->leftJoin('profession as p','p.id','=','e.professionId')
             ->offset($start)->limit($limit)
             ->orderBy('createTime','desc')
-            ->get([$this->table.'.*','e.name as employeeName','e.jobNumber','p.name as professionName'])->toArray();
+            ->get([$this->table.'.*','e.name as employeeName','e.jobNumber','p.name as professionName','e.status as employeeStatus'])->toArray();
     }
 
     /**
@@ -59,7 +59,7 @@ class EmployeeLeaveModel
      */
     public function back(array $data)
     {
-        $info  = get_object_vars(DB::table($this->table)->where('id',$data['id'])->fisrst());
+        $info  = get_object_vars(DB::table($this->table)->where('id',$data['id'])->first());
         (new EmployeeModel())->updateStatus(['id'=>$info['employeeId'],'status'=>1]);
         return DB::table($this->table)
             ->where('id',$data['id'])

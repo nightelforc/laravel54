@@ -31,6 +31,22 @@ class EmployeeAttendanceModel
     }
 
     /**
+     * @param $id
+     * @param $startTime
+     * @param $endTime
+     * @return mixed
+     */
+    public function getAttendancesSum($id, $startTime, $endTime)
+    {
+        return DB::table($this->table)
+            ->where('employeeId',$id)
+            ->where('day','>',$startTime)
+            ->where('day','<',$endTime)
+            ->select(DB::raw('SUM(length) as attendance'))
+            ->first();
+    }
+
+    /**
      * @param $employeeId
      * @param $projectId
      * @param $startTime

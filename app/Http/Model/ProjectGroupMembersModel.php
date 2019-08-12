@@ -24,7 +24,7 @@ class ProjectGroupMembersModel
             ->leftJoin('employee as e','e.id','=',$this->table.'.employeeId')
             ->where($this->table.'.groupId',$data['groupId'])
             ->where('isDel',0)
-            ->get([$this->table.'.*','e.jobNumber','e.status'])->toArray();
+            ->get([$this->table.'.*','e.jobNumber','e.name as employeeName','e.status'])->toArray();
     }
 
     /**

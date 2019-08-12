@@ -1525,6 +1525,10 @@ class WarehouseController extends Controller
         $this->logLists($request,self::BREAKDOWN);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function consumeLists(Request $request){
         $rules = [
             'projectId' => 'required|integer',

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Model\AdminModel;
 use App\Http\Model\AdminPermissionModel;
 use App\Http\Model\AdminRoleModel;
+use App\Http\Model\AdminSessionModel;
 use App\Http\Model\RolePermissionModel;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -71,7 +72,7 @@ class LoginController extends Controller
                     $roleId = isset($result['role']['roleId'])?$result['role']['roleId']:0;
                     $result['permission'] = (new AdminController())->getPermission($result['id'],$roleId);
 
-                    $request->session()->put(parent::pasn, $result);
+                    AdminSessionModel::put($result['id'],$this->tokenGenerator());
                     $this->data = $result;
                 }else{
                     $this->code = 110104;
@@ -107,7 +108,7 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->session()->forget(parent::pasn);
+        AdminSessionModel::delete($request->input(config('yucheng.token')));
         return Response::create(['code' => $this->code, 'msg' => '退出成功'], 200);
     }
 

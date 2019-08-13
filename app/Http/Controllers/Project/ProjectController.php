@@ -1458,4 +1458,70 @@ class ProjectController extends Controller
         }
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function areaSelectLists(Request $request){
+        $rules = [
+            'projectId' => 'required|integer',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型错误',
+        ];
+        $input = $request->only(['projectId']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $projectAreaModel = new ProjectAreaModel();
+            $this->data = $projectAreaModel->selectLists($input);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 422301;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 422302;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function sectionSelectLists(Request $request){
+        $rules = [
+            'areaId' => 'required|integer',
+        ];
+        $message = [
+            'areaId.required' => '获取施工区参数失败',
+            'areaId.integer' => '施工区参数类型错误',
+        ];
+        $input = $request->only(['areaId']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $projectSectionModel = new ProjectSectionModel();
+            $this->data = $projectSectionModel->selectLists($input);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 422401;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 422402;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
 }

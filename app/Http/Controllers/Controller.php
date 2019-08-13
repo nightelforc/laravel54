@@ -63,8 +63,8 @@ class Controller extends BaseController
      */
     public function ajaxResult($code, $msg, Array $data = [], $status = 200, Array $headers = ['content-type' => 'application/json;charset=UTF-8'])
     {
-        $token = $this->tokenGenerator();
-        return Response::create(['code' => $code, 'msg' => $msg, 'data' => $data, config('yucheng.token') => $token], $status, $headers);
+//        $token = $this->tokenGenerator();
+        return Response::create(['code' => $code, 'msg' => $msg, 'data' => $data], $status, $headers);
     }
 
     /**

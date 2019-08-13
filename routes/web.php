@@ -106,6 +106,7 @@ Route::group([
         Route::post('/project/selectLists', 'ProjectController@selectLists');
         //楼栋
         Route::post('/project/areaLists', 'ProjectController@areaLists');
+        Route::post('/project/areaSelectLists', 'ProjectController@areaSelectLists');
         Route::post('/project/addArea', 'ProjectController@addArea');
         Route::post('/project/batchAddArea', 'ProjectController@batchAddArea');
         Route::post('/project/areaInfo', 'ProjectController@areaInfo');
@@ -113,6 +114,7 @@ Route::group([
         Route::post('/project/delArea', 'ProjectController@delArea');
         //楼层
         Route::post('/project/sectionLists', 'ProjectController@sectionLists');
+        Route::post('/project/sectionSelectLists', 'ProjectController@sectionSelectLists');
         Route::post('/project/addSection', 'ProjectController@addSection');
         Route::post('/project/batchAddSection', 'ProjectController@batchAddSection');
         Route::post('/project/sectionInfo', 'ProjectController@sectionInfo');

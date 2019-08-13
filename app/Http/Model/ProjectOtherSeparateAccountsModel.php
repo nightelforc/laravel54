@@ -57,7 +57,7 @@ class ProjectOtherSeparateAccountsModel
             ->where($this->table.'.projectId', $input['projectId'])
             ->orderBy($this->table.'.separateTime','des')
             ->offset($start)->limit($limit)
-            ->select($this->table.'.*','e.name as employeeName','p.name as professionName','pa.name as areaName','ps.name as sectionName','a.name as assignmentName')
+            ->select($this->table.'.*','e.name as employeeName','e.jobNumber','p.name as professionName','pa.name as areaName','ps.name as sectionName','a.name as assignmentName')
             ->get()->toArray();
     }
 

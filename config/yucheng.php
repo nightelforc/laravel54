@@ -8,5 +8,6 @@
 return [
     'limit' => 10,
     'token' => env('TOKEN', ''),
+    'tokenExist' => env('TOKEN_EXIST', 7200),
 
 ];

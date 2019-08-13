@@ -8,8 +8,12 @@
 
 namespace App\Http\Middleware;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Auth\AdminController;
+use App\Http\Model\AdminPermissionModel;
+use App\Http\Model\AdminSessionModel;
+use App\Http\Model\RolePermissionModel;
 use Closure;
+use Illuminate\Http\Response;
 
 class ApiAuth
 {
@@ -23,14 +27,22 @@ class ApiAuth
      */
     public function handle($request, Closure $next)
     {
-//        $token = $this->tokenValidate($request);
-//        if (!$token) {
+
+//        $adminId = $this->tokenValidate($request);
+//        if (!$adminId) {
 //            return Response::create(['code' => 100001, 'msg' => '身份信息已过时，请重新登录'], 403);
 //        }
-//        $session = $this->sessionValidate($request);
-//        if (!$session) {
-//            return Response::create(['code' => 100002, 'msg' => '登录信息已过时，请重新登录'], 403);
+//
+//        $role = (new AdminController())->getRole($adminId);
+//        if (empty($role)){
+//            return Response::create(['code' => 100002, 'msg' => '当前账号没有分配角色'], 403);
 //        }
+//
+//        $result = $this->authValidate($request,$adminId,$role['roleId']);
+//        if(!$result){
+//            return Response::create(['code' => 100003, 'msg' => '当前账号没有权限访问此接口'], 403);
+//        }
+
         return $next($request);
     }
 
@@ -43,23 +55,41 @@ class ApiAuth
     public function tokenValidate($request)
     {
         $tokenRequest = $request->input(config('yucheng.token'), '');
-        $tokenSession = $request->session()->get(config('yucheng.token'), '123456');
-        if ($tokenRequest == '') {
-            return false;
-        } elseif ($tokenSession == '') {
-            return false;
-        } elseif ($tokenSession != $tokenRequest) {
+        //验证token是否存在
+        $adminSession = AdminSessionModel::get($tokenRequest);
+        if (empty($adminSession)){
             return false;
         }
-        return true;
+        //验证token是否超时
+        $curTimestamp = intval(time());
+        $sessionTimestamp = intval(strtotime($adminSession['tokenTime']));
+        if ($curTimestamp-$sessionTimestamp >= config('yucheng.tokenExist')){
+            return false;
+        }
+
+        return $adminSession['adminId'];
     }
 
+    /**
+     * 对账号的权限进行验证
+     *
+     * @param $request
+     * @param $adminId
+     * @param $roleId
+     * @return bool
+     */
+    public function authValidate($request,$adminId,$roleId){
+        $uri = $request->getRequestUri();
+        //检查用户权限
+        $r1 = (new AdminPermissionModel())->checkAuth($adminId,$uri);
+        //检查用户的角色权限
+        $r2 = (new RolePermissionModel())->checkAuth($roleId,$uri);
 
-    private function sessionValidate($request)
-    {
-        if ($request->session()->has(Controller::pasn)) {
+        if ($r1 || $r2){
             return true;
+        }else{
+            return false;
         }
-        return false;
     }
+
 }

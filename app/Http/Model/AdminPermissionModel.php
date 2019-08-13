@@ -45,4 +45,23 @@ class AdminPermissionModel
         }
         return $i;
     }
+
+    /**
+     * @param $adminId
+     * @param $uri
+     * @return bool
+     */
+    public function checkAuth($adminId,$uri){
+        $result = DB::table($this->table)
+            ->leftJoin('permission as p','p.id','=',$this->table.'.permissionId')
+            ->where($this->table.'.adminId',$adminId)
+            ->where('p.url',$uri)
+            ->get()->toArray();
+
+        if (count($result)>0){
+            return true;
+        }else{
+            return false;
+        }
+    }
 }

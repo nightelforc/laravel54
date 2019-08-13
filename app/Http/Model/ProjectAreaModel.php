@@ -77,4 +77,17 @@ class ProjectAreaModel
     {
         return DB::table($this->table)->where($data)->delete();
     }
+
+    /**
+     * @param array $input
+     * @return mixed
+     */
+    public function selectLists(array $input)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use ($input) {
+                $query->where('projectId', $input['projectId']);
+            })
+            ->get()->toArray();
+    }
 }

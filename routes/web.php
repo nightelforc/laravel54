@@ -20,7 +20,7 @@ Route::group([
 });
 
 Route::group([
-    'middleware'=>'apiAuth',
+//    'middleware'=>'apiAuth',
 ],function(){
     //登录、审批、工作流等
     Route::group([
@@ -146,6 +146,7 @@ Route::group([
 
         //-------------------供应商管理-------------------//
         Route::post('/supplier/lists', 'SupplierController@lists');
+        Route::post('/supplier/selectLists', 'SupplierController@selectLists');
         Route::post('/supplier/add', 'SupplierController@add');
         Route::post('/supplier/info', 'SupplierController@info');
         Route::post('/supplier/edit', 'SupplierController@edit');
@@ -157,6 +158,7 @@ Route::group([
         Route::post('/supplier/repaymentLists', 'SupplierController@repaymentLists');
 
         //-------------------材料管理-------------------//
+        Route::post('/material/search', 'MaterialController@search');
         Route::post('/material/lists', 'MaterialController@lists');
         Route::post('/material/add', 'MaterialController@add');
         Route::post('/material/info', 'MaterialController@info');
@@ -164,12 +166,14 @@ Route::group([
         Route::post('/material/editStatus', 'MaterialController@editStatus');
 
         Route::post('/material/specLists', 'MaterialController@specLists');
+        Route::post('/material/specSelectLists', 'MaterialController@specSelectLists');
         Route::post('/material/addSpec', 'MaterialController@addSpec');
         Route::post('/material/editSpec', 'MaterialController@editSpec');
         Route::post('/material/specInfo', 'MaterialController@specInfo');
         Route::post('/material/delSpec', 'MaterialController@delSpec');
 
         //-------------------仓库管理-------------------//
+        Route::post('/warehouse/search', 'WarehouseController@search');
         Route::post('/warehouse/lists', 'WarehouseController@lists');
         Route::post('/warehouse/info', 'WarehouseController@info');
         Route::post('/warehouse/setSalePrice', 'WarehouseController@setSalePrice');
@@ -219,5 +223,13 @@ Route::group([
         Route::post('/assignment/add', 'AssignmentController@add');
         Route::post('/assignment/edit', 'AssignmentController@edit');
         Route::post('/assignment/editStatus', 'AssignmentController@editStatus');
+    });
+
+    //系统设置
+    Route::group([
+        'namespace'=>'Excel',
+        'prefix'=>'excel',
+    ],function(){
+        Route::post('/import/test', 'ImportController@test');
     });
 });

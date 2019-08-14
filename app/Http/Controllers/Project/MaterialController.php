@@ -490,4 +490,61 @@ class MaterialController extends Controller
         }
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function specSelectLists(Request $request){
+        $rules = [
+            'materialId' => 'required|integer',
+        ];
+        $message = [
+            'materialId.required' => '获取材料参数失败',
+            'materialId.integer' => '材料参数类型错误',
+        ];
+        $input = $request->only(['materialId']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $materialSpecModel = new MaterialSpecModel();
+            $this->data = $materialSpecModel->selectLists($input);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'materialId') {
+                if (key($failed['materialId']) == 'Required') {
+                    $this->code = 451101;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['materialId']) == 'Integer') {
+                    $this->code = 451102;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    public function search(Request $request){
+        $rules = [
+            'search' => 'required',
+        ];
+        $message = [
+            'search.required' => '未获取到搜索内容',
+        ];
+        $input = $request->only(['search']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $materialModel = new MaterialModel();
+            $this->data = $materialModel->search($input);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'search') {
+                if (key($failed['search']) == 'Required') {
+                    $this->code = 451101;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
 }

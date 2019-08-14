@@ -93,5 +93,14 @@ class SupplierModel
         }
     }
 
+    /**
+     * @return mixed
+     */
+    public function selectLists()
+    {
+        return DB::table($this->table)
+            ->get()->toArray();
+    }
+
 
 }

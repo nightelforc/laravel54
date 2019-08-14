@@ -642,8 +642,6 @@ class SupplierController extends Controller
             $orderIds = $input['orderIds'];
             unset($input['orderIds']);
             $supplierRepaymentModel = new SupplierRepaymentModel();
-            $session = $request->session()->get(parent::pasn);
-            $input['projectId'] = $session['projectId'];
             $supplierRepaymentModel->insert($input);
             $supplierOrdersModel = new SupplierOrdersModel();
             foreach ($orderIds as $orderId) {
@@ -809,6 +807,15 @@ class SupplierController extends Controller
                 }
             }
         }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @return \Illuminate\Http\Response
+     */
+    public function selectLists(){
+        $supplierModel = new SupplierModel();
+        $this->data = $supplierModel->selectLists();
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
 }

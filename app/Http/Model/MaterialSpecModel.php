@@ -73,4 +73,17 @@ class MaterialSpecModel
         $result = DB::table($this->table)->where($data)->first();
         return empty($result) ? [] : get_object_vars($result);
     }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function selectLists(array $data)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use($data){
+                $query->where('materialId',$data['materialId'])->where('isDel',0);
+            })
+            ->get()->toArray();
+    }
 }

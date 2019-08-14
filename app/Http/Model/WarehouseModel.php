@@ -62,4 +62,28 @@ class WarehouseModel
     public function insert(array $data){
         return DB::table($this->table)->insert($data);
     }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function search(array $data)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use($data){
+                if (isset($data['projectId']) && !is_null($data['projectId'])){
+                    $query->where('projectId',$data['projectId']);
+                }
+                if (isset($data['supplierId']) && !is_null($data['supplierId'])){
+                    $query->where('supplierId',$data['supplierId']);
+                }
+                if (isset($data['materialId']) && !is_null($data['materialId'])){
+                    $query->where('materialId',$data['materialId']);
+                }
+                if (isset($data['specId']) && !is_null($data['specId'])){
+                    $query->where('specId',$data['specId']);
+                }
+            })
+            ->get()->toArray();
+    }
 }

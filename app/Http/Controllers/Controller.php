@@ -49,6 +49,10 @@ class Controller extends BaseController
             'warehouse' => 46,
             'finance' => 47,
         ],
+        'excel'=>[
+            'import'=>51,
+            'export'=>52,
+        ]
     ];
 
     /**

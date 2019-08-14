@@ -67,4 +67,17 @@ class MaterialModel
         return DB::table($this->table)->where('id',$id)->update($data);
     }
 
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function search(array $data)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use($data){
+                $query->where('name','like','%'.$data['search'].'%')->where('status',1);
+            })
+            ->get()->toArray();
+    }
+
 }

@@ -20,7 +20,7 @@ class RoleController extends Controller
     /**
      * @return \Illuminate\Http\Response
      */
-    public function roleList()
+    public function lists()
     {
         $roleModel = new RoleModel();
         $this->data = $roleModel->lists();

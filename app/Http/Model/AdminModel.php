@@ -102,8 +102,8 @@ class AdminModel
         }
 
         return DB::table($this->table)
-            ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
             ->leftJoin('admin_role as ar','ar.adminId','=',$this->table.'.id')
+            ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
             ->leftJoin('role as r','r.id','=','ar.roleId')
             ->where(function($query) use ($input){
 //                $query->where('projectId',$input['projectId']);
@@ -169,8 +169,13 @@ class AdminModel
                 unset($data['roleId']);
                 $this->update($id,$data);
                 $adminRoleModel = new AdminRoleModel();
-                $adminRoleModel->update($id,['roleId'=>$roleId]);
-
+                $info = $adminRoleModel->info(['adminId'=>$id,'roleId'=>$roleId]);
+                if (empty($info)){
+                    $adminRoleModel->delete(['adminId'=>$id]);
+                    $adminRoleModel->insert(['adminId'=>$id,'roleId'=>$roleId]);
+                }else{
+                    $adminRoleModel->update($id,['roleId'=>$roleId]);
+                }
             });
         }catch (\Exception $e){
             return $e->getMessage();

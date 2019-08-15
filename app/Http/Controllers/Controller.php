@@ -89,4 +89,13 @@ class Controller extends BaseController
         return $token;
     }
 
+    /**
+     * @param $method
+     * @return bool|string
+     */
+    protected function getMethodName($method){
+        $pos = strripos($method,':');
+        return substr($method,$pos+1);
+    }
+
 }

@@ -230,6 +230,8 @@ Route::group([
         'namespace'=>'Excel',
         'prefix'=>'excel',
     ],function(){
-        Route::post('/import/test', 'ImportController@test');
+        Route::post('/import/iEmployeeLists', 'ImportController@iEmployeeLists');
+
+        Route::get('/download', 'ExportController@download');
     });
 });

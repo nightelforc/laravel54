@@ -70,6 +70,7 @@ class WarehouseModel
     public function search(array $data)
     {
         return DB::table($this->table)
+            ->leftJoin('material as m','m.id','=',$this->table.'.materialId')
             ->where(function ($query) use($data){
                 if (isset($data['projectId']) && !is_null($data['projectId'])){
                     $query->where('projectId',$data['projectId']);
@@ -83,7 +84,11 @@ class WarehouseModel
                 if (isset($data['specId']) && !is_null($data['specId'])){
                     $query->where('specId',$data['specId']);
                 }
+                if (isset($data['search']) && !is_null($data['search'])){
+                    $query->where('m.name','like','%'.$data['specId'].'%');
+                }
             })
+            ->select($this->table.'.*','m.name as materialName')
             ->get()->toArray();
     }
 }

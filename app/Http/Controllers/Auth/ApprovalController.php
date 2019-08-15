@@ -46,17 +46,17 @@ class ApprovalController extends Controller
             self::afterApproval($callBackClass, $callBackMethod, $pk, $data,1);
             return $approval;
         }
-        $session = session(parent::pasn);
+//        $session = session(parent::pasn);
         $workflowNodeModel = new WorkflowNodeModel();
         //加载审批流程当前全流程节点
-        $processList = $workflowNodeModel->handlerLists(['workflowId' => $info['id'], 'projectId' => $session['projectId']]);
+        $processList = $workflowNodeModel->handlerLists(['workflowId' => $info['id'], 'projectId' => $data['projectId']]);
 
         $approvalData = [
             'workflowId' => $info['id'],
-            'projectId' => $session['projectId'],
-            'adminId' => $session['id'],
+            'projectId' => $data['projectId'],
+            'adminId' => 0, //TODO  拿不到当前登录账号的id
             'joinTime' => date('Y-m-d H:i:s'),
-            'curnode' => $processList[0],
+            'curnode' => (isset($processList[0]) && !empty($processList[0]))?$processList[0]:0,
             'process' => json_encode($processList),
             'callBackClass' => $callBackClass,
             'callBackMethod' => $callBackMethod,

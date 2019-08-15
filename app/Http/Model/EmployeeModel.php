@@ -352,6 +352,22 @@ class EmployeeModel extends Model
      */
     public function insert(array $input)
     {
+        $input['entryTime'] = date('Y-m-d H:i:s');
         return DB::table($this->table)->insertGetId($input);
+    }
+
+    /**
+     * 检查工号和当前年度所有未进行清算的工人的工号是否相同
+     *
+     * @param $param
+     * @return mixed
+     */
+    public function checkJobNumber($param)
+    {
+        return  DB::table($this->table)
+            ->where(function ($query) use ($param){
+                $query->where('jobNumber',$param)->where('isFinish', 0);
+            })
+            ->get()->toArray();
     }
 }

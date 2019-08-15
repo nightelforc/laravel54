@@ -42,7 +42,13 @@ class AdminController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $adminModel = new AdminModel();
-            $this->data = $adminModel->lists($input);
+            $lists = $adminModel->lists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>count($lists),
+                "recordsTotal"=>count($lists),
+            ];
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {

@@ -455,7 +455,7 @@ class SupplierController extends Controller
             'data.required' => '请填写材料信息',
             'data.array' => '材料信息类型不正确',
         ];
-        $input = $request->only(['supplierId', 'supplierId', 'totalPrice', 'deliveryTime', 'payType', 'data']);
+        $input = $request->only(['projectId','supplierId', 'supplierId', 'totalPrice', 'deliveryTime', 'payType', 'data']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $data = $input['data'];
@@ -549,7 +549,7 @@ class SupplierController extends Controller
                 if ($orderId > 0) {
                     foreach ($data as $key => $d) {
                         $data[$key]['supplierId'] = $input['supplierId'];
-                        $data[$key]['orderId'] = $input['orderId'];
+                        $data[$key]['orderId'] = $orderId;
                     }
                     $supplierOrdersInfoModel = new SupplierOrdersInfoModel();
                     $supplierOrdersInfoModel->insert($data);
@@ -698,7 +698,7 @@ class SupplierController extends Controller
     {
         $rules = [
             'supplierId' => 'required|integer',
-            'month' => 'nullable|date_format:Y-m-d',
+            'month' => 'nullable|date_format:Y-m',
             'draw' => 'required|integer',
             'length' => 'required|integer|in:10,20,50',
             'start' => 'required|integer|min:0',
@@ -706,6 +706,7 @@ class SupplierController extends Controller
         $message = [
             'supplierId.required' => '获取供应商参数失败',
             'supplierId.integer' => '供应商参数类型不正确',
+            'month.date_format' => '月份格式不正确',
             'length.required' => '获取记录条数参数失败',
             'length.integer' => '记录条数参数类型错误',
             'length.in' => '记录条数参数值不正确',

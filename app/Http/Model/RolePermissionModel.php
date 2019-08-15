@@ -49,22 +49,26 @@ class RolePermissionModel
     public function getPermission($roleId)
     {
         return DB::table($this->table)
+            ->leftJoin('role as r','r.id','=',$this->table.'.roleId')
             ->leftJoin('permission as p','p.id','=',$this->table.'.permissionId')
             ->where('roleId',$roleId)
+            ->where('r.status',1)
             ->select('p.name as permissionName','p.code','p.type','p.url','p.isMenu')
             ->get()->toArray();
     }
 
     /**
-     * @param $adminId
+     * @param $roleId
      * @param $uri
      * @return bool
      */
     public function checkAuth($roleId,$uri){
         $result = DB::table($this->table)
+            ->leftJoin('role as r','r.id','=',$this->table.'.roleId')
             ->leftJoin('permission as p','p.id','=',$this->table.'.permissionId')
             ->where($this->table.'.roleId',$roleId)
             ->where('p.url',$uri)
+            ->where('r.status',1)
             ->get()->toArray();
 
         if (count($result)>0){

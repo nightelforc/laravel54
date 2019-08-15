@@ -31,17 +31,26 @@ class WarehouseLogModel
      */
     public function addLog(array $data)
     {
-        $logInfo = $data['data'];
-        unset($data['data']);
+
         $insertId = '';
         try {
-            $insertId = DB::transaction(function () use ($data, $logInfo, $insertId) {
-                $insertId = $this->insert($data);
+            $insertId = DB::transaction(function () use ($data, $data, $insertId) {
+                $warehouseLog = [
+                    'projectId' => $data['projectId'],
+                    'time' => $data['time'],
+                    'remark' => $data['remark'],
+                    'type' => $data['type'],
+                ];
+                $insertId = $this->insert($warehouseLog);
                 $warehouseLogInfoModel = new WarehouseLogInfoModel();
-                foreach ($logInfo as $i) {
-                    $i['logId'] = $insertId;
-                    $warehouseLogInfoModel->insert($i);
-                }
+                $warehouseLogInfo = [
+                    'logId' => $insertId,
+                    'materialId' => $data['materialId'],
+                    'specId' => $data['specId'],
+                    'supplierId' => $data['supplierId'],
+                    'amount' => $data['amount'],
+                ];
+                $warehouseLogInfoModel->insert($warehouseLogInfo);
                 return $insertId;
             });
             return $insertId;
@@ -209,33 +218,27 @@ class WarehouseLogModel
             try {
                 $warehouseModel = new WarehouseModel();
                 //检查库存
-                foreach ($data['data'] as $d) {
-                    $warehouseInfo = $warehouseModel->info([
-                        'projectId' => $data['projectId'],
-                        'materialId' => $d['materialId'],
-                        'specId' => $d['specId'],
-                        'supplierId' => $d['supplierId'],
-                    ]);
-                    if (empty($warehouseInfo) || $warehouseInfo['amount'] < $d['amount']) {
-                        throw new \Exception('库存不足', 'consume1');
-                    }
+                $warehouseInfo = $warehouseModel->info([
+                    'projectId' => $data['projectId'],
+                    'materialId' => $data['materialId'],
+                    'specId' => $data['specId'],
+                    'supplierId' => $data['supplierId'],
+                ]);
+                if (empty($warehouseInfo) || $warehouseInfo['amount'] < $data['amount']) {
+                    throw new \Exception('库存不足', 'consume1');
                 }
 
                 DB::transaction(function () use ($data, $warehouseModel, $pk, $approvalResult) {
-
                     //扣除库存
-                    foreach ($data['data'] as $key => $d) {
-                        $warehouseInfo = $warehouseModel->info([
-                            'projectId' => $data['projectId'],
-                            'materialId' => $d['materialId'],
-                            'specId' => $d['specId'],
-                            'supplierId' => $d['supplierId'],
-                        ]);
-                        $newAmount = $warehouseInfo['amount'] - $d['amount'];
-                        $data['data'][$key]['purchasePrice'] = $warehouseInfo['purchasePrice'];
-                        $data['data'][$key]['salePrice'] = $warehouseInfo['salePrice'];
-                        $warehouseModel->update($warehouseInfo['id'], ['amount' => $newAmount, 'updateTime' => date('Y-m-d H:i:s')]);
-                    }
+                    $warehouseInfo = $warehouseModel->info([
+                        'projectId' => $data['projectId'],
+                        'materialId' => $data['materialId'],
+                        'specId' => $data['specId'],
+                        'supplierId' => $data['supplierId'],
+                    ]);
+                    $newAmount = $warehouseInfo['amount'] - $data['amount'];
+
+                    $warehouseModel->update($warehouseInfo['id'], ['amount' => $newAmount, 'updateTime' => date('Y-m-d H:i:s')]);
                     //修改出入库记录审批状态
                     $this->update($pk, ['status' => $approvalResult]);
 

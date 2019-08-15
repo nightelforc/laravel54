@@ -12,11 +12,26 @@ use Closure;
 class Cors
 {
     public function handle($request, Closure $next) {
+        $IlluminateResponse = 'Illuminate\Http\Response';
+        $SymfonyResponse = 'Symfony\Component\HttpFoundation\Response';
         $response = $next($request);
-        $response->header('Access-Control-Allow-Origin', '*');
-        $response->header('Access-Control-Allow-Headers', 'Origin, Content-Type, Cookie, Accept');
-        $response->header('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, OPTIONS');
-        $response->header('Access-Control-Allow-Credentials', 'false');
+        $headers = [
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Methods' => 'POST, GET, OPTIONS, PUT, PATCH, DELETE',
+            'Access-Control-Allow-Headers' => 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Authorization , Access-Control-Request-Headers, X-CSRF-TOKEN'
+        ];
+
+        if ($response instanceof $IlluminateResponse) {
+            foreach ($headers as $key => $value) {
+                $response->header($key, $value);
+            }
+        }
+
+        if ($response instanceof $SymfonyResponse) {
+            foreach ($headers as $key => $value) {
+                $response->headers->set($key, $value);
+            }
+        }
         return $response;
     }
 }

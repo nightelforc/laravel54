@@ -56,7 +56,7 @@ class EmployeeMaterialOrderInfoModel
             ->select($this->table . '.*',
                 'm.name as materialName', 'spec.spec', 'spec.brand', 's.name as supplierName',
                 'p.name as projectName', 'e.name as employeeName',
-                'emo.employeeId', 'emo.orderTime')
+                'emo.employeeId', 'emo.orderTime', 'emo.createTime')
             ->get()->toArray();
     }
 }

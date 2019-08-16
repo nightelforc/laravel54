@@ -949,7 +949,7 @@ class WarehouseController extends Controller
                 'amount' => 'required|integer',
                 'price' => 'required|numeric',
                 'totalPrice' => 'required|numeric',
-                'payType' => 'required|integer|in:1.2'
+                'payType' => 'required|integer|in:1,2'
             ];
             $message1 = [
                 'materialId.required' => '请选择材料',
@@ -1082,6 +1082,7 @@ class WarehouseController extends Controller
                 }
             }
             if ($continue) {
+                $input['type'] = self::PURCHASE;
                 $warehouseLogModel = new WarehouseLogModel();
                 $result = $warehouseLogModel->purchase($input);
                 if (!$result) {
@@ -1436,10 +1437,11 @@ class WarehouseController extends Controller
 
     /**
      * @param Request $request
+     * @return \Illuminate\Http\Response
      */
     public function breakdownLists(Request $request)
     {
-        $this->logLists($request, self::BREAKDOWN);
+        return $this->logLists($request, self::BREAKDOWN);
     }
 
     /**

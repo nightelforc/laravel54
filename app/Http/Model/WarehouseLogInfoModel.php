@@ -67,7 +67,7 @@ class WarehouseLogInfoModel
             ->select($this->table . '.*',
                 'm.name as materialName', 'spec.spec', 'spec.brand', 's.name as supplierName',
                 'p.name as projectName', 'p1.name as sourceProjectName', 'e.name as employeeName',
-                'wl.projectId', 'wl.price', 'wl.type', 'wl.sourceEmployeeId', 'wl.sourceProjectId', 'wl.time', 'wl.status', 'wl.remark', 'wl.recoveryFunds')
+                'wl.projectId', 'wl.price', 'wl.type', 'wl.sourceEmployeeId', 'wl.sourceProjectId', 'wl.time', 'wl.createTime','wl.status', 'wl.remark', 'wl.recoveryFunds')
             ->get()->toArray();
     }
 }

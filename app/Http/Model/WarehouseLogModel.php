@@ -31,10 +31,9 @@ class WarehouseLogModel
      */
     public function addLog(array $data)
     {
-
         $insertId = '';
         try {
-            $insertId = DB::transaction(function () use ($data, $data, $insertId) {
+            $insertId = DB::transaction(function () use ($data, $insertId) {
                 $warehouseLog = [
                     'projectId' => $data['projectId'],
                     'time' => $data['time'],
@@ -43,14 +42,19 @@ class WarehouseLogModel
                 ];
                 $insertId = $this->insert($warehouseLog);
                 $warehouseLogInfoModel = new WarehouseLogInfoModel();
-                $warehouseLogInfo = [
-                    'logId' => $insertId,
-                    'materialId' => $data['materialId'],
-                    'specId' => $data['specId'],
-                    'supplierId' => $data['supplierId'],
-                    'amount' => $data['amount'],
-                ];
-                $warehouseLogInfoModel->insert($warehouseLogInfo);
+                foreach ($data['data'] as $d){
+                    $warehouseLogInfo = [
+                        'logId' => $insertId,
+                        'materialId' => $d['materialId'],
+                        'specId' => $d['specId'],
+                        'supplierId' => $d['supplierId'],
+                        'amount' => $d['amount'],
+                        'price' => $d['price'],
+                        'totalPrice' => $d['totalPrice'],
+                    ];
+                    $warehouseLogInfoModel->insert($warehouseLogInfo);
+                }
+
                 return $insertId;
             });
             return $insertId;
@@ -315,7 +319,7 @@ class WarehouseLogModel
     public function purchase(array $data)
     {
         try {
-            DB::transaction(function () use ($data) {
+            $result = DB::transaction(function () use ($data) {
                 $supplierModel = new SupplierModel();
                 $supplierOrdersModel = new SupplierOrdersModel();
                 $supplierOrdersInfoModel = new SupplierOrdersInfoModel();
@@ -381,9 +385,17 @@ class WarehouseLogModel
                     unset($data['data'][$key]['payType']);
                 }
                 //增加入库记录
-                $this->addLog($data);
+                $r = $this->addLog($data);
+                if (!is_int($r)){
+                    return $r;
+                }
                 return true;
             });
+            if ($result){
+                return true;
+            }else{
+                return false;
+            }
         } catch (\Exception $e) {
             return false;
         }
@@ -396,7 +408,7 @@ class WarehouseLogModel
     public function receipt(array $data)
     {
         try {
-            DB::transaction(function () use ($data) {
+            $result = DB::transaction(function () use ($data) {
                 $warehouseModel = new WarehouseModel();
                 foreach ($data['data'] as $key => $d) {
                     //增加库存，检查仓库中是否有材料，增加库存
@@ -428,6 +440,11 @@ class WarehouseLogModel
                 $this->addLog($data);
                 return true;
             });
+            if ($result){
+                return true;
+            }else{
+                return false;
+            }
         } catch (\Exception $e) {
             return false;
         }

@@ -66,7 +66,7 @@ class ApiAuth
         if ($curTimestamp-$sessionTimestamp >= config('yucheng.tokenExist')){
             return false;
         }
-
+        AdminSessionModel::put($tokenRequest,$adminSession['adminId']);
         return $adminSession['adminId'];
     }
 

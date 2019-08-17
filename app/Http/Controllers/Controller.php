@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-
+    protected static $token;
     protected $code = 100000;
     protected $msg = '保存成功';
     protected $data = [];
@@ -54,6 +54,11 @@ class Controller extends BaseController
             'export'=>52,
         ]
     ];
+
+    public function __construct()
+    {
+        self::$token = config('yucheng.token');
+    }
 
     /**
      * 自定义ajax返回格式，并生成response

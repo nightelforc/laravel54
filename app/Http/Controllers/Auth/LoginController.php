@@ -66,15 +66,16 @@ class LoginController extends Controller
             $adminModel = new AdminModel();
             $result = $adminModel->login($request->all());
             if (!empty($result)) {
-                if ($result['status'] == 1){
+                if ($result['status'] == 1) {
                     $result['role'] = (new AdminController())->getRole($result['id']);
                     //获取用户权限
-                    $roleId = isset($result['role']['roleId'])?$result['role']['roleId']:0;
-                    $result['permission'] = (new AdminController())->getPermission($result['id'],$roleId);
-
-                    AdminSessionModel::put($result['id'],$this->tokenGenerator());
+                    $roleId = isset($result['role']['roleId']) ? $result['role']['roleId'] : 0;
+                    $result['permission'] = (new AdminController())->getPermission($result['id'], $roleId);
+                    $token = $this->tokenGenerator();
+                    $result['token'] = $token;
+                    AdminSessionModel::put($token, $result['id'], $result['projectId']);
                     $this->data = $result;
-                }else{
+                } else {
                     $this->code = 110104;
                     $this->msg = '账号已经被停用';
                 }
@@ -97,7 +98,7 @@ class LoginController extends Controller
 
         }
 
-        return $this->ajaxResult($this->code, $this->msg,$this->data);
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
 
     /**

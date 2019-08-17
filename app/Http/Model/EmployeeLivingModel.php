@@ -74,7 +74,7 @@ class EmployeeLivingModel
                 }
             })
             ->offset($start)->limit($limit)
-            ->select($this->table . '.*', 'e.name as employeeName')
+            ->select($this->table . '.*', 'e.name as employeeName','e.jobNumber')
             ->get()->toArray();
     }
 

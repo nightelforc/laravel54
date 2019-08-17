@@ -74,7 +74,7 @@ class UnitController extends Controller
             'name.required' => '请输入计量单位名称',
             'shortname.required' => '请输入计量单位简称',
         ];
-        $input = $request->all();
+        $input = $request->only(['name','shortname',parent::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $unitModel = new UnitModel();

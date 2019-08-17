@@ -17,15 +17,24 @@ class AdminSessionModel
 
     /**
      * @param $adminId
+     * @param int $projectId
      * @param $token
      */
-    public static function put($adminId,$token){
+    public static function put($token,$adminId,$projectId= 0){
         $session = self::info($token);
         if (empty($session)){
             DB::table(self::TABLE)->where('adminId',$adminId)->delete();
-            DB::table(self::TABLE)->insert(['adminId'=>$adminId,'token'=>$token,'tokenTime'=>date('Y-m-d H:i:s')]);
+            $data = ['adminId'=>$adminId,'token'=>$token,'tokenTime'=>date('Y-m-d H:i:s')];
+            if ($projectId != 0){
+                $data['projectId'] = $projectId;
+            }
+            DB::table(self::TABLE)->insert($data);
         }else{
-            DB::table(self::TABLE)->where('token',$token)->update(['adminId'=>$adminId,'tokenTime'=>date('Y-m-d H:i:s')]);
+            $data = ['adminId'=>$adminId,'tokenTime'=>date('Y-m-d H:i:s')];
+            if ($projectId != 0){
+                $data['projectId'] = $projectId;
+            }
+            DB::table(self::TABLE)->where('token',$token)->update($data);
         }
     }
 

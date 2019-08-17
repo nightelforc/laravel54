@@ -52,28 +52,28 @@ class FinanceController extends Controller
             $lists = $employeeModel->lists($input);
             foreach ($lists as $key => $l){
                 $wages = $employeeModel->wages($l->id);
-                $wagesTotal = [
-                    'bonus' => 0,
-                    'fine' => 0,
-                    'living' => 0,
-                    'loan' => 0,
-                    'materialOrder' => 0,
-                    'attendance' => 0,
-                    'separateAccounts' => 0,
-                    'otherSeparateAccounts' => 0,
-                ];
-                foreach ($wages as $w){
-                    $wagesTotal['bonus'] += $w['bonus'];
-                    $wagesTotal['fine'] += $w['fine'];
-                    $wagesTotal['living'] += $w['living'];
-                    $wagesTotal['loan'] += $w['loan'];
-                    $wagesTotal['materialOrder'] += $w['materialOrder'];
-                    $wagesTotal['attendance'] += $w['attendance'];
-                    $wagesTotal['separateAccounts'] += $w['separateAccounts'];
-                    $wagesTotal['otherSeparateAccounts'] += $w['otherSeparateAccounts'];
-                }
+//                $wagesTotal = [
+//                    'bonus' => 0,
+//                    'fine' => 0,
+//                    'living' => 0,
+//                    'loan' => 0,
+//                    'materialOrder' => 0,
+//                    'attendance' => 0,
+//                    'separateAccounts' => 0,
+//                    'otherSeparateAccounts' => 0,
+//                ];
+//                foreach ($wages as $w){
+//                    $wagesTotal['bonus'] += $w['bonus'];
+//                    $wagesTotal['fine'] += $w['fine'];
+//                    $wagesTotal['living'] += $w['living'];
+//                    $wagesTotal['loan'] += $w['loan'];
+//                    $wagesTotal['materialOrder'] += $w['materialOrder'];
+//                    $wagesTotal['attendance'] += $w['attendance'];
+//                    $wagesTotal['separateAccounts'] += $w['separateAccounts'];
+//                    $wagesTotal['otherSeparateAccounts'] += $w['otherSeparateAccounts'];
+//                }
 
-                $lists[$key]->wage = $wagesTotal;
+                $lists[$key]->wage = $wages;
             }
             $this->data = [
                 "draw"=>$input['draw'],

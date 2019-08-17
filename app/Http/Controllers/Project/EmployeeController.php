@@ -207,7 +207,7 @@ class EmployeeController extends Controller
             'status.integer' => '工作状态参数类型错误',
             'status.in' => '工作状态参数值不正确'
         ];
-        $input = $request->only(['ids', 'status']);
+        $input = $request->only(['ids', 'status',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             //审批流程
@@ -268,7 +268,7 @@ class EmployeeController extends Controller
             'projectId.required' => '请选择工作状态',
             'projectId.integer' => '工作状态参数类型错误',
         ];
-        $input = $request->only(['ids', 'projectId']);
+        $input = $request->only(['ids', 'projectId',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeModel = new EmployeeModel();
@@ -342,7 +342,7 @@ class EmployeeController extends Controller
             'loanTime.required' => '请选择借款时间',
             'loanTime.date_format' => '借款时间格式不正确',
         ];
-        $input = $request->only(['employeeId', 'account', 'loanTime']);
+        $input = $request->only(['employeeId', 'account', 'loanTime',self::token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             //追加工人当前的projectId
@@ -426,7 +426,7 @@ class EmployeeController extends Controller
             'livingTime.required' => '请选择借款时间',
             'livingTime.date_format' => '借款时间格式不正确',
         ];
-        $input = $request->only(['employeeId', 'account', 'type', 'livingTime']);
+        $input = $request->only(['employeeId', 'account', 'type', 'livingTime',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             //追加工人当前的projectId
@@ -863,7 +863,7 @@ class EmployeeController extends Controller
             'preBackTime.date_format' => '预计销假时间格式不正确',
             'preBackTime.after' => '预计销假时间必须晚于预计请假时间',
         ];
-        $input = $request->only(['employeeId', 'projectId', 'preLeaveTime', 'preBackTime', 'remark']);
+        $input = $request->only(['employeeId', 'projectId', 'preLeaveTime', 'preBackTime', 'remark',self::token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeLeaveModel = new  EmployeeLeaveModel();

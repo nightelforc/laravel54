@@ -9,6 +9,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Model\AdminSessionModel;
 use App\Http\Model\WorkflowItemModel;
 use App\Http\Model\WorkflowItemProcessModel;
 use App\Http\Model\WorkflowModel;
@@ -25,6 +26,9 @@ class ApprovalController extends Controller
      */
     public static function approval($code, $data)
     {
+        $session = AdminSessionModel::get($data[parent::TOKEN]);
+        unset($data[parent::TOKEN]);
+
         $approval = [
             'status' => true,
             'result' => false,
@@ -46,15 +50,15 @@ class ApprovalController extends Controller
             self::afterApproval($callBackClass, $callBackMethod, $pk, $data,1);
             return $approval;
         }
-//        $session = session(parent::pasn);
+
         $workflowNodeModel = new WorkflowNodeModel();
         //加载审批流程当前全流程节点
         $processList = $workflowNodeModel->handlerLists(['workflowId' => $info['id'], 'projectId' => $data['projectId']]);
 
         $approvalData = [
             'workflowId' => $info['id'],
-            'projectId' => $data['projectId'],
-            'adminId' => 0, //TODO  拿不到当前登录账号的id
+            'projectId' => $session['projectId'],
+            'adminId' => $session['adminId'],
             'joinTime' => date('Y-m-d H:i:s'),
             'curnode' => (isset($processList[0]) && !empty($processList[0]))?$processList[0]:0,
             'process' => json_encode($processList),

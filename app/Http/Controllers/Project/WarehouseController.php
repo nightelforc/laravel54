@@ -220,7 +220,7 @@ class WarehouseController extends Controller
             'data.required' => '请填写材料具体信息',
             'data.array' => '材料具体信息类型不正确',
         ];
-        $input = $request->only(['projectId', 'sourceEmployeeId', 'time', 'data', 'price', 'remark']);
+        $input = $request->only(['projectId', 'sourceEmployeeId', 'time', 'data', 'price', 'remark',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $rules1 = [
@@ -428,7 +428,7 @@ class WarehouseController extends Controller
             'data.required' => '请填写材料具体信息',
             'data.array' => '材料具体信息类型不正确',
         ];
-        $input = $request->only(['projectId', 'time', 'data', 'remark']);
+        $input = $request->only(['projectId', 'time', 'data', 'remark',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $rules1 = [
@@ -626,7 +626,7 @@ class WarehouseController extends Controller
             'amount.required' => '请填写材料数量',
             'amount.integer' => '材料数量类型错误',
         ];
-        $input = $request->only(['projectId', 'time', 'remark', 'materialId', 'specId', 'supplierId', 'amount']);
+        $input = $request->only(['projectId', 'time', 'remark', 'materialId', 'specId', 'supplierId', 'amount',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $warehouseModel = new WarehouseModel();
@@ -725,7 +725,7 @@ class WarehouseController extends Controller
             'data.required' => '请填写材料具体信息',
             'data.array' => '材料具体信息类型不正确',
         ];
-        $input = $request->only(['projectId', 'sourceProjectId', 'time', 'data', 'remark']);
+        $input = $request->only(['projectId', 'sourceProjectId', 'time', 'data', 'remark',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $rules1 = [

@@ -880,7 +880,7 @@ class ProjectController extends Controller
             'data.required' => '获取分账数据失败',
             'data.array' => '分账参数类型错误',
         ];
-        $input = $request->only(['projectId', 'areaId', 'sectionId','professionId', 'groupId', 'data']);
+        $input = $request->only(['projectId', 'areaId', 'sectionId','professionId', 'groupId', 'data',self::token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $rules1 = [
@@ -1052,7 +1052,7 @@ class ProjectController extends Controller
             'data.required' => '获取分账数据失败',
             'data.array' => '分账参数类型错误',
         ];
-        $input = $request->only(['projectId', 'areaId', 'sectionId', 'groupId', 'data']);
+        $input = $request->only(['projectId', 'areaId', 'sectionId', 'groupId', 'data',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $rules1 = [
@@ -1286,7 +1286,7 @@ class ProjectController extends Controller
             'data.required' => '请填写作业内容',
             'data.array' => '作业内容类型不正确',
         ];
-        $input = $request->only(['projectId', 'employeeId', 'account', 'separateTime', 'data']);
+        $input = $request->only(['projectId', 'employeeId', 'account', 'separateTime', 'data',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $rules1 = [

@@ -26,13 +26,12 @@ class AdminController extends Controller
     public function lists(Request $request)
     {
         $rules = [
-//            'projectId' => 'required|integer',
+            'projectId' => 'nullable|integer',
             'length' => 'nullable|integer|in:10,20,50',
             'length' => 'nullable|integer|min:1',
         ];
         $message = [
-//            'projectId.required' => '获取项目参数失败',
-//            'projectId.integer' => '项目参数类型错误',
+            'projectId.integer' => '项目参数类型错误',
             'length.integer' => '记录条数参数类型错误',
             'length.in' => '记录条数参数值不正确',
             'start.integer' => '页码参数类型错误',
@@ -52,10 +51,10 @@ class AdminController extends Controller
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {
-                if (key($failed['projectId']) == 'Required') {
-                    $this->code = 120101;
-                    $this->msg = $validator->errors()->first();
-                }
+//                if (key($failed['projectId']) == 'Required') {
+//                    $this->code = 120101;
+//                    $this->msg = $validator->errors()->first();
+//                }
                 if (key($failed['projectId']) == 'Integer') {
                     $this->code = 120102;
                     $this->msg = $validator->errors()->first();

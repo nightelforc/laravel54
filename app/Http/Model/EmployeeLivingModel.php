@@ -38,6 +38,9 @@ class EmployeeLivingModel
     public function insert(array $input)
     {
         $input['createTime'] = date('Y-m-d H:i:s');
+        if ($input['type'] == 2){
+            $input['account'] *= -1;
+        }
         return DB::table($this->table)->insertGetId($input);
     }
 

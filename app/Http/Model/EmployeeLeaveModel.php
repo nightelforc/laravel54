@@ -30,7 +30,9 @@ class EmployeeLeaveModel
 
         return DB::table($this->table)
             ->where(function ($query) use ($input) {
-                $query->where($this->table.'.projectId', $input['projectId']);
+                if (isset($input['projectId']) && !empty($input['projectId'])) {
+                    $query->where($this->table.'.projectId', $input['projectId']);
+                }
                 if (isset($input['professionId']) && !is_null($input['professionId'])) {
                     $query->where('e.professionId', $input['professionId']);
                 }

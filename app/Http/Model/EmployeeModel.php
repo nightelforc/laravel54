@@ -30,9 +30,10 @@ class EmployeeModel extends Model
 
         return DB::table($this->table)
             ->leftJoin('profession as p', 'p.id', '=', $this->table . '.professionId')
+            ->leftJoin('project','project.id','=',$this->table.'.projectId')
             ->where(function ($query) use ($input) {
                 $query->where('isFinish', 0);
-                if (isset($input['projectId']) && !is_null($input['projectId'])) {
+                if (isset($input['projectId']) && !empty($input['projectId'])) {
                     $query->where('projectId', $input['projectId']);
                 }
                 if (isset($input['professionId']) && !is_null($input['professionId'])) {
@@ -50,7 +51,7 @@ class EmployeeModel extends Model
                 }
             })
             ->offset($start)->limit($limit)
-            ->select($this->table . '.*', 'p.name as professionName')
+            ->select($this->table . '.*', 'p.name as professionName','project.name as projectName')
             ->get()->toArray();
     }
 

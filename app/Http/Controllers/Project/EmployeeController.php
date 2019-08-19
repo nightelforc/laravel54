@@ -342,15 +342,17 @@ class EmployeeController extends Controller
             'loanTime.required' => '请选择借款时间',
             'loanTime.date_format' => '借款时间格式不正确',
         ];
-        $input = $request->only(['employeeId', 'account', 'loanTime',self::token]);
+        $input = $request->only(['employeeId', 'account', 'loanTime',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             //追加工人当前的projectId
             $employeeModel = new EmployeeModel();
             $info = $employeeModel->info(['id' => $input['employeeId']]);
             $input['projectId'] = $info['projectId'];
+            $data = $input;
+            unset($data[self::$token]);
             $employeeLoanModel = new EmployeeLoanModel();
-            $insertId = $employeeLoanModel->insert($input);
+            $insertId = $employeeLoanModel->insert($data);
             if ($insertId){
                 $input['id'] = $insertId;
                 $approval = ApprovalController::approval('addLoan', $input);
@@ -433,8 +435,10 @@ class EmployeeController extends Controller
             $employeeModel = new EmployeeModel();
             $info = $employeeModel->info(['id' => $input['employeeId']]);
             $input['projectId'] = $info['projectId'];
+            $data = $input;
+            unset($data[self::$token]);
             $employeeLivingModel = new EmployeeLivingModel();
-            $insertId = $employeeLivingModel->insert($input);
+            $insertId = $employeeLivingModel->insert($data);
             if ($insertId){
                 $input['id'] = $insertId;
                 //审批流程
@@ -863,11 +867,13 @@ class EmployeeController extends Controller
             'preBackTime.date_format' => '预计销假时间格式不正确',
             'preBackTime.after' => '预计销假时间必须晚于预计请假时间',
         ];
-        $input = $request->only(['employeeId', 'projectId', 'preLeaveTime', 'preBackTime', 'remark',self::token]);
+        $input = $request->only(['employeeId', 'projectId', 'preLeaveTime', 'preBackTime', 'remark',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeLeaveModel = new  EmployeeLeaveModel();
-            $insertId = $employeeLeaveModel->insert($input);
+            $data = $input;
+            unset($data[self::$token]);
+            $insertId = $employeeLeaveModel->insert($data);
             if ($insertId) {
                 $input['id'] = $insertId;
                 $approval = ApprovalController::approval('addLeave', $input);

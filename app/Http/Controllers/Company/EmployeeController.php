@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Model\EmployeeExperienceModel;
 use App\Http\Model\EmployeeModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class EmployeeController extends Controller
@@ -27,7 +28,7 @@ class EmployeeController extends Controller
             'name' => 'required',
             'idcard'=>'required|size:18',
             'jobNumber' => 'required',
-            'gender'=>'nullable|integer|in:0,1,2',
+            'gender'=>'nullable|integer|in:1,2',
             'age'=>'nullable|integer',
             'professionId' => 'required|integer',
         ];
@@ -50,14 +51,14 @@ class EmployeeController extends Controller
             $imagePath = '';
             if ($request->hasFile('image')){
                 $image = $request->file('image');
-                $fileExtension = strtolower($image->getExtension());
+                $fileExtension = strtolower($request->image->extension());
                 if (in_array($fileExtension,['jpg','jpeg','png','bmp'])){
                     $newName = time() . mt_rand(100,999);
-                    if($image->move('../upload',$newName)){
-                        $imagePath =  '../upload/'.$newName;   //返回一个地址
+                    if($image->move('./upload',$newName.'.'.$fileExtension)){
+                        $imagePath =  '/upload/'.$newName.'.'.$fileExtension;   //返回一个地址
                     }
                 }else{
-                    $this->code = 310112;
+                    $this->code = 310212;
                     $this->msg = '上传图片格式不正确';
                 }
             }
@@ -133,6 +134,127 @@ class EmployeeController extends Controller
         }
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Request $request){
+        $rules = [
+            'id' => 'required|integer',
+            'projectId' => 'required|integer',
+            'name' => 'required',
+            'idcard'=>'required|size:18',
+            'jobNumber' => 'required',
+            'gender'=>'nullable|integer|in:1,2',
+            'age'=>'nullable|integer',
+            'professionId' => 'required|integer',
+        ];
+        $message = [
+            'id.required' => '获取工人参数失败',
+            'id.integer' => '工人参数类型错误',
+            'projectId.required' => '获取工人参数失败',
+            'projectId.integer' => '工人参数类型错误',
+            'name.required' => '请填写姓名',
+            'idcard.required' => '请填写身份证号',
+            'idcard.size' => '身份证号位数不正确',
+            'jobNumber.required'=>'请填写工号',
+            'gender.integer'=>'性别参数类型错误',
+            'gender.in'=>'性别参数不正确',
+            'age.integer'=>'年龄参数类型错误',
+            'professionId.required' => '请选择工种',
+            'professionId.integer' => '工种参数类型错误',
+        ];
+        $input = $request->only(['id','projectId', 'name', 'idcard', 'jobNumber','gender','age','nation','phone','bankNumber','homeAddress','professionId']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $imagePath = '';
+            if ($request->hasFile('image')){
+                $image = $request->file('image');
+                $fileExtension = strtolower($request->image->extension());
+                if (in_array($fileExtension,['jpg','jpeg','png','bmp'])){
+                    $newName = time() . mt_rand(100,999);
+                    if($image->move('../storage/app/public/upload',$newName.'.'.$fileExtension)){
+                        $imagePath =  '/upload/'.$newName.'.'.$fileExtension;   //返回一个地址
+                    }
+                }else{
+                    $this->code = 310212;
+                    $this->msg = '上传图片格式不正确';
+                }
+            }
+            $input['image'] = $imagePath;
+            $employeeModel = new EmployeeModel();
+            $id = $input['id'];
+            $info = $employeeModel->info(['id'=>$id]);
+            Storage::disk('public')->delete($info['image']);
+            $employeeModel->update($id,$input);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'id') {
+                if (key($failed['id']) == 'Required') {
+                    $this->code = 310201;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['id']) == 'Integer') {
+                    $this->code = 310202;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 310201;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 310202;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'name') {
+                if (key($failed['name']) == 'Required') {
+                    $this->code = 310203;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'idcard') {
+                if (key($failed['idcard']) == 'Required') {
+                    $this->code = 310204;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['idcard']) == 'Size') {
+                    $this->code = 310205;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'jobNumber') {
+                if (key($failed['jobNumber']) == 'Required') {
+                    $this->code = 310206;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'gender') {
+                if (key($failed['gender']) == 'Integer') {
+                    $this->code = 310207;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['gender']) == 'In') {
+                    $this->code = 310208;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'age') {
+                if (key($failed['age']) == 'Integer') {
+                    $this->code = 310209;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'professionId') {
+                if (key($failed['professionId']) == 'Required') {
+                    $this->code = 310210;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['professionId']) == 'Integer') {
+                    $this->code = 310211;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
     /**
      * @param Request $request
      * @return \Illuminate\Http\Response

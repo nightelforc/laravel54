@@ -26,8 +26,8 @@ class ApprovalController extends Controller
      */
     public static function approval($code, $data)
     {
-        $session = AdminSessionModel::get($data[parent::TOKEN]);
-        unset($data[parent::TOKEN]);
+        $session = AdminSessionModel::get($data[parent::$token]);
+        unset($data[parent::$token]);
 
         $approval = [
             'status' => true,
@@ -53,7 +53,7 @@ class ApprovalController extends Controller
 
         $workflowNodeModel = new WorkflowNodeModel();
         //加载审批流程当前全流程节点
-        $processList = $workflowNodeModel->handlerLists(['workflowId' => $info['id'], 'projectId' => $data['projectId']]);
+        $processList = $workflowNodeModel->handlerLists(['workflowId' => $info['id'], 'projectId' => $session['projectId']]);
 
         $approvalData = [
             'workflowId' => $info['id'],
@@ -127,11 +127,12 @@ class ApprovalController extends Controller
             'start.integer' => '页码参数类型错误',
             'start.min' => '页码参数值不小于:min',
         ];
-        $input = $request->only(['projectId', 'startTime','endTime','status','draw', 'length', 'start']);
+        $input = $request->only(['projectId', 'startTime','endTime','status','draw', 'length', 'start',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $WorkflowItemModel = new WorkflowItemModel();
-            $input['curnode'] = $request->session()->get(parent::pasn)['id'];
+            $session = AdminSessionModel::get($input[self::$token]);
+            $input['curnode'] = $session['adminId'];
             $this->data = $WorkflowItemModel->lists($input);
         } else {
             $failed = $validator->failed();

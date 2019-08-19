@@ -106,9 +106,11 @@ class AdminModel
             ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
             ->leftJoin('role as r','r.id','=','ar.roleId')
             ->where(function($query) use ($input){
-//                $query->where('projectId',$input['projectId']);
+                if (isset($input['projectId']) && !is_null($input['projectId'])){
+                    $query->where('projectId',$input['projectId']);
+                }
                 if (isset($input['search']) && !is_null($input['search'])) {
-                    $query->where($this->table.'.name', 'like', '%' . $input['search'] . '%');
+                    $query->where($this->table.'.username', 'like', '%' . $input['search'] . '%');
                 }
             })
             ->offset($start)->limit($limit)

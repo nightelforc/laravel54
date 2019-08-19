@@ -31,7 +31,7 @@ class WarehouseModel
             ->leftJoin('unit as u','u.id','=',$this->table.'.unitId')
             ->where(function ($query) use ($input) {
                 if (isset($input['search']) && !is_null($input['search'])) {
-                    $query->where($this->table.'.name', 'like', '%' . $input['search'] . '%');
+                    $query->where('m.name', 'like', '%' . $input['search'] . '%');
                 }
             })
             ->offset($start)->limit($limit)

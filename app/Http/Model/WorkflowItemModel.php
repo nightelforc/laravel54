@@ -134,7 +134,7 @@ class WorkflowItemModel extends Model
             }
             return true;
         }catch(\Exception $e){
-            return false;
+            return $e->getMessage();
         }
     }
 }

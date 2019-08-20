@@ -24,12 +24,11 @@ use Illuminate\Support\Facades\Validator;
 class ProjectController extends Controller
 {
     /**
-     * @param Request $request
      * @return \Illuminate\Http\Response
      */
     public function selectLists(){
         $projectModel = new ProjectModel();
-        $this->data = $projectModel->lists();
+        $this->data = $projectModel->selectLists();
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
 

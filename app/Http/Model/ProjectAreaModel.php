@@ -29,12 +29,14 @@ class ProjectAreaModel
         }
 
         return DB::table($this->table)
+            ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
             ->where(function ($query) use ($input) {
                 $query->where('projectId', $input['projectId']);
                 if (isset($input['search']) && !is_null($input['search'])) {
-                    $query->where('name', 'like', '%' . $input['search'] . '%');
+                    $query->where($this->table.'.name', 'like', '%' . $input['search'] . '%');
                 }
             })
+            ->select($this->table.'.*','p.name as projectName')
             ->offset($start)->limit($limit)->get()->toArray();
     }
 

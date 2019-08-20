@@ -249,6 +249,7 @@ class EmployeeModel extends Model
     public function attendanceEmployee(array $data){
         return DB::table($this->table)
             ->leftJoin('profession as p','p.id','=',$this->table.'.professionId')
+            ->leftJoin('project','project.id','=',$this->table.'.projectId')
             ->where(function ($query) use ($data){
                 $query->where('hasAttendance', 1)->where('isFinish', 0);
                 if (isset($data['projectId']) && !empty($data['projectId'])){
@@ -257,14 +258,14 @@ class EmployeeModel extends Model
                 if (isset($data['professionId']) && !empty($data['professionId'])){
                     $query->where('professionId', $data['professionId']);
                 }
-                if (isset($input['search']) && !is_null($data['search'])) {
+                if (isset($data['search']) && !is_null($data['search'])) {
                     $query->where(function ($query1) use ($data) {
                         $query1->where($this->table . '.name', 'like', '%' . $data['search'] . '%')->orWhere('jobNumber', 'like', '%' . $data['search'] . '%');
                     });
                 }
             })
             ->orderBy('status', 'asc')
-            ->select($this->table.'.*','p.name as professionName')
+            ->select($this->table.'.*','p.name as professionName','project.name as projectName')
             ->get()->toArray();
     }
 

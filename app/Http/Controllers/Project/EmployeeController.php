@@ -87,10 +87,10 @@ class EmployeeController extends Controller
             $employeeModel = new EmployeeModel();
             $lists = $employeeModel->lists($input);
             $this->data = [
-                "draw"=>$input['draw'],
-                "data"=>$lists,
-                "recordsFiltered"=>count($lists),
-                "recordsTotal"=>count($lists),
+                "draw" => $input['draw'],
+                "data" => $lists,
+                "recordsFiltered" => count($lists),
+                "recordsTotal" => count($lists),
             ];
         } else {
             $failed = $validator->failed();
@@ -122,7 +122,7 @@ class EmployeeController extends Controller
                     $this->code = 410106;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'length') {
+            } elseif (key($failed) == 'length') {
                 if (key($failed['length']) == 'Required') {
                     $this->code = 410107;
                     $this->msg = $validator->errors()->first();
@@ -207,7 +207,7 @@ class EmployeeController extends Controller
             'status.integer' => '工作状态参数类型错误',
             'status.in' => '工作状态参数值不正确'
         ];
-        $input = $request->only(['ids', 'status',self::$token]);
+        $input = $request->only(['ids', 'status', self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             //审批流程
@@ -268,7 +268,7 @@ class EmployeeController extends Controller
             'projectId.required' => '请选择工作状态',
             'projectId.integer' => '工作状态参数类型错误',
         ];
-        $input = $request->only(['ids', 'projectId',self::$token]);
+        $input = $request->only(['ids', 'projectId', self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeModel = new EmployeeModel();
@@ -342,31 +342,36 @@ class EmployeeController extends Controller
             'loanTime.required' => '请选择借款时间',
             'loanTime.date_format' => '借款时间格式不正确',
         ];
-        $input = $request->only(['employeeId', 'account', 'loanTime',self::$token]);
+        $input = $request->only(['employeeId', 'account', 'loanTime', self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            //追加工人当前的projectId
-            $employeeModel = new EmployeeModel();
-            $info = $employeeModel->info(['id' => $input['employeeId']]);
-            $input['projectId'] = $info['projectId'];
-            $data = $input;
-            unset($data[self::$token]);
-            $employeeLoanModel = new EmployeeLoanModel();
-            $insertId = $employeeLoanModel->insert($data);
-            if ($insertId){
-                $input['id'] = $insertId;
-                $approval = ApprovalController::approval('addLoan', $input);
-                if ($approval['status']) {
-                    if ($approval['result']) {
-                        $this->msg = '申请提交成功，请等待审批结果';
-                    } else {
-                        $this->code = 410508;
-                        $this->msg = '保存失败，请稍后重试';
+            if ($input['loanTime'] <= date('Y-m-d')) {
+                //追加工人当前的projectId
+                $employeeModel = new EmployeeModel();
+                $info = $employeeModel->info(['id' => $input['employeeId']]);
+                $input['projectId'] = $info['projectId'];
+                $data = $input;
+                unset($data[self::$token]);
+                $employeeLoanModel = new EmployeeLoanModel();
+                $insertId = $employeeLoanModel->insert($data);
+                if ($insertId) {
+                    $input['id'] = $insertId;
+                    $approval = ApprovalController::approval('addLoan', $input);
+                    if ($approval['status']) {
+                        if ($approval['result']) {
+                            $this->msg = '申请提交成功，请等待审批结果';
+                        } else {
+                            $this->code = 410509;
+                            $this->msg = '保存失败，请稍后重试';
+                        }
                     }
+                } else {
+                    $this->code = 410508;
+                    $this->msg = '保存失败，请稍后重试';
                 }
-            }else{
+            } else {
                 $this->code = 410507;
-                $this->msg = '保存失败，请稍后重试';
+                $this->msg = '日期不能晚于当日日期';
             }
         } else {
             $failed = $validator->failed();
@@ -428,32 +433,37 @@ class EmployeeController extends Controller
             'livingTime.required' => '请选择借款时间',
             'livingTime.date_format' => '借款时间格式不正确',
         ];
-        $input = $request->only(['employeeId', 'account', 'type', 'livingTime',self::$token]);
+        $input = $request->only(['employeeId', 'account', 'type', 'livingTime', self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            //追加工人当前的projectId
-            $employeeModel = new EmployeeModel();
-            $info = $employeeModel->info(['id' => $input['employeeId']]);
-            $input['projectId'] = $info['projectId'];
-            $data = $input;
-            unset($data[self::$token]);
-            $employeeLivingModel = new EmployeeLivingModel();
-            $insertId = $employeeLivingModel->insert($data);
-            if ($insertId){
-                $input['id'] = $insertId;
-                //审批流程
-                $approval = ApprovalController::approval('addLiving', $input);
-                if ($approval['status']) {
-                    if ($approval['result']) {
-                        $this->msg = '申请提交成功，请等待审批结果';
-                    } else {
-                        $this->code = 410611;
-                        $this->msg = '保存失败，请稍后重试';
+            if ($input['livingTime'] <= date('Y-m-d')) {
+                //追加工人当前的projectId
+                $employeeModel = new EmployeeModel();
+                $info = $employeeModel->info(['id' => $input['employeeId']]);
+                $input['projectId'] = $info['projectId'];
+                $data = $input;
+                unset($data[self::$token]);
+                $employeeLivingModel = new EmployeeLivingModel();
+                $insertId = $employeeLivingModel->insert($data);
+                if ($insertId) {
+                    $input['id'] = $insertId;
+                    //审批流程
+                    $approval = ApprovalController::approval('addLiving', $input);
+                    if ($approval['status']) {
+                        if ($approval['result']) {
+                            $this->msg = '申请提交成功，请等待审批结果';
+                        } else {
+                            $this->code = 410612;
+                            $this->msg = '保存失败，请稍后重试';
+                        }
                     }
+                } else {
+                    $this->code = 410611;
+                    $this->msg = '保存失败，请稍后重试';
                 }
-            }else{
+            } else {
                 $this->code = 410610;
-                $this->msg = '保存失败，请稍后重试';
+                $this->msg = '日期不能晚于当日日期';
             }
         } else {
             $failed = $validator->failed();
@@ -567,13 +577,18 @@ class EmployeeController extends Controller
         $input = $request->only(['employeeId', 'day', 'length']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            //追加工人当前的projectId
-            $employeeModel = new EmployeeModel();
-            $info = $employeeModel->info(['id' => $input['employeeId']]);
-            $input['projectId'] = $info['projectId'];
-            $employeeAttendanceModel = new EmployeeAttendanceModel();
-            $employeeAttendanceModel->insert($input);
-            $employeeModel->hasAttendance(['id' => $input['employeeId']]);
+            if ($input['day'] <= date('Y-m-d')){
+                //追加工人当前的projectId
+                $employeeModel = new EmployeeModel();
+                $info = $employeeModel->info(['id' => $input['employeeId']]);
+                $input['projectId'] = $info['projectId'];
+                $employeeAttendanceModel = new EmployeeAttendanceModel();
+                $employeeAttendanceModel->insert($input);
+                $employeeModel->hasAttendance(['id' => $input['employeeId']]);
+            }else{
+                $this->code = 410807;
+                $this->msg = '考勤日期不能超过当前日期';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'employeeId') {
@@ -641,7 +656,7 @@ class EmployeeController extends Controller
                 if (key($failed) == 'employeeId') {
                     if (key($failed['employeeId']) == 'Required') {
                         $this->code = 410901;
-                        $this->msg = '第'.$key.'条'.$validator->errors()->first();
+                        $this->msg = '第' . $key . '条' . $validator->errors()->first();
                     }
                     if (key($failed['employeeId']) == 'Integer') {
                         $this->code = 410902;
@@ -676,6 +691,13 @@ class EmployeeController extends Controller
                     }
                 }
                 $return = true;
+                break;
+            }
+
+            if ($d['day'] <= date('Y-m-d')){
+                $this->code = 410909;
+                $this->msg = '考勤日期不能超过当前时间';
+                $return =true;
                 break;
             }
         }
@@ -722,16 +744,16 @@ class EmployeeController extends Controller
             'start.integer' => '页码参数类型错误',
             'start.min' => '页码参数值不小于:min',
         ];
-        $input = $request->only(['projectId', 'professionId', 'backStatus', 'status', 'search','draw','length','start']);
+        $input = $request->only(['projectId', 'professionId', 'backStatus', 'status', 'search', 'draw', 'length', 'start']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeLeaveModel = new  EmployeeLeaveModel();
             $lists = $employeeLeaveModel->lists($input);
             $this->data = [
-                "draw"=>$input['draw'],
-                "data"=>$lists,
-                "recordsFiltered"=>count($lists),
-                "recordsTotal"=>count($lists),
+                "draw" => $input['draw'],
+                "data" => $lists,
+                "recordsFiltered" => count($lists),
+                "recordsTotal" => count($lists),
             ];
         } else {
             $failed = $validator->failed();
@@ -758,7 +780,7 @@ class EmployeeController extends Controller
                     $this->code = 411005;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'status') {
+            } elseif (key($failed) == 'status') {
                 if (key($failed['status']) == 'Integer') {
                     $this->code = 411006;
                     $this->msg = $validator->errors()->first();
@@ -767,7 +789,7 @@ class EmployeeController extends Controller
                     $this->code = 411007;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'length') {
+            } elseif (key($failed) == 'length') {
                 if (key($failed['length']) == 'Required') {
                     $this->code = 411008;
                     $this->msg = $validator->errors()->first();
@@ -867,7 +889,7 @@ class EmployeeController extends Controller
             'preBackTime.date_format' => '预计销假时间格式不正确',
             'preBackTime.after' => '预计销假时间必须晚于预计请假时间',
         ];
-        $input = $request->only(['employeeId', 'projectId', 'preLeaveTime', 'preBackTime', 'remark',self::$token]);
+        $input = $request->only(['employeeId', 'projectId', 'preLeaveTime', 'preBackTime', 'remark', self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeLeaveModel = new  EmployeeLeaveModel();
@@ -885,7 +907,7 @@ class EmployeeController extends Controller
                         $this->msg = '保存失败，请稍后重试';
                     }
                 }
-            }else{
+            } else {
                 $this->code = 411210;
                 $this->msg = '保存失败，请稍后重试';
             }

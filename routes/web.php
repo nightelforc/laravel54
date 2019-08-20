@@ -81,6 +81,8 @@ Route::group([
         Route::post('/project/info', 'ProjectController@info');
         Route::post('/project/edit', 'ProjectController@edit');
         Route::post('/project/editStatus', 'ProjectController@editStatus');
+
+        Route::post('/project/editBudget', 'ProjectController@editBudget');
     });
 
     //项目主要业务

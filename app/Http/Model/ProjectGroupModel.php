@@ -32,6 +32,7 @@ class ProjectGroupModel
     {
         return DB::table($this->table)
             ->leftJoin('profession as p','p.id','=',$this->table.'.professionId')
+            ->leftJoin('project','project.id','=',$this->table.'.projectId')
             ->leftJoin('employee as e','e.id',$this->table.'.groupLeader')
             ->where(function ($query) use ($data){
                 $query->where($this->table.'.projectId',$data['projectId'])
@@ -45,7 +46,8 @@ class ProjectGroupModel
                     $query->where($this->table.'.name','like','%'. $data['search'].'%');
                 }
             })
-            ->get([$this->table.'.*','p.name as professionName','e.name as employeeName'])->toArray();
+            ->select($this->table.'.*','p.name as professionName','e.name as employeeName','project.name as projectName')
+            ->get()->toArray();
     }
 
     /**

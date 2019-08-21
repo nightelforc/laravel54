@@ -42,11 +42,12 @@ class AdminController extends Controller
         if ($validator->passes()) {
             $adminModel = new AdminModel();
             $lists = $adminModel->lists($input);
+            $countLists = $adminModel->countLists($input);
             $this->data = [
                 "draw"=>$input['draw'],
                 "data"=>$lists,
-                "recordsFiltered"=>count($lists),
-                "recordsTotal"=>count($lists),
+                "recordsFiltered"=>$countLists,
+                "recordsTotal"=>$countLists,
             ];
         } else {
             $failed = $validator->failed();

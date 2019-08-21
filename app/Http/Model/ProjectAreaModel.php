@@ -41,6 +41,24 @@ class ProjectAreaModel
     }
 
     /**
+     * @param array $input
+     * @return mixed
+     */
+    public function countLists(array $input)
+    {
+        return DB::table($this->table)
+            ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
+            ->where(function ($query) use ($input) {
+                $query->where('projectId', $input['projectId']);
+                if (isset($input['search']) && !is_null($input['search'])) {
+                    $query->where($this->table.'.name', 'like', '%' . $input['search'] . '%');
+                }
+            })
+            ->select($this->table.'.*','p.name as projectName')
+            ->count();
+    }
+
+    /**
      * @param array $data
      * @return mixed
      */

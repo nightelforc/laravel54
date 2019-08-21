@@ -22,16 +22,15 @@ class ApiAuth
      *
      * @param  \Illuminate\Http\Request $request
      * @param  \Closure $next
-     * @param  string|null $guard
      * @return mixed
      */
     public function handle($request, Closure $next)
     {
 
-//        $adminId = $this->tokenValidate($request);
-//        if (!$adminId) {
-//            return Response::create(['code' => 100001, 'msg' => '身份信息已过时，请重新登录'], 403);
-//        }
+        $adminId = $this->tokenValidate($request);
+        if (!$adminId) {
+            return Response::create(['code' => 100001, 'msg' => '身份信息已过时，请重新登录'], 403);
+        }
 //
 //        $role = (new AdminController())->getRole($adminId);
 //        if (empty($role)){
@@ -63,7 +62,7 @@ class ApiAuth
         //验证token是否超时
         $curTimestamp = intval(time());
         $sessionTimestamp = intval(strtotime($adminSession['tokenTime']));
-        if ($curTimestamp-$sessionTimestamp >= config('yucheng.tokenExist')){
+        if (($curTimestamp-$sessionTimestamp) >= config('yucheng.tokenExist')){
             return false;
         }
         AdminSessionModel::put($tokenRequest,$adminSession['adminId']);

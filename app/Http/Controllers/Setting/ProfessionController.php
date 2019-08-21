@@ -72,14 +72,20 @@ class ProfessionController extends Controller
         $message = [
             'name.required' => '请输入工种名称',
         ];
-        $input = $request->all();
+        $input = $request->only(['name']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $professionModel = new ProfessionModel();
-            $result = $professionModel->insert($input);
-            if (!$result) {
-                $this->code = 240203;
-                $this->msg = '保存失败，请稍后重试';
+            $info = $professionModel->info($input);
+            if (empty($info)){
+                $result = $professionModel->insert($input);
+                if (!$result) {
+                    $this->code = 240203;
+                    $this->msg = '保存失败，请稍后重试';
+                }
+            }else{
+                $this->code = 240202;
+                $this->msg = '请勿重复建立相同名称的工种';
             }
         } else {
             $failed = $validator->failed();
@@ -112,7 +118,13 @@ class ProfessionController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $professionModel = new ProfessionModel();
-            $professionModel->update($input);
+            $info = $professionModel->info(['name'=>$input['name']]);
+            if (empty($info)){
+                $professionModel->update($input);
+            }else{
+                $this->code = 240305;
+                $this->msg = '请勿重复建立相同名称的工种';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {

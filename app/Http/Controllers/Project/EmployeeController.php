@@ -694,7 +694,7 @@ class EmployeeController extends Controller
                 break;
             }
 
-            if ($d['day'] <= date('Y-m-d')){
+            if ($d['day'] > date('Y-m-d')){
                 $this->code = 410909;
                 $this->msg = '考勤日期不能超过当前时间';
                 $return =true;

@@ -106,10 +106,16 @@ class AssignmentController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $assignmentModel = new AssignmentModel();
-            $result = $assignmentModel->insert($input);
-            if (!$result) {
+            $info = $assignmentModel->info(['professionId' => $input['id'], 'name' => $input['name']]);
+            if (empty($info)) {
+                $result = $assignmentModel->insert($input);
+                if (!$result) {
+                    $this->code = 250207;
+                    $this->msg = '保存失败，请稍后重试';
+                }
+            } else {
                 $this->code = 250206;
-                $this->msg = '保存失败，请稍后重试';
+                $this->msg = '当前工种下，请勿重复建立相同名称的施工项';
             }
         } else {
             $failed = $validator->failed();
@@ -122,12 +128,12 @@ class AssignmentController extends Controller
                     $this->code = 250202;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'name') {
+            } elseif (key($failed) == 'name') {
                 if (key($failed['name']) == 'Required') {
                     $this->code = 250203;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'unitId') {
+            } elseif (key($failed) == 'unitId') {
                 if (key($failed['unitId']) == 'Required') {
                     $this->code = 250204;
                     $this->msg = $validator->errors()->first();
@@ -145,7 +151,8 @@ class AssignmentController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request)
+    public
+    function edit(Request $request)
     {
         $rules = [
             'id' => 'required|integer',
@@ -163,7 +170,13 @@ class AssignmentController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $assignmentModel = new AssignmentModel();
-            $assignmentModel->update($input);
+            $info = $assignmentModel->info(['professionId' => $input['id'], 'name' => $input['name']]);
+            if (empty($info)) {
+                $assignmentModel->update($input);
+            } else {
+                $this->code = 250306;
+                $this->msg = '当前工种下，请勿重复建立相同名称的施工项';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
@@ -199,7 +212,8 @@ class AssignmentController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function editStatus(Request $request)
+    public
+    function editStatus(Request $request)
     {
         $rules = [
             'id' => 'required|integer',
@@ -228,7 +242,7 @@ class AssignmentController extends Controller
                     $this->code = 250402;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'status') {
+            } elseif (key($failed) == 'status') {
                 if (key($failed['status']) == 'Required') {
                     $this->code = 250401;
                     $this->msg = $validator->errors()->first();

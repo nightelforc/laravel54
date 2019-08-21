@@ -85,7 +85,13 @@ class ProjectGroupController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();
-            $projectGroupModel->insert($input);
+            $info = $projectGroupModel->info(['projectId'=>$input['projectId'],'name'=>$input['name'],'professionId'=>$input['professionId']]);
+            if (empty($info)){
+                $projectGroupModel->insert($input);
+            }else{
+                $this->code = 430206;
+                $this->msg = '相同工种下，班组名称不能重复命名';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {
@@ -170,7 +176,14 @@ class ProjectGroupController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();
-            $projectGroupModel->update($input);
+            $info = $projectGroupModel->info(['id'=>$input['id']]);
+            $info = $projectGroupModel->info(['projectId'=>$info['projectId'],'name'=>$input['name'],'professionId'=>$input['professionId']]);
+            if (empty($info)){
+                $projectGroupModel->update($input);
+            }else{
+                $this->code = 430406;
+                $this->msg = '相同工种下，班组名称不能重复命名';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
@@ -312,8 +325,8 @@ class ProjectGroupController extends Controller
                 if (empty($info)){
                     $projectGroupMembersModel->insert($input);
                 }else{
-                    if ($info->isDel == 1){
-                        $projectGroupMembersModel->update(['id'=>$info->id],['isDel'=>0]);
+                    if ($info['isDel'] == 1){
+                        $projectGroupMembersModel->update(['id'=>$info['id']],['isDel'=>0]);
                     }
                 }
             }else{
@@ -370,7 +383,7 @@ class ProjectGroupController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupMembersModel = new ProjectGroupMembersModel();
-            $projectGroupMembersModel->update(['id'=>$input['id']],['isDel'=>1]);
+            $projectGroupMembersModel->delMember($input);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
@@ -407,11 +420,11 @@ class ProjectGroupController extends Controller
             //获取组员信息
             $info = $projectGroupMembersModel->info($input);
             //清空原有组员的班组长状态
-            $projectGroupMembersModel->update(['groupId'=>$info->groupId],['isLeader'=>0]);
+            $projectGroupMembersModel->update(['groupId'=>$info['groupId']],['isLeader'=>0]);
             //设置新班组长
             $projectGroupMembersModel->update(['id'=>$input['id']],['isLeader'=>1]);
             //更新班组中的班组长字段
-            $projectGroupModel->updateIsLeader(['groupId'=>$info->groupId,'groupLeader' => $info->employeeId]);
+            $projectGroupModel->updateIsLeader(['groupId'=>$info['groupId'],'groupLeader' => $info['employeeId']]);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {

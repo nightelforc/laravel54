@@ -59,11 +59,12 @@ class ProjectController extends Controller
         if ($validator->passes()) {
             $projectAreaModel = new ProjectAreaModel();
             $lists = $projectAreaModel->lists($input);
+            $countLists = $projectAreaModel->countLists($input);
             $this->data = [
                 "draw"=>$input['draw'],
                 "data"=>$lists,
-                "recordsFiltered"=>count($lists),
-                "recordsTotal"=>count($lists),
+                "recordsFiltered"=>$countLists,
+                "recordsTotal"=>$countLists,
             ];
         } else {
             $failed = $validator->failed();
@@ -135,7 +136,13 @@ class ProjectController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectAreaModel = new ProjectAreaModel();
-            $projectAreaModel->insert($input);
+            $info = $projectAreaModel->info(['projectId'=>$input['projectId'],'name'=>$input['name']]);
+            if (empty($info)){
+                $projectAreaModel->insert($input);
+            }else{
+                $this->code = 420304;
+                $this->msg = '已存在相同名称的施工区';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {

@@ -119,6 +119,28 @@ class AdminModel
     }
 
     /**
+     * @param array $input
+     * @return mixed
+     */
+    public function countLists(array $input)
+    {
+        return DB::table($this->table)
+            ->leftJoin('admin_role as ar','ar.adminId','=',$this->table.'.id')
+            ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
+            ->leftJoin('role as r','r.id','=','ar.roleId')
+            ->where(function($query) use ($input){
+                if (isset($input['projectId']) && !is_null($input['projectId'])){
+                    $query->where('projectId',$input['projectId']);
+                }
+                if (isset($input['search']) && !is_null($input['search'])) {
+                    $query->where($this->table.'.username', 'like', '%' . $input['search'] . '%');
+                }
+            })
+            ->select($this->table.'.*','p.name as projectName','r.name as roleName')
+            ->count();
+    }
+
+    /**
      * @param array $data
      * @return mixed
      */
@@ -194,4 +216,5 @@ class AdminModel
     {
         return DB::table($this->table)->where('id',$id)->update($data);
     }
+
 }

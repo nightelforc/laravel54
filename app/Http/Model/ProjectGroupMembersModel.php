@@ -52,7 +52,8 @@ class ProjectGroupMembersModel
      * @return mixed
      */
     public function info(array $data){
-        return DB::table($this->table)->where($data)->first();
+        $result = DB::table($this->table)->where($data)->first();
+        return empty($result) ? [] : get_object_vars($result);
     }
 
     /**
@@ -71,5 +72,29 @@ class ProjectGroupMembersModel
     public function update(array $where, array $data)
     {
         return DB::table($this->table)->where($where)->update($data);
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function delMember(array $data)
+    {
+        try{
+            $result = DB::transaction(function () use ($data){
+                $this->update(['id'=>$data['id']],['isDel'=>1]);
+                $info = $this->info(['id'=>$data['id']]);
+                (new ProjectGroupModel())->updateIsLeader(['groupId'=>$info['groupId'],'groupLeader'=>null]);
+
+                return true;
+            });
+            if ($result){
+                return true;
+            }else{
+                return false;
+            }
+        }catch(\Exception $e){
+            return false;
+        }
     }
 }

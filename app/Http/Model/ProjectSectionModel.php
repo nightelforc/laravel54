@@ -42,6 +42,22 @@ class ProjectSectionModel
      * @param array $data
      * @return mixed
      */
+    public function countLists(array $data)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use ($data) {
+                $query->where('areaId', $data['areaId']);
+                if (isset($data['search']) && !is_null($data['search'])) {
+                    $query->where('name', 'like', '%' . $data['search'] . '%');
+                }
+            })
+            ->count();
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
     public function insert(array $data)
     {
         $data['createTime'] = date('Y-m-d H:i:s');
@@ -89,4 +105,32 @@ class ProjectSectionModel
             })
             ->get()->toArray();
     }
+
+    /**
+     * @return array
+     */
+    public function batchInfo()
+    {
+        $result = DB::table($this->table)->where('name','like','%层')->orderBy('id', 'desc')->first();
+        return empty($result) ? [] : get_object_vars($result);
+    }
+
+    /**
+     * @param array $check
+     * @param $id
+     * @return array
+     */
+    public function checkRepeat(array $check, $id = 0)
+    {
+        $result = DB::table($this->table)->where($check)
+            ->where(function ($query) use ($id){
+                if ($id != 0){
+                    $query->where('id','!=',$id);
+                }
+            })
+            ->first();
+        return empty($result) ? [] : get_object_vars($result);
+    }
+
+
 }

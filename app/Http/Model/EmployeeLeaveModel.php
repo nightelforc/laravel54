@@ -52,7 +52,37 @@ class EmployeeLeaveModel
             ->leftJoin('profession as p','p.id','=','e.professionId')
             ->offset($start)->limit($limit)
             ->orderBy('createTime','desc')
-            ->get([$this->table.'.*','e.name as employeeName','e.jobNumber','p.name as professionName','e.status as employeeStatus'])->toArray();
+            ->select($this->table.'.*','e.name as employeeName','e.jobNumber','p.name as professionName','e.status as employeeStatus')
+            ->get()->toArray();
+    }
+
+    /**
+     * @param array $input
+     * @return mixed
+     */
+    public function countLists(array $input)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use ($input) {
+                if (isset($input['projectId']) && !empty($input['projectId'])) {
+                    $query->where($this->table.'.projectId', $input['projectId']);
+                }
+                if (isset($input['professionId']) && !is_null($input['professionId'])) {
+                    $query->where('e.professionId', $input['professionId']);
+                }
+                if (isset($input['backStatus']) && !is_null($input['backStatus'])) {
+                    $query->where($this->table.'.backStatus', $input['backStatus']);
+                }
+                if (isset($input['status']) && !is_null($input['status'])) {
+                    $query->where($this->table.'.status', $input['status']);
+                }
+                if (isset($input['search']) && !is_null($input['search'])) {
+                    $query->where(function ($query1) use ($input) {
+                        $query1->where('e.name', 'like', '%' . $input['search'] . '%')->orWhere('e.jobNumber', 'like', '%' . $input['search'] . '%');
+                    });
+                }
+            })
+            ->count();
     }
 
     /**
@@ -93,6 +123,8 @@ class EmployeeLeaveModel
         }
 
     }
+
+
 
 
 }

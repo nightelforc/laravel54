@@ -54,11 +54,12 @@ class WarehouseController extends Controller
         if ($validator->passes()) {
             $warehouseModel = new WarehouseModel();
             $lists = $warehouseModel->lists($input);
+            $countLists = $warehouseModel->countLists($input);
             $this->data = [
                 "draw" => $input['draw'],
                 "data" => $lists,
-                "recordsFiltered" => count($lists),
-                "recordsTotal" => count($lists),
+                "recordsFiltered" => $countLists,
+                "recordsTotal" => $countLists,
             ];
         } else {
             $failed = $validator->failed();
@@ -1349,11 +1350,12 @@ class WarehouseController extends Controller
         if ($validator->passes()) {
             $warehouseLogInfoModel = new WarehouseLogInfoModel();
             $lists = $warehouseLogInfoModel->lists($input);
+            $countLists = $warehouseLogInfoModel->countLists($input);
             $this->data = [
                 "draw" => $input['draw'],
                 "data" => $lists,
-                "recordsFiltered" => count($lists),
-                "recordsTotal" => count($lists),
+                "recordsFiltered" => $countLists,
+                "recordsTotal" => $countLists,
             ];
         } else {
             $failed = $validator->failed();
@@ -1478,6 +1480,7 @@ class WarehouseController extends Controller
         if ($validator->passes()) {
             $employeeMaterialOrderInfoModel = new EmployeeMaterialOrderInfoModel();
             $lists = $employeeMaterialOrderInfoModel->lists($input);
+            $countLists = $employeeMaterialOrderInfoModel->countLists($input);
             $this->data = [
                 "draw" => $input['draw'],
                 "data" => $lists,

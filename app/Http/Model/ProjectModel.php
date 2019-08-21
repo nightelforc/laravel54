@@ -83,4 +83,19 @@ class ProjectModel
     {
         return DB::table($this->table)->where('id','>',1)->get()->toArray();
     }
+
+
+    public function countLists(array $data)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use ($data){
+                $query->where('id','!=',1);
+                if (isset($data['search']) && !is_null($data['search'])) {
+                    $query->where(function ($query1) use ($data) {
+                        $query1->where($this->table . '.name', 'like', '%' . $data['search'] . '%');
+                    });
+                }
+            })
+            ->count();
+    }
 }

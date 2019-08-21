@@ -39,6 +39,19 @@ class MaterialSpecModel
      * @param array $data
      * @return mixed
      */
+    public function countLists(array $data)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use($data){
+                $query->where('materialId',$data['materialId'])->where('isDel',0);
+            })
+            ->count();
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
     public function add(array $data)
     {
         $data['createTime'] = date('Y-m-d H:i:s');
@@ -86,4 +99,6 @@ class MaterialSpecModel
             })
             ->get()->toArray();
     }
+
+
 }

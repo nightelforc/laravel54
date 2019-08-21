@@ -168,14 +168,14 @@ class UnitController extends Controller
     {
         $rules = [
             'id' => 'required|integer',
-            'status' => 'required|integer|in:0,1',
+            'useStatus' => 'required|integer|in:0,1',
         ];
         $message = [
             'id.required' => '获取计量单位参数失败',
             'id.integer' => '计量单位参数类型错误',
-            'status.required' => '未获取到状态',
-            'status.integer' => '计量单位状态参数类型错误',
-            'status.in' => '计量单位状态参数值不正确',
+            'useStatus.required' => '未获取到状态',
+            'useStatus.integer' => '计量单位状态参数类型错误',
+            'useStatus.in' => '计量单位状态参数值不正确',
         ];
         $input = $request->all();
         $validator = Validator::make($input, $rules, $message);
@@ -193,16 +193,16 @@ class UnitController extends Controller
                     $this->code = 230402;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'status') {
-                if (key($failed['status']) == 'Required') {
+            }elseif (key($failed) == 'useStatus') {
+                if (key($failed['useStatus']) == 'Required') {
                     $this->code = 230401;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['status']) == 'Integer') {
+                if (key($failed['useStatus']) == 'Integer') {
                     $this->code = 230402;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['status']) == 'In') {
+                if (key($failed['useStatus']) == 'In') {
                     $this->code = 230405;
                     $this->msg = $validator->errors()->first();
                 }

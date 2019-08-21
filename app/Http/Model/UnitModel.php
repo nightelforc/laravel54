@@ -70,7 +70,7 @@ class UnitModel
      */
     public function updateStatus($data)
     {
-        return DB::table($this->table)->where('id', $data['id'])->update(['useStatus' => $data['status']]);
+        return DB::table($this->table)->where('id', $data['id'])->update(['useStatus' => $data['useStatus']]);
     }
 
     /**

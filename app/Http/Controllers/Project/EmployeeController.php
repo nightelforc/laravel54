@@ -86,6 +86,7 @@ class EmployeeController extends Controller
         if ($validator->passes()) {
             $employeeModel = new EmployeeModel();
             $lists = $employeeModel->lists($input);
+            $countLists = $employeeModel->countLists($input);
             $this->data = [
                 "draw" => $input['draw'],
                 "data" => $lists,
@@ -749,11 +750,12 @@ class EmployeeController extends Controller
         if ($validator->passes()) {
             $employeeLeaveModel = new  EmployeeLeaveModel();
             $lists = $employeeLeaveModel->lists($input);
+            $countLists = $employeeLeaveModel->countLists($input);
             $this->data = [
                 "draw" => $input['draw'],
                 "data" => $lists,
-                "recordsFiltered" => count($lists),
-                "recordsTotal" => count($lists),
+                "recordsFiltered" => $countLists,
+                "recordsTotal" => $countLists,
             ];
         } else {
             $failed = $validator->failed();

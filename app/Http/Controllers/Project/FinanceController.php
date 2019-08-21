@@ -24,7 +24,8 @@ class FinanceController extends Controller
      * @return \Illuminate\Http\Response
      * @throws \Exception
      */
-    public function wageLists(Request $request){
+    public function wageLists(Request $request)
+    {
         $rules = [
             'projectId' => 'required|integer',
             'professionId' => 'nullable|integer',
@@ -50,7 +51,8 @@ class FinanceController extends Controller
         if ($validator->passes()) {
             $employeeModel = new EmployeeModel();
             $lists = $employeeModel->lists($input);
-            foreach ($lists as $key => $l){
+            $countLists = $employeeModel->countLists($input);
+            foreach ($lists as $key => $l) {
                 $wages = $employeeModel->wages($l->id);
 //                $wagesTotal = [
 //                    'bonus' => 0,
@@ -76,10 +78,10 @@ class FinanceController extends Controller
                 $lists[$key]->wage = $wages;
             }
             $this->data = [
-                "draw"=>$input['draw'],
-                "data"=>$lists,
-                "recordsFiltered"=>count($lists),
-                "recordsTotal"=>count($lists),
+                "draw" => $input['draw'],
+                "data" => $lists,
+                "recordsFiltered" => $countLists,
+                "recordsTotal" => $countLists,
             ];
         } else {
             $failed = $validator->failed();
@@ -111,7 +113,7 @@ class FinanceController extends Controller
                     $this->code = 470106;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'length') {
+            } elseif (key($failed) == 'length') {
                 if (key($failed['length']) == 'Required') {
                     $this->code = 470107;
                     $this->msg = $validator->errors()->first();
@@ -146,7 +148,8 @@ class FinanceController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function supplierOrder(Request $request){
+    public function supplierOrder(Request $request)
+    {
         $rules = [
             'projectId' => 'required|integer',
             'time' => 'nullable|date_format:Y-m',
@@ -158,7 +161,7 @@ class FinanceController extends Controller
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型不正确',
-            'time.date_format' =>'月份格式不正确',
+            'time.date_format' => '月份格式不正确',
             'isPay.integer' => '付款状态参数类型错误',
             'isPay.in' => '付款状态参数值不正确',
             'length.required' => '获取记录条数失败',
@@ -168,16 +171,17 @@ class FinanceController extends Controller
             'start.integer' => '页码参数类型错误',
             'start.min' => '页码参数值不小于:min',
         ];
-        $input = $request->only(['projectId', 'isPay','draw', 'length', 'start', 'search','time']);
+        $input = $request->only(['projectId', 'isPay', 'draw', 'length', 'start', 'search', 'time']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $supplierOrdersModel = new SupplierOrdersModel();
             $lists = $supplierOrdersModel->lists($input);
+            $countLists = $supplierOrdersModel->countLists($input);
             $this->data = [
-                "draw"=>$input['draw'],
-                "data"=>$lists,
-                "recordsFiltered"=>count($lists),
-                "recordsTotal"=>count($lists),
+                "draw" => $input['draw'],
+                "data" => $lists,
+                "recordsFiltered" => $countLists,
+                "recordsTotal" => $countLists,
             ];
         } else {
             $failed = $validator->failed();
@@ -213,7 +217,7 @@ class FinanceController extends Controller
                     $this->code = 470207;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'length') {
+            } elseif (key($failed) == 'length') {
                 if (key($failed['length']) == 'Integer') {
                     $this->code = 470208;
                     $this->msg = $validator->errors()->first();
@@ -240,7 +244,8 @@ class FinanceController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function loanLists(Request $request){
+    public function loanLists(Request $request)
+    {
         $rules = [
             'projectId' => 'required|integer',
             'startTime' => 'nullable|date_format:Y-m-d',
@@ -253,8 +258,8 @@ class FinanceController extends Controller
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型不正确',
-            'startTime.date_format' =>'日期格式不正确',
-            'endTime.date_format' =>'日期格式不正确',
+            'startTime.date_format' => '日期格式不正确',
+            'endTime.date_format' => '日期格式不正确',
             'status.integer' => '付款状态参数类型错误',
             'status.in' => '付款状态参数值不正确',
             'length.required' => '获取记录条数失败',
@@ -264,16 +269,17 @@ class FinanceController extends Controller
             'start.integer' => '页码参数类型错误',
             'start.min' => '页码参数值不小于:min',
         ];
-        $input = $request->only(['projectId', 'startTime','endTime','status','draw', 'length', 'start', 'search']);
+        $input = $request->only(['projectId', 'startTime', 'endTime', 'status', 'draw', 'length', 'start', 'search']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeLoanModel = new EmployeeLoanModel();
             $lists = $employeeLoanModel->lists($input);
+            $countLists = $employeeLoanModel->countLists($input);
             $this->data = [
-                "draw"=>$input['draw'],
-                "data"=>$lists,
-                "recordsFiltered"=>count($lists),
-                "recordsTotal"=>count($lists),
+                "draw" => $input['draw'],
+                "data" => $lists,
+                "recordsFiltered" => $countLists,
+                "recordsTotal" => $countLists,
             ];
         } else {
             $failed = $validator->failed();
@@ -296,7 +302,7 @@ class FinanceController extends Controller
                     $this->code = 470304;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'status') {
+            } elseif (key($failed) == 'status') {
                 if (key($failed['status']) == 'Integer') {
                     $this->code = 470305;
                     $this->msg = $validator->errors()->first();
@@ -314,7 +320,7 @@ class FinanceController extends Controller
                     $this->code = 470308;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'length') {
+            } elseif (key($failed) == 'length') {
                 if (key($failed['length']) == 'Integer') {
                     $this->code = 470309;
                     $this->msg = $validator->errors()->first();
@@ -341,7 +347,8 @@ class FinanceController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function livingLists(Request $request){
+    public function livingLists(Request $request)
+    {
         $rules = [
             'projectId' => 'required|integer',
             'startTime' => 'nullable|date_format:Y-m-d',
@@ -354,8 +361,8 @@ class FinanceController extends Controller
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型不正确',
-            'startTime.date_format' =>'日期格式不正确',
-            'endTime.date_format' =>'日期格式不正确',
+            'startTime.date_format' => '日期格式不正确',
+            'endTime.date_format' => '日期格式不正确',
             'status.integer' => '付款状态参数类型错误',
             'status.in' => '付款状态参数值不正确',
             'length.required' => '获取记录条数失败',
@@ -365,16 +372,17 @@ class FinanceController extends Controller
             'start.integer' => '页码参数类型错误',
             'start.min' => '页码参数值不小于:min',
         ];
-        $input = $request->only(['projectId', 'startTime','endTime','status','draw', 'length', 'start', 'search']);
+        $input = $request->only(['projectId', 'startTime', 'endTime', 'status', 'draw', 'length', 'start', 'search']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeLivingModel = new EmployeeLivingModel();
             $lists = $employeeLivingModel->lists($input);
+            $countLists = $employeeLivingModel->countLists($input);
             $this->data = [
-                "draw"=>$input['draw'],
-                "data"=>$lists,
-                "recordsFiltered"=>count($lists),
-                "recordsTotal"=>count($lists),
+                "draw" => $input['draw'],
+                "data" => $lists,
+                "recordsFiltered" => $countLists,
+                "recordsTotal" => $countLists,
             ];
         } else {
             $failed = $validator->failed();
@@ -397,7 +405,7 @@ class FinanceController extends Controller
                     $this->code = 470404;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'status') {
+            } elseif (key($failed) == 'status') {
                 if (key($failed['status']) == 'Integer') {
                     $this->code = 470405;
                     $this->msg = $validator->errors()->first();
@@ -415,7 +423,7 @@ class FinanceController extends Controller
                     $this->code = 470408;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'length') {
+            } elseif (key($failed) == 'length') {
                 if (key($failed['length']) == 'Integer') {
                     $this->code = 470409;
                     $this->msg = $validator->errors()->first();

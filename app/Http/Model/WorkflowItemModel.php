@@ -130,7 +130,7 @@ class WorkflowItemModel extends Model
             } else {
                 //更新审批状态
                 $this->update($id, ['curnode' => 0, 'status' => self::REJECT]);
-                ApprovalController::afterApproval($workflowItemInfo['callBackClass'], $workflowItemInfo['callBackMethod'], $workflowItemInfo['pk'], $workflowItemInfo['data'], 0);
+                ApprovalController::afterApproval($workflowItemInfo['callBackClass'], $workflowItemInfo['callBackMethod'], $workflowItemInfo['pk'], $workflowItemInfo['data'], 2);
             }
             return true;
         }catch(\Exception $e){

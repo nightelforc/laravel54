@@ -62,6 +62,17 @@ class ProjectOtherSeparateAccountsModel
     }
 
     /**
+     * @param array $input
+     * @return mixed
+     */
+    public function countLists(array $input)
+    {
+        return DB::table($this->table)
+            ->where($this->table.'.projectId', $input['projectId'])
+            ->count();
+    }
+
+    /**
      * @param $data
      * @return array
      */
@@ -108,6 +119,8 @@ class ProjectOtherSeparateAccountsModel
             DB::table($this->table)->where('id',$id)->update(['status'=>$approvalResult]);
         }
     }
+
+
 
 
 }

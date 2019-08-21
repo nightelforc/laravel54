@@ -106,7 +106,7 @@ class AssignmentController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $assignmentModel = new AssignmentModel();
-            $info = $assignmentModel->info(['professionId' => $input['id'], 'name' => $input['name']]);
+            $info = $assignmentModel->checkRepeat(['professionId' => $input['id'], 'name' => $input['name']]);
             if (empty($info)) {
                 $result = $assignmentModel->insert($input);
                 if (!$result) {
@@ -170,7 +170,7 @@ class AssignmentController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $assignmentModel = new AssignmentModel();
-            $info = $assignmentModel->info(['professionId' => $input['id'], 'name' => $input['name']]);
+            $info = $assignmentModel->checkRepeat(['professionId' => $input['id'], 'name' => $input['name']],$input['id']);
             if (empty($info)) {
                 $assignmentModel->update($input);
             } else {

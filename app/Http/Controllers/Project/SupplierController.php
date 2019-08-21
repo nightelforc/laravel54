@@ -43,11 +43,12 @@ class SupplierController extends Controller
         if ($validator->passes()) {
             $supplierModel = new SupplierModel();
             $lists = $supplierModel->lists($input);
+            $countLists = $supplierModel->countLists($input);
             $this->data = [
                 "draw" => $input['draw'],
                 "data" => $lists,
-                "recordsFiltered" => count($lists),
-                "recordsTotal" => count($lists),
+                "recordsFiltered" => $countLists,
+                "recordsTotal" => $countLists,
             ];
         } else {
             $failed = $validator->failed();
@@ -121,7 +122,17 @@ class SupplierController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $supplierModel = new SupplierModel();
-            $supplierModel->insert($input);
+            $info = $supplierModel->checkRepeat([
+                'name'=>$input['name'],
+                'accountName'=>$input['accountName'],
+                'accountNumber'=>$input['accountNumber'],
+            ]);
+            if (empty($info)){
+                $supplierModel->insert($input);
+            }else{
+                $this->code = 440109;
+                $this->msg = '公司名称、开户名称或开户账号已存在';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'name') {
@@ -236,7 +247,17 @@ class SupplierController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $supplierModel = new SupplierModel();
-            $supplierModel->update($input);
+            $info = $supplierModel->checkRepeat([
+                'name'=>$input['name'],
+                'accountName'=>$input['accountName'],
+                'accountNumber'=>$input['accountNumber'],
+            ],$input['id']);
+            if (empty($info)){
+                $supplierModel->update($input);
+            }else{
+                $this->code = 440109;
+                $this->msg = '公司名称、开户名称或开户账号已存在';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'name') {
@@ -314,11 +335,12 @@ class SupplierController extends Controller
         if ($validator->passes()) {
             $supplierOrdersModel = new SupplierOrdersModel();
             $lists = $supplierOrdersModel->lists($input);
+            $countLists = $supplierOrdersModel->countLists($input);
             $this->data = [
                 "draw" => $input['draw'],
                 "data" => $lists,
-                "recordsFiltered" => count($lists),
-                "recordsTotal" => count($lists),
+                "recordsFiltered" => $countLists,
+                "recordsTotal" => $countLists,
             ];
         } else {
             $failed = $validator->failed();
@@ -719,11 +741,12 @@ class SupplierController extends Controller
         if ($validator->passes()) {
             $supplierRepaymentModel = new SupplierRepaymentModel();
             $lists = $supplierRepaymentModel->lists($input);
+            $countLists = $supplierRepaymentModel->countLists($input);
             $this->data = [
                 "draw"=>$input['draw'],
                 "data"=>$lists,
-                "recordsFiltered"=>count($lists),
-                "recordsTotal"=>count($lists),
+                "recordsFiltered"=>$countLists,
+                "recordsTotal"=>$countLists,
             ];
         } else {
             $failed = $validator->failed();

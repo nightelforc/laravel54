@@ -76,7 +76,7 @@ class ProfessionController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $professionModel = new ProfessionModel();
-            $info = $professionModel->info($input);
+            $info = $professionModel->checkRepeat($input);
             if (empty($info)){
                 $result = $professionModel->insert($input);
                 if (!$result) {
@@ -118,7 +118,7 @@ class ProfessionController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $professionModel = new ProfessionModel();
-            $info = $professionModel->info(['name'=>$input['name']]);
+            $info = $professionModel->checkRepeat(['name'=>$input['name']],$input['id']);
             if (empty($info)){
                 $professionModel->update($input);
             }else{

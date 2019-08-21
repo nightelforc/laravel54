@@ -102,4 +102,52 @@ class ProjectGroupAssignmentModel
             DB::table($this->table)->where('id',$id)->update(['status'=>$approvalResult]);
         }
     }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function info(array $data)
+    {
+        $result = DB::table($this->table)->where($data)->first();
+        return empty($result) ? [] : get_object_vars($result);
+    }
+
+    /**
+     * @param $data
+     * @return mixed
+     */
+    public function delete($data){
+        return DB::table($this->table)->where($data)->delete();
+    }
+
+    /**
+     * @param array $data
+     * @return bool
+     */
+    public function delAssignment(array $data)
+    {
+        try{
+            $result = DB::transaction(function () use ($data) {
+                $info = $this->info($data);
+                $this->delete($data);
+                (new ProjectGroupSeparateAccountsModel())->delete([
+                    'projectId'=>$info['projectId'],
+                    'areaId'=>$info['areaId'],
+                    'sectionId'=>$info['sectionId'],
+                    'groupId'=>$info['groupId'],
+                ]);
+
+                return true;
+            });
+
+            if ($result){
+                return true;
+            }else{
+                return false;
+            }
+        }catch (\Exception $e){
+            return false;
+        }
+    }
 }

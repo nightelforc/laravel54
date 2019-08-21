@@ -70,4 +70,32 @@ class WarehouseLogInfoModel
                 'wl.projectId', 'wl.price', 'wl.type', 'wl.sourceEmployeeId', 'wl.sourceProjectId', 'wl.time', 'wl.createTime','wl.status', 'wl.remark', 'wl.recoveryFunds')
             ->get()->toArray();
     }
+
+    /**
+     * @param array $input
+     * @return mixed
+     */
+    public function countLists(array $input)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use ($input) {
+                $query->where('wl.projectId', $input['projectId']);
+                if (isset($input['type']) && !is_null($input['type']) && $input['type'] != 0) {
+                    $query->where('wl.type', $input['type']);
+                }
+                if (isset($input['status']) && !is_null($input['status'])) {
+                    $query->where('wl.status', $input['status']);
+                }
+                if (isset($input['startTime']) && !is_null($input['status'])) {
+                    $query->where('wl.time', '>=', $input['startTime'] . " 00:00:00");
+                }
+                if (isset($input['endTime']) && !is_null($input['endTime'])) {
+                    $query->where('wl.time', '<=', $input['endTime'] . " 23:59:59");
+                }
+                if (isset($input['search']) && !is_null($input['search'])) {
+                    $query->where('m.name', 'like', '%' . $input['search'] . '%');
+                }
+            })
+            ->count();
+    }
 }

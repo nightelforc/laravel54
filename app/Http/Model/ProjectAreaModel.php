@@ -110,4 +110,30 @@ class ProjectAreaModel
             })
             ->get()->toArray();
     }
+
+    /**
+     * @return array
+     */
+    public function batchInfo()
+    {
+        $result = DB::table($this->table)->where('name','like','%号楼')->orderBy('id', 'desc')->first();
+        return empty($result) ? [] : get_object_vars($result);
+    }
+
+    /**
+     * @param array $check
+     * @param $id
+     * @return array
+     */
+    public function checkRepeat(array $check, $id = 0)
+    {
+        $result = DB::table($this->table)->where($check)
+            ->where(function ($query) use ($id){
+                if ($id != 0){
+                    $query->where('id','!=',$id);
+                }
+            })
+            ->first();
+        return empty($result) ? [] : get_object_vars($result);
+    }
 }

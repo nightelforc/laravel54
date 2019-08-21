@@ -25,7 +25,11 @@ class SupplierRepaymentModel
         return DB::table($this->table)->insert($data);
     }
 
-
+    /**
+     * @param array $data
+     * @return mixed
+     * @throws \Exception
+     */
     public function lists(array $data)
     {
         $limit = config('yucheng.limit');
@@ -47,6 +51,27 @@ class SupplierRepaymentModel
             ->where('repayTime','>',$startTime)
             ->where('repayTime','<',$endTime)
             ->offset($start)->limit($limit)->get()->toArray();
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     * @throws \Exception
+     */
+    public function countLists(array $data)
+    {
+        if (empty($data['month'])){
+            $startTime = date('Y-01-01 00:00:00');
+            $endTime = date('Y-12-31 23:59:59');
+        }else{
+            $startTime = $data['month'].'-01 00:00:00';
+            $endTime = (new \DateTime($data['month']))->format('Y-m-t 23:59:59');
+        }
+        return DB::table($this->table)
+            ->where('supplierId',$data['supplierId'])
+            ->where('repayTime','>',$startTime)
+            ->where('repayTime','<',$endTime)
+            ->count();
     }
 
 }

@@ -32,8 +32,8 @@ class SupplierOrdersInfoModel
                 }
             })
             ->select($this->table . '.*','m.name as materialName','ms.spec','ms.brand')
-            ->first();
-        return empty($result) ? [] : get_object_vars($result);
+            ->get()->toArray();
+        return $result;
     }
 
     /**

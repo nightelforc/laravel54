@@ -132,8 +132,11 @@ Route::group([
         //分账
         Route::post('/projectSeparate/sectionListsWithGroup', 'ProjectController@sectionListsWithGroup');
         Route::post('/projectSeparate/separateLog', 'ProjectController@separateLog');
+        Route::post('/projectSeparate/separateLogInfo', 'ProjectController@separateLogInfo');
         Route::post('/projectSeparate/addAssignment', 'ProjectController@addAssignment');
+        Route::post('/projectSeparate/delAssignment', 'ProjectController@delAssignment');
         Route::post('/projectSeparate/addSeparate', 'ProjectController@addSeparate');
+        Route::post('/projectSeparate/delSeparate', 'ProjectController@delSeparate');
         //杂工分账
         Route::post('/projectSeparate/otherSeparateLists', 'ProjectController@otherSeparateLists');
         Route::post('/projectSeparate/addOtherSeparate', 'ProjectController@addOtherSeparate');

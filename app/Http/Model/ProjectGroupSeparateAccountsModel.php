@@ -85,4 +85,24 @@ class ProjectGroupSeparateAccountsModel
             DB::table($this->table)->where('id',$id)->update(['status'=>$approvalResult]);
         }
     }
+
+    /**
+     * @param array $array
+     * @return mixed
+     */
+    public function delete(array $array)
+    {
+        return DB::table($this->table)->where($array)->delete();
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function info(array $data)
+    {
+        $result = DB::table($this->table)->where($data)->first();
+        return empty($result) ? [] : get_object_vars($result);
+    }
+
 }

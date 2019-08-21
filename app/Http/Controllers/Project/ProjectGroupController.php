@@ -85,7 +85,7 @@ class ProjectGroupController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();
-            $info = $projectGroupModel->info(['projectId'=>$input['projectId'],'name'=>$input['name'],'professionId'=>$input['professionId']]);
+            $info = $projectGroupModel->checkRepeat(['projectId'=>$input['projectId'],'name'=>$input['name'],'professionId'=>$input['professionId']]);
             if (empty($info)){
                 $projectGroupModel->insert($input);
             }else{
@@ -177,7 +177,7 @@ class ProjectGroupController extends Controller
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();
             $info = $projectGroupModel->info(['id'=>$input['id']]);
-            $info = $projectGroupModel->info(['projectId'=>$info['projectId'],'name'=>$input['name'],'professionId'=>$input['professionId']]);
+            $info = $projectGroupModel->checkRepeat(['projectId'=>$info['projectId'],'name'=>$input['name'],'professionId'=>$input['professionId'],$input['id']]);
             if (empty($info)){
                 $projectGroupModel->update($input);
             }else{

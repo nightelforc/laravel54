@@ -102,5 +102,39 @@ class SupplierModel
             ->get()->toArray();
     }
 
+    /**
+     * @param array $data
+     * @param $pk
+     * @return mixed
+     */
+    public function checkRepeat(array $data,$pk = 0)
+    {
+        return DB::table($this->table)
+            ->where('name',$data['name'])
+            ->orWhere('accountName',$data['name'])
+            ->orWhere('accountNumber',$data['accountNumber'])
+            ->where(function ($query) use ($pk){
+                if($pk != 0){
+                    $query->where('id','!=',$pk);
+                }
+            })
+            ->get()->toArray();
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function countLists(array $data)
+    {
+        return DB::table($this->table)
+            ->where(function($query) use ($data){
+                if (isset($data['search']) && !is_null($data['search'])) {
+                    $query->where('name', 'like', '%' . $data['search'] . '%');
+                }
+            })
+            ->count();
+    }
+
 
 }

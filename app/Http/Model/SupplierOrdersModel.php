@@ -67,6 +67,46 @@ class SupplierOrdersModel
     }
 
     /**
+     * @param array $input
+     * @return mixed
+     */
+    public function countLists(array $input)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use ($input) {
+                if (isset($input['supplierId']) && !is_null($input['supplierId'])) {
+                    $query->where('supplierId', $input['supplierId']);
+                }
+                if (isset($input['projectId']) && !is_null($input['projectId'])) {
+                    $query->where('projectId', $input['projectId']);
+                }
+                if (isset($input['time']) && !is_null($input['time'])) {
+                    $startTime = (new \DateTime($input['time']))->format('Y-m-01 00:00:00');
+                    $endTime = (new \DateTime($input['time']))->format('Y-m-t 23:59:59');
+                }else{
+                    $findYear = (new YearModel())->findYear(date('Y-m-d H:i:s', time()));
+                    if (empty($findYear)) {
+                        $findYear['startTime'] = date('Y-01-01 00:00:00');
+                        $findYear['endTime'] = date('Y-12-31 23:59:59');
+                    } else {
+                        $findYear = get_object_vars($findYear);
+                    }
+                    $startTime = $findYear['startTime'];
+                    $endTime = $findYear['endTime'];
+                }
+                $query->where('deliveryTime', '>=',$startTime)->where('deliveryTime', '<=',$endTime);
+
+                if (isset($input['isPay']) && !is_null($input['isPay'])) {
+                    $query->where('isPay', $input['isPay']);
+                }
+                if (isset($input['search']) && !is_null($input['search'])) {
+                    $query->where('ordersn', 'like', '%' . $input['search'] . '%');
+                }
+            })
+            ->count();
+    }
+
+    /**
      * @param array $data
      * @return mixed
      */
@@ -78,7 +118,7 @@ class SupplierOrdersModel
         }else{
             $data['isPay'] = 0;
         }
-        $data['createTime'] = date('Y-m-d');
+        $data['createTime'] = date('Y-m-d H:i:s');
         return DB::table($this->table)->insertGetId($data);
     }
 
@@ -98,4 +138,6 @@ class SupplierOrdersModel
     public function countSupplierOrders($supplierId){
         return DB::table($this->table)->where('supplierId',$supplierId)->count();
     }
+
+
 }

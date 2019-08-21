@@ -59,4 +59,26 @@ class EmployeeMaterialOrderInfoModel
                 'emo.employeeId', 'emo.orderTime', 'emo.createTime')
             ->get()->toArray();
     }
+
+    /**
+     * @param array $input
+     * @return mixed
+     */
+    public function countLists(array $input)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use ($input) {
+                $query->where('emo.projectId', $input['projectId']);
+                if (isset($input['startTime']) && !is_null($input['status'])) {
+                    $query->where('emo.orderTime', '>=', $input['startTime'] . " 00:00:00");
+                }
+                if (isset($input['endTime']) && !is_null($input['endTime'])) {
+                    $query->where('emo.orderTime', '<=', $input['endTime'] . " 23:59:59");
+                }
+                if (isset($input['search']) && !is_null($input['search'])) {
+                    $query->where('m.name', 'like', '%' . $input['search'] . '%');
+                }
+            })
+            ->count();
+    }
 }

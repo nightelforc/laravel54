@@ -80,4 +80,19 @@ class MaterialModel
             ->get()->toArray();
     }
 
+    /**
+     * @param array $input
+     * @return mixed
+     */
+    public function countLists(array $input)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use ($input) {
+                if (isset($input['search']) && !is_null($input['search'])) {
+                    $query->where('name', 'like', '%' . $input['search'] . '%');
+                }
+            })
+            ->count();
+    }
+
 }

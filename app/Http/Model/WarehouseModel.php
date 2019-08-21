@@ -40,6 +40,21 @@ class WarehouseModel
     }
 
     /**
+     * @param array $input
+     * @return mixed
+     */
+    public function countLists(array $input)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use ($input) {
+                if (isset($input['search']) && !is_null($input['search'])) {
+                    $query->where('m.name', 'like', '%' . $input['search'] . '%');
+                }
+            })
+            ->count();
+    }
+
+    /**
      * @param array $data
      * @return array
      */
@@ -91,4 +106,6 @@ class WarehouseModel
             ->select($this->table.'.*','m.name as materialName')
             ->get()->toArray();
     }
+
+
 }

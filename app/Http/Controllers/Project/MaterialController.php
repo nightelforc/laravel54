@@ -40,11 +40,12 @@ class MaterialController extends Controller
         if ($validator->passes()) {
             $materialModel = new MaterialModel();
             $lists = $materialModel->lists($input);
+            $countLists = $materialModel->countLists($input);
             $this->data = [
                 "draw"=>$input['draw'],
                 "data"=>$lists,
-                "recordsFiltered"=>count($lists),
-                "recordsTotal"=>count($lists),
+                "recordsFiltered"=>$countLists,
+                "recordsTotal"=>$countLists,
             ];
         } else {
             $failed = $validator->failed();
@@ -271,11 +272,12 @@ class MaterialController extends Controller
         if ($validator->passes()) {
             $materialSpecModel = new MaterialSpecModel();
             $lists = $materialSpecModel->lists($input);
+            $countLists = $materialSpecModel->countLists($input);
             $this->data = [
                 "draw"=>$input['draw'],
                 "data"=>$lists,
-                "recordsFiltered"=>count($lists),
-                "recordsTotal"=>count($lists),
+                "recordsFiltered"=>$countLists,
+                "recordsTotal"=>$countLists,
             ];
         } else {
             $failed = $validator->failed();

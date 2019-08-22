@@ -41,7 +41,9 @@ class EmployeeMaterialOrderInfoModel
             ->leftJoin('project as p', 'p.id', '=', 'emo.projectId')
             ->leftJoin('employee as e', 'e.id', '=', 'emo.employeeId')
             ->where(function ($query) use ($input) {
-                $query->where('emo.projectId', $input['projectId']);
+                if (isset($input['projectId']) && !empty($input['projectId'])) {
+                    $query->where('emo.projectId', $input['projectId']);
+                }
                 if (isset($input['startTime']) && !is_null($input['status'])) {
                     $query->where('emo.orderTime', '>=', $input['startTime'] . " 00:00:00");
                 }
@@ -67,8 +69,12 @@ class EmployeeMaterialOrderInfoModel
     public function countLists(array $input)
     {
         return DB::table($this->table)
+            ->leftJoin('employee_material_order as emo', 'emo.id', '=', $this->table . '.orderId')
+            ->leftJoin('material as m', 'm.id', '=', $this->table . '.materialId')
             ->where(function ($query) use ($input) {
-                $query->where('emo.projectId', $input['projectId']);
+                if (isset($input['projectId']) && !empty($input['projectId'])) {
+                    $query->where('emo.projectId', $input['projectId']);
+                }
                 if (isset($input['startTime']) && !is_null($input['status'])) {
                     $query->where('emo.orderTime', '>=', $input['startTime'] . " 00:00:00");
                 }

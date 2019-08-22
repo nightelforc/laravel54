@@ -24,6 +24,9 @@ class AdminModel
     {
         $where = $this->encrypt($data);
         $info = $this->info($where);
+        if (!empty($info)){
+            $this->update($info['id'],['lastLoginTime'=>date('Y-m-d H:i:s')]);
+        }
         return $info;
     }
 
@@ -215,6 +218,18 @@ class AdminModel
     public function updateStatus($id,array $data)
     {
         return DB::table($this->table)->where('id',$id)->update($data);
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function checkRepeat(array $data)
+    {
+        return DB::table($this->table)
+            ->where('username',$data['username'])
+            ->orWhere('name',$data['name'])
+            ->get()->toArray();
     }
 
 }

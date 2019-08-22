@@ -109,11 +109,18 @@ class AdminController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $adminModel = new AdminModel();
-            $result = $adminModel->addAdmin($input);
-            if (!$result) {
+            $info = $adminModel->checkRepeat(['username'=>$input['username'],'name'=>$input['name']]);
+            if (empty($info)){
+                $result = $adminModel->addAdmin($input);
+                if (!$result) {
+                    $this->code = 120209;
+                    $this->msg = json_encode($result);
+                }
+            }else{
                 $this->code = 120208;
-                $this->msg = json_encode($result);
+                $this->msg = '不能建立相同账号名或相同姓名的账号';
             }
+
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'username') {

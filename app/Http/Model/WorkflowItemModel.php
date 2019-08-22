@@ -67,7 +67,10 @@ class WorkflowItemModel extends Model
             ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
             ->leftJoin('admin as a','a.id','=',$this->table.'.adminId')
             ->where(function ($query) use ($input){
-                $query->where($this->table.'.projectId',$input['projectId'])->where($this->table.'.curnode',$input['curnode']);
+                $query->where($this->table.'.curnode',$input['curnode']);
+                if (isset($input['projectId']) && !empty($input['projectId'])){
+                    $query->where($this->table.'.projectId',$input['projectId']);
+                }
                 if (isset($input['startTime']) && !is_null($input['startTime'])){
                     $query->where('joinTime','>=',$input['startTime'].' 00:00:00');
                 }

@@ -12,6 +12,7 @@ namespace App\Http\Controllers\Project;
 use App\Http\Controllers\Auth\ApprovalController;
 use App\Http\Controllers\Controller;
 use App\Http\Model\EmployeeMaterialOrderInfoModel;
+use App\Http\Model\SettingModel;
 use App\Http\Model\WarehouseLogInfoModel;
 use App\Http\Model\WarehouseLogModel;
 use App\Http\Model\WarehouseModel;
@@ -168,7 +169,20 @@ class WarehouseController extends Controller
             $warehouseModel = new WarehouseModel();
             $id = $input['id'];
             unset($input['id']);
-            $warehouseModel->update($id, $input);
+            $info = $warehouseModel->info(['id'=>$id]);
+            if (!empty($info)){
+                $settingModel = new SettingModel();
+                $saleRate = $settingModel->get('saleRate',$info['projectId']);
+                $purchasePrice = $info['purchasePrice'];
+                $result = $input['salePrice']-$purchasePrice*(1+$saleRate);
+                if ($result > 0){
+                    $warehouseModel->update($id, $input);
+                }else{
+                    $this->code = 460305;
+                    $this->msg = '材料价格不能低于默认最低价格';
+                }
+
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
@@ -1312,6 +1326,7 @@ class WarehouseController extends Controller
 
     /**
      * @param Request $request
+     * @param int $type
      * @return \Illuminate\Http\Response
      */
     public function logLists(Request $request, $type = 0)
@@ -1484,8 +1499,8 @@ class WarehouseController extends Controller
             $this->data = [
                 "draw" => $input['draw'],
                 "data" => $lists,
-                "recordsFiltered" => count($lists),
-                "recordsTotal" => count($lists),
+                "recordsFiltered" => $countLists,
+                "recordsTotal" => $countLists,
             ];
         } else {
             $failed = $validator->failed();
@@ -1583,23 +1598,73 @@ class WarehouseController extends Controller
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {
-                if (key($failed['projectId']) == 'integer') {
+                if (key($failed['projectId']) == 'Integer') {
                     $this->code = 461201;
                     $this->msg = $validator->errors()->first();
                 }
             } elseif (key($failed) == 'supplierId') {
-                if (key($failed['supplierId']) == 'integer') {
+                if (key($failed['supplierId']) == 'Integer') {
                     $this->code = 461202;
                     $this->msg = $validator->errors()->first();
                 }
             } elseif (key($failed) == 'materialId') {
-                if (key($failed['materialId']) == 'integer') {
+                if (key($failed['materialId']) == 'Integer') {
                     $this->code = 461203;
                     $this->msg = $validator->errors()->first();
                 }
             } elseif (key($failed) == 'specId') {
-                if (key($failed['specId']) == 'integer') {
+                if (key($failed['specId']) == 'Integer') {
                     $this->code = 461204;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function setRate(Request $request){
+        $rules = [
+            'projectId' => 'required|integer',
+            'rate' => 'required|numeric|min:0',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数错误',
+            'projectId.integer' => '项目参数类型错误',
+            'rate.required' => '请填写溢价率',
+            'rate.numeric' => '溢价率类型错误',
+            'rate.min' => '溢价率不能小于0',
+        ];
+        $input = $request->only(['projectId', 'rate']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $settingModel = new SettingModel();
+            $settingModel->set('saleRate',$input['rate'],$input['projectId']);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 461201;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 461202;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'rate') {
+                if (key($failed['rate']) == 'Required') {
+                    $this->code = 461203;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['rate']) == 'Numeric') {
+                    $this->code = 461204;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['rate']) == 'Min') {
+                    $this->code = 461205;
                     $this->msg = $validator->errors()->first();
                 }
             }

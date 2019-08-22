@@ -233,7 +233,6 @@ class LoginController extends Controller
             $adminInfo = $adminModel->info($input);
             if (!empty($adminInfo)) {
                 $token = $this->tokenGenerator();
-                AdminSessionModel::put($token, $adminInfo['id']);
                 $this->data = [config('yucheng.token') => $token];
             } else {
                 $this->code = 110302;
@@ -277,7 +276,6 @@ class LoginController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $adminModel = new AdminModel();
-            $sessionInfo = AdminSessionModel::get($input[config('yucheng.token')]);
             $data = [
                 'id' => $sessionInfo['adminId'],
                 'password' => $input['password'],

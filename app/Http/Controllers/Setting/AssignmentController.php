@@ -102,11 +102,11 @@ class AssignmentController extends Controller
             'unitId.required' => '获取工种参数失败',
             'unitId.integer' => '工种参数类型错误',
         ];
-        $input = $request->all();
+        $input = $request->only(['professionId','name','unitId','remark']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $assignmentModel = new AssignmentModel();
-            $info = $assignmentModel->checkRepeat(['professionId' => $input['id'], 'name' => $input['name']]);
+            $info = $assignmentModel->checkRepeat(['professionId' => $input['professionId'], 'name' => $input['name']]);
             if (empty($info)) {
                 $result = $assignmentModel->insert($input);
                 if (!$result) {

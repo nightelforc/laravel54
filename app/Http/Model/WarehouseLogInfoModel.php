@@ -46,7 +46,9 @@ class WarehouseLogInfoModel
             ->leftJoin('project as p1', 'p1.id', '=', 'wl.sourceProjectId')
             ->leftJoin('employee as e', 'e.id', '=', 'wl.sourceEmployeeId')
             ->where(function ($query) use ($input) {
-                $query->where('wl.projectId', $input['projectId']);
+                if (isset($input['projectId']) && !empty($input['projectId'])) {
+                    $query->where('wl.projectId', $input['projectId']);
+                }
                 if (isset($input['type']) && !is_null($input['type']) && $input['type'] != 0) {
                     $query->where('wl.type', $input['type']);
                 }
@@ -67,7 +69,7 @@ class WarehouseLogInfoModel
             ->select($this->table . '.*',
                 'm.name as materialName', 'spec.spec', 'spec.brand', 's.name as supplierName',
                 'p.name as projectName', 'p1.name as sourceProjectName', 'e.name as employeeName',
-                'wl.projectId', 'wl.price', 'wl.type', 'wl.sourceEmployeeId', 'wl.sourceProjectId', 'wl.time', 'wl.createTime','wl.status', 'wl.remark', 'wl.recoveryFunds')
+                'wl.projectId', 'wl.type', 'wl.sourceEmployeeId', 'wl.sourceProjectId', 'wl.time', 'wl.createTime','wl.status', 'wl.remark', 'wl.recoveryFunds')
             ->get()->toArray();
     }
 
@@ -78,8 +80,12 @@ class WarehouseLogInfoModel
     public function countLists(array $input)
     {
         return DB::table($this->table)
+            ->leftJoin('warehouse_log as wl', 'wl.id', '=', $this->table . '.logId')
+            ->leftJoin('material as m', 'm.id', '=', $this->table . '.materialId')
             ->where(function ($query) use ($input) {
-                $query->where('wl.projectId', $input['projectId']);
+                if (isset($input['projectId']) && !empty($input['projectId'])) {
+                    $query->where('wl.projectId', $input['projectId']);
+                }
                 if (isset($input['type']) && !is_null($input['type']) && $input['type'] != 0) {
                     $query->where('wl.type', $input['type']);
                 }

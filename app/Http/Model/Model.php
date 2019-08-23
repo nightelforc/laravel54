@@ -29,7 +29,6 @@ class Model
         foreach ($period as $dt) {
             $result[$dt->format($periodFormat)] = '';
         }
-
         return $result;
     }
 }

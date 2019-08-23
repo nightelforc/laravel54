@@ -15,7 +15,8 @@ Route::group([
     'namespace'=>'Auth',
     'prefix'=>'auth',
 ],function(){
-    Route::post('/login', 'LoginController@login');
+    Route::post('/project/login', 'LoginController@loginProject');
+    Route::post('/company/login', 'LoginController@loginCompany');
     Route::post('/logout', 'LoginController@logout');
     Route::post('/forgetPwd', 'LoginController@forgetPwd');
     Route::post('/resetPwd', 'LoginController@resetPwd');

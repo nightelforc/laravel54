@@ -29,4 +29,4 @@
 </script>
 </html>
 <?php
-var_dump('2019-08-20' - '2019-08-22');
+echo 0x11;

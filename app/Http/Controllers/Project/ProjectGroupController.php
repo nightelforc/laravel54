@@ -31,18 +31,34 @@ class ProjectGroupController extends Controller
         $rules = [
             'projectId' => 'required|integer',
             'professionId' => 'nullable|integer',
+            'draw' => 'required|integer',
+            'length' => 'required|integer|in:10,20,50',
+            'start' => 'required|integer|min:0',
         ];
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型错误',
             'professionId.required' => '获取工种参数失败',
             'professionId.integer' => '工种参数类型错误',
+            'length.required' => '获取记录条数失败',
+            'length.integer' => '记录条数参数类型错误',
+            'length.in' => '记录条数参数值不正确',
+            'start.required' => '获取起始记录位置失败',
+            'start.integer' => '页码参数类型错误',
+            'start.min' => '页码参数值不小于:min',
         ];
-        $input = $request->only(['projectId','professionId','search']);
+        $input = $request->only(['projectId','professionId','search','draw','length','start']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();
-            $this->data = $projectGroupModel->lists($input);
+            $lists = $projectGroupModel->lists($input);
+            $countLists = $projectGroupModel->countLists($input);
+            $this->data = [
+                "draw" => $input['draw'],
+                "data" => $lists,
+                "recordsFiltered" => $countLists,
+                "recordsTotal" => $countLists,
+            ];
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {
@@ -57,6 +73,41 @@ class ProjectGroupController extends Controller
             }elseif (key($failed) == 'professionId') {
                 if (key($failed['professionId']) == 'Integer') {
                     $this->code = 430103;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
+                    $this->code = 430104;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['draw']) == 'Integer') {
+                    $this->code = 430105;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'length') {
+                if (key($failed['length']) == 'Required') {
+                    $this->code = 430106;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'Integer') {
+                    $this->code = 430107;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'In') {
+                    $this->code = 430108;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Required') {
+                    $this->code = 430109;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Integer') {
+                    $this->code = 430110;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Min') {
+                    $this->code = 430111;
                     $this->msg = $validator->errors()->first();
                 }
             }

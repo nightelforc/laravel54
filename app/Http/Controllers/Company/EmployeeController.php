@@ -174,7 +174,7 @@ class EmployeeController extends Controller
                 $fileExtension = strtolower($request->image->extension());
                 if (in_array($fileExtension,['jpg','jpeg','png','bmp'])){
                     $newName = time() . mt_rand(100,999);
-                    if($image->move('../storage/app/public/upload',$newName.'.'.$fileExtension)){
+                    if($image->move('./upload',$newName.'.'.$fileExtension)){
                         $imagePath =  '/upload/'.$newName.'.'.$fileExtension;   //返回一个地址
                     }
                 }else{
@@ -186,7 +186,7 @@ class EmployeeController extends Controller
             $employeeModel = new EmployeeModel();
             $id = $input['id'];
             $info = $employeeModel->info(['id'=>$id]);
-            Storage::disk('public')->delete($info['image']);
+            unlink('.'.$info['image']);
             $employeeModel->update($id,$input);
         } else {
             $failed = $validator->failed();

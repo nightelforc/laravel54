@@ -52,7 +52,7 @@ class LoginController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function login(Request $request)
+    public function loginProject(Request $request)
     {
         $rules = [
             'username' => 'required',
@@ -67,18 +67,23 @@ class LoginController extends Controller
             $adminModel = new AdminModel();
             $result = $adminModel->login($request->all());
             if (!empty($result)) {
-                if ($result['status'] == 1) {
-                    $result['role'] = (new AdminController())->getRole($result['id']);
-                    //获取用户权限
-                    $roleId = isset($result['role']['roleId']) ? $result['role']['roleId'] : 0;
-                    $result['permission'] = (new AdminController())->getPermission($result['id'], $roleId);
-                    $token = $this->tokenGenerator();
-                    $result['token'] = $token;
-                    AdminSessionModel::put($token, $result['id'], $result['projectId']);
-                    $this->data = $result;
-                } else {
+                if (!is_null($result['projectId']) && $result['projectId'] != 0) {
+                    if ($result['status'] == 1) {
+                        $result['role'] = (new AdminController())->getRole($result['id']);
+                        //获取用户权限
+                        $roleId = isset($result['role']['roleId']) ? $result['role']['roleId'] : 0;
+                        $result['permission'] = (new AdminController())->getPermission($result['id'], $roleId);
+                        $token = $this->tokenGenerator();
+                        $result['token'] = $token;
+                        AdminSessionModel::put($token, $result['id'], $result['projectId']);
+                        $this->data = $result;
+                    } else {
+                        $this->code = 110105;
+                        $this->msg = '账号已经被停用';
+                    }
+                }else{
                     $this->code = 110104;
-                    $this->msg = '账号已经被停用';
+                    $this->msg = '此账号不能登录项目管理系统';
                 }
             } else {
                 return $this->ajaxResult(110103, '用户名或密码错误');
@@ -233,6 +238,7 @@ class LoginController extends Controller
             $adminInfo = $adminModel->info($input);
             if (!empty($adminInfo)) {
                 $token = $this->tokenGenerator();
+                AdminSessionModel::put($token, $adminInfo['id']);
                 $this->data = [config('yucheng.token') => $token];
             } else {
                 $this->code = 110302;
@@ -276,6 +282,7 @@ class LoginController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $adminModel = new AdminModel();
+            $sessionInfo = AdminSessionModel::get($input[config('yucheng.token')]);
             $data = [
                 'id' => $sessionInfo['adminId'],
                 'password' => $input['password'],
@@ -321,5 +328,66 @@ class LoginController extends Controller
             }
         }
         return $this->ajaxResult($this->code, $this->msg);
+    }
+
+    /**
+     * 系统登录
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function loginCompany(Request $request)
+    {
+        $rules = [
+            'username' => 'required',
+            'password' => 'required',
+        ];
+        $message = [
+            'username.required' => '请填写用户名',
+            'password.required' => '请填写密码',
+        ];
+        $validator = Validator::make($request->all(), $rules, $message);
+        if ($validator->passes()) {
+            $adminModel = new AdminModel();
+            $result = $adminModel->login($request->all());
+            if (!empty($result)) {
+                if ($result['projectId'] == 0) {
+                    if ($result['status'] == 1) {
+                        $result['role'] = (new AdminController())->getRole($result['id']);
+                        //获取用户权限
+                        $roleId = isset($result['role']['roleId']) ? $result['role']['roleId'] : 0;
+                        $result['permission'] = (new AdminController())->getPermission($result['id'], $roleId);
+                        $token = $this->tokenGenerator();
+                        $result['token'] = $token;
+                        AdminSessionModel::put($token, $result['id'], $result['projectId']);
+                        $this->data = $result;
+                    } else {
+                        $this->code = 110105;
+                        $this->msg = '账号已经被停用';
+                    }
+                }else{
+                    $this->code = 110104;
+                    $this->msg = '此账号不能登录公司管理系统';
+                }
+            } else {
+                return $this->ajaxResult(110103, '用户名或密码错误');
+            }
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'username') {
+                if (key($failed['username']) == 'Required') {
+                    $this->code = 110101;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'password') {
+                if (key($failed['password']) == 'Required') {
+                    $this->code = 110102;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+
+        }
+
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
 }

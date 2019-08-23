@@ -57,7 +57,11 @@ class EmployeeAttendanceModel
     {
         return DB::table($this->table)
             ->where('employeeId',$employeeId)
-            ->where('projectId',$projectId)
+            ->where(function ($query) use ($projectId){
+                if ($projectId != 0){
+                    $query->where('projectId',$projectId);
+                }
+            })
             ->whereBetween('day',[$startTime,$endTime])
             ->get()->toArray();
     }

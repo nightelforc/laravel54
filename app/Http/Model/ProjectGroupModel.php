@@ -54,6 +54,31 @@ class ProjectGroupModel
      * @param array $data
      * @return mixed
      */
+    public function countLists(array $data)
+    {
+        return DB::table($this->table)
+            ->leftJoin('profession as p','p.id','=',$this->table.'.professionId')
+            ->leftJoin('project','project.id','=',$this->table.'.projectId')
+            ->leftJoin('employee as e','e.id',$this->table.'.groupLeader')
+            ->where(function ($query) use ($data){
+                $query->where($this->table.'.projectId',$data['projectId'])
+                    ->whereIn($this->table.'.status',[1,2])
+                    ->where($this->table.'.createTime','>',$this->startTime)
+                    ->where($this->table.'.createTime','<',$this->endTime);;
+                if (isset($data['professionId']) && !is_null($data['professionId'])) {
+                    $query->where($this->table.'.professionId', $data['professionId']);
+                }
+                if (isset($data['search']) && !is_null($data['search'])) {
+                    $query->where($this->table.'.name','like','%'. $data['search'].'%');
+                }
+            })
+            ->count();
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
     public function insert(array $data)
     {
         $data['createTime'] = date('Y-m-d H:i:s');
@@ -117,4 +142,6 @@ class ProjectGroupModel
             ->first();
         return empty($result) ? [] : get_object_vars($result);
     }
+
+
 }

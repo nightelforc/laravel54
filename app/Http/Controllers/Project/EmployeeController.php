@@ -90,8 +90,8 @@ class EmployeeController extends Controller
             $this->data = [
                 "draw" => $input['draw'],
                 "data" => $lists,
-                "recordsFiltered" => count($lists),
-                "recordsTotal" => count($lists),
+                "recordsFiltered" => $countLists,
+                "recordsTotal" => $countLists,
             ];
         } else {
             $failed = $validator->failed();
@@ -307,12 +307,12 @@ class EmployeeController extends Controller
                     $this->code = 410402;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'status') {
-                if (key($failed['status']) == 'Required') {
+            } elseif (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
                     $this->code = 410403;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['status']) == 'Integer') {
+                if (key($failed['projectId']) == 'Integer') {
                     $this->code = 410404;
                     $this->msg = $validator->errors()->first();
                 }

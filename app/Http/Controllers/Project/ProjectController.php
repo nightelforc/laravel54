@@ -1242,7 +1242,7 @@ class ProjectController extends Controller
             'start.integer' => '起始记录参数类型错误',
             'start.min' => '起始记录参数值不小于:min',
         ];
-        $input = $request->only(['projectId', 'draw', 'length', 'start']);
+        $input = $request->only(['projectId', 'draw', 'length', 'start', 'search']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectOtherSeparateAccountsModel = new ProjectOtherSeparateAccountsModel();

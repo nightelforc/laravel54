@@ -83,8 +83,7 @@ class EmployeeModel extends Model
                     });
                 }
             })
-            ->select($this->table . '.*', 'p.name as professionName','project.name as projectName')
-            ->get()->toArray();
+            ->count();
     }
 
     /**
@@ -171,6 +170,11 @@ class EmployeeModel extends Model
         $otherSeparateAccounts = (new ProjectOtherSeparateAccountsModel())->getOtherSeparateAccounts($id, $findYear['startTime'], $findYear['endTime']);
 
         $wageList = $this->datePeriod($findYear['startTime'], $findYear['endTime'], '1 month', 'Y-m');
+        $endTime = (new \DateTime($findYear['endTime']))->format('Y-m');
+        end($wageList);
+        if (key($wageList) != $endTime){
+            $wageList[$endTime] = '';
+        }
         foreach ($wageList as $key => $w) {
             $wageList[$key] = [
                 'bonus' => 0,

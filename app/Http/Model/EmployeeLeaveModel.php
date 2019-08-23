@@ -33,7 +33,7 @@ class EmployeeLeaveModel
                 if (isset($input['projectId']) && !empty($input['projectId'])) {
                     $query->where($this->table.'.projectId', $input['projectId']);
                 }
-                if (isset($input['professionId']) && !is_null($input['professionId'])) {
+                if (isset($input['professionId']) && !empty($input['professionId'])) {
                     $query->where('e.professionId', $input['professionId']);
                 }
                 if (isset($input['backStatus']) && !is_null($input['backStatus'])) {
@@ -63,11 +63,13 @@ class EmployeeLeaveModel
     public function countLists(array $input)
     {
         return DB::table($this->table)
+            ->leftJoin('employee as e','e.id','=',$this->table.'.employeeId')
+            ->leftJoin('profession as p','p.id','=','e.professionId')
             ->where(function ($query) use ($input) {
                 if (isset($input['projectId']) && !empty($input['projectId'])) {
                     $query->where($this->table.'.projectId', $input['projectId']);
                 }
-                if (isset($input['professionId']) && !is_null($input['professionId'])) {
+                if (isset($input['professionId']) && !empty($input['professionId'])) {
                     $query->where('e.professionId', $input['professionId']);
                 }
                 if (isset($input['backStatus']) && !is_null($input['backStatus'])) {

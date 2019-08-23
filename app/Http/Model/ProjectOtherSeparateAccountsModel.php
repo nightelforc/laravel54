@@ -78,7 +78,22 @@ class ProjectOtherSeparateAccountsModel
     public function countLists(array $input)
     {
         return DB::table($this->table)
-            ->where($this->table . '.projectId', $input['projectId'])
+            ->leftJoin('employee as e', 'e.id', '=', $this->table . '.employeeId')
+//            ->leftJoin('project', 'project.id', '=', $this->table . '.projectId')
+//            ->leftJoin('profession as p', 'p.id', '=', $this->table . '.professionId')
+//            ->leftJoin('project_area as pa', 'pa.id', '=', $this->table . '.areaId')
+//            ->leftJoin('project_section as ps', 'ps.id', '=', $this->table . '.sectionId')
+//            ->leftJoin('assignment as a', 'a.id', '=', $this->table . '.assignmentId')
+            ->where(function ($query) use ($input) {
+                if (isset($input['projectId']) && $input['projectId'] != 0) {
+                    $query->where($this->table . '.projectId', $input['projectId']);
+                }
+                if (isset($input['search']) && $input['search'] != 0) {
+                    $query->where(function ($query1) use ($input) {
+                        $query1->where('e.name', 'like', $input['search'])->orWhere('e.jobNumber', 'like', $input['search']);
+                    });
+                }
+            })
             ->count();
     }
 

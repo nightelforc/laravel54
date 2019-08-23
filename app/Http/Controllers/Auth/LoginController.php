@@ -67,7 +67,7 @@ class LoginController extends Controller
             $adminModel = new AdminModel();
             $result = $adminModel->login($request->all());
             if (!empty($result)) {
-                if (!is_null($result['projectId']) && $result['projectId'] != 0) {
+                if (!is_null($result['projectId']) && $result['projectId'] != 1) {
                     if ($result['status'] == 1) {
                         $result['role'] = (new AdminController())->getRole($result['id']);
                         //获取用户权限
@@ -351,7 +351,7 @@ class LoginController extends Controller
             $adminModel = new AdminModel();
             $result = $adminModel->login($request->all());
             if (!empty($result)) {
-                if ($result['projectId'] == 0) {
+                if ($result['projectId'] == 1) {
                     if ($result['status'] == 1) {
                         $result['role'] = (new AdminController())->getRole($result['id']);
                         //获取用户权限

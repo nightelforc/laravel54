@@ -841,8 +841,13 @@ class EmployeeController extends Controller
         $input = $request->only(['id', 'backTime']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            $employeeLeaveModel = new EmployeeLeaveModel();
-            $employeeLeaveModel->back($input);
+            if ($input['backTime'] <= date('Y-m-d')){
+                $employeeLeaveModel = new EmployeeLeaveModel();
+                $employeeLeaveModel->back($input);
+            }else{
+                $this->code = 411105;
+                $this->msg = '销假日期不能晚于当天日期';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {

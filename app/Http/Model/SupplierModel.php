@@ -110,9 +110,11 @@ class SupplierModel
     public function checkRepeat(array $data,$pk = 0)
     {
         return DB::table($this->table)
-            ->where('name',$data['name'])
-            ->orWhere('accountName',$data['name'])
-            ->orWhere('accountNumber',$data['accountNumber'])
+            ->where(function ($query) use ($data){
+                $query->where('name',$data['name'])
+                    ->orWhere('accountName',$data['accountName'])
+                    ->orWhere('accountNumber',$data['accountNumber']);
+            })
             ->where(function ($query) use ($pk){
                 if($pk != 0){
                     $query->where('id','!=',$pk);

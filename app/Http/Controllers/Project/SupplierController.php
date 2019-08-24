@@ -715,6 +715,7 @@ class SupplierController extends Controller
     /**
      * @param Request $request
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function repaymentLists(Request $request)
     {

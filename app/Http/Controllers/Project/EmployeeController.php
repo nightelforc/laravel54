@@ -835,7 +835,7 @@ class EmployeeController extends Controller
         $message = [
             'id.required' => '获取请假参数失败',
             'id.integer' => '请假参数类型错误',
-            'backTime.required' => '获取销假时间失败',
+            'backTime.required' => '请选择销假时间',
             'backTime.date_format' => '销假时间格式不正确',
         ];
         $input = $request->only(['id', 'backTime']);

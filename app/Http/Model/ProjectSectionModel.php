@@ -107,11 +107,12 @@ class ProjectSectionModel
     }
 
     /**
+     * @param array $data
      * @return array
      */
-    public function batchInfo()
+    public function batchInfo(array $data)
     {
-        $result = DB::table($this->table)->where('name','like','%层')->orderBy('id', 'desc')->first();
+        $result = DB::table($this->table)->where('name','like','%层')->where('areaId',$data['areaId'])->orderBy('id', 'desc')->first();
         return empty($result) ? [] : get_object_vars($result);
     }
 

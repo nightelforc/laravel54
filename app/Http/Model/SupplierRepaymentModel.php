@@ -50,6 +50,7 @@ class SupplierRepaymentModel
             ->where('supplierId',$data['supplierId'])
             ->where('repayTime','>',$startTime)
             ->where('repayTime','<',$endTime)
+            ->orderBy('createTime','desc')
             ->offset($start)->limit($limit)->get()->toArray();
     }
 

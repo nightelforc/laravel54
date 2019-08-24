@@ -173,7 +173,7 @@ class ProjectController extends Controller
     {
         $rules = [
             'projectId' => 'required|integer',
-            'amount' => 'required|integer',
+            'amount' => 'required|integer|min:1',
         ];
         $message = [
             'projectId.required' => '获取项目参数失败',
@@ -185,7 +185,7 @@ class ProjectController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectAreaModel = new ProjectAreaModel();
-            $batchInfo = $projectAreaModel->batchInfo();
+            $batchInfo = $projectAreaModel->batchInfo($input);
             if (empty($batchInfo)) {
                 $start = 1;
             } else {
@@ -212,6 +212,10 @@ class ProjectController extends Controller
                 }
                 if (key($failed['amount']) == 'Integer') {
                     $this->code = 420404;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['amount']) == 'Min') {
+                    $this->code = 420405;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -491,7 +495,7 @@ class ProjectController extends Controller
         $rules = [
             'projectId' => 'required|integer',
             'areaId' => 'required|integer',
-            'amount' => 'required|integer',
+            'amount' => 'required|integer|min:1',
         ];
         $message = [
             'projectId.required' => '获取项目参数失败',
@@ -504,7 +508,7 @@ class ProjectController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectSectionModel = new ProjectSectionModel();
-            $batchInfo = $projectSectionModel->batchInfo();
+            $batchInfo = $projectSectionModel->batchInfo($input);
             if (empty($batchInfo)) {
                 $start = 1;
             } else {
@@ -540,6 +544,10 @@ class ProjectController extends Controller
                 }
                 if (key($failed['amount']) == 'Integer') {
                     $this->code = 421006;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['amount']) == 'Min') {
+                    $this->code = 421007;
                     $this->msg = $validator->errors()->first();
                 }
             }

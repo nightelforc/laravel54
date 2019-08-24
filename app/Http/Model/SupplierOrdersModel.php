@@ -62,6 +62,7 @@ class SupplierOrdersModel
                 }
             })
             ->offset($start)->limit($limit)
+            ->orderBy('createTime','desc')
             ->select($this->table.'.*','p.name as projectName','s.name as supplierName')
             ->get()->toArray();
     }

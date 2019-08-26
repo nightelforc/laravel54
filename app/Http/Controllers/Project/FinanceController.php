@@ -12,7 +12,9 @@ namespace App\Http\Controllers\Project;
 use App\Http\Controllers\Controller;
 use App\Http\Model\EmployeeLivingModel;
 use App\Http\Model\EmployeeLoanModel;
+use App\Http\Model\EmployeeMaterialOrderModel;
 use App\Http\Model\EmployeeModel;
+use App\Http\Model\ProjectGroupSeparateAccountsModel;
 use App\Http\Model\SupplierOrdersModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -439,6 +441,132 @@ class FinanceController extends Controller
                 }
                 if (key($failed['start']) == 'Min') {
                     $this->code = 470412;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function separateInfo(Request $request){
+        $rules = [
+            'projectId' => 'required|integer',
+            'employeeId' => 'required|integer',
+            'startTime' => 'nullable|date_format:Y-m-d',
+            'endTime' => 'nullable|date_format:Y-m-d',
+            'month' => 'nullable|date_format:Y-m',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型不正确',
+            'employeeId.required' => '获取工人参数失败',
+            'employeeId.integer' => '工人参数类型不正确',
+            'startTime.date_format' => '日期格式不正确',
+            'endTime.date_format' => '日期格式不正确',
+        ];
+        $input = $request->only(['projectId', 'startTime', 'endTime','employeeId','month']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $projectGroupSeparateAccountsModel = new ProjectGroupSeparateAccountsModel();
+            $this->data = $projectGroupSeparateAccountsModel->listsByEmployee($input);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 470501;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 470502;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'employeeId') {
+                if (key($failed['employeeId']) == 'Required') {
+                    $this->code = 470503;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['employeeId']) == 'Integer') {
+                    $this->code = 470504;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'startTime') {
+                if (key($failed['startTime']) == 'DateFormat') {
+                    $this->code = 470505;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'endTime') {
+                if (key($failed['endTime']) == 'DateFormat') {
+                    $this->code = 470506;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'month') {
+                if (key($failed['month']) == 'DateFormat') {
+                    $this->code = 470507;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    public function materialOrdersInfo(Request $request){
+        $rules = [
+            'projectId' => 'required|integer',
+            'employeeId' => 'required|integer',
+            'startTime' => 'nullable|date_format:Y-m-d',
+            'endTime' => 'nullable|date_format:Y-m-d',
+            'month' => 'nullable|date_format:Y-m',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型不正确',
+            'employeeId.required' => '获取工人参数失败',
+            'employeeId.integer' => '工人参数类型不正确',
+            'startTime.date_format' => '日期格式不正确',
+            'endTime.date_format' => '日期格式不正确',
+        ];
+        $input = $request->only(['projectId', 'startTime', 'endTime','employeeId','month']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $employeeMaterialOrderModel = new EmployeeMaterialOrderModel();
+            $this->data = $employeeMaterialOrderModel->listsByEmployee($input);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 470601;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 470602;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'employeeId') {
+                if (key($failed['employeeId']) == 'Required') {
+                    $this->code = 470603;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['employeeId']) == 'Integer') {
+                    $this->code = 470604;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'startTime') {
+                if (key($failed['startTime']) == 'DateFormat') {
+                    $this->code = 470605;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'endTime') {
+                if (key($failed['endTime']) == 'DateFormat') {
+                    $this->code = 470606;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'month') {
+                if (key($failed['month']) == 'DateFormat') {
+                    $this->code = 470607;
                     $this->msg = $validator->errors()->first();
                 }
             }

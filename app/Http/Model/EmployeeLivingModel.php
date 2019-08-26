@@ -62,10 +62,10 @@ class EmployeeLivingModel
             ->where(function ($query) use ($input) {
                 $query->where($this->table.'.projectId', $input['projectId']);
                 if (isset($input['startTime']) && !is_null($input['startTime'])){
-                    $query->where('loanTime','>=',$input['startTime'].' 00:00:00');
+                    $query->where('livingTime','>=',$input['startTime'].' 00:00:00');
                 }
                 if (isset($input['endTime']) && !is_null($input['endTime'])){
-                    $query->where('loanTime','<=',$input['endTime'].' 23:59:59');
+                    $query->where('livingTime','<=',$input['endTime'].' 23:59:59');
                 }
                 if (isset($input['status']) && !is_null($input['status'])) {
                     $query->where($this->table . '.status', $input['status']);
@@ -100,10 +100,10 @@ class EmployeeLivingModel
             ->where(function ($query) use ($input) {
                 $query->where($this->table.'.projectId', $input['projectId']);
                 if (isset($input['startTime']) && !is_null($input['startTime'])){
-                    $query->where('loanTime','>=',$input['startTime'].' 00:00:00');
+                    $query->where('livingTime','>=',$input['startTime'].' 00:00:00');
                 }
                 if (isset($input['endTime']) && !is_null($input['endTime'])){
-                    $query->where('loanTime','<=',$input['endTime'].' 23:59:59');
+                    $query->where('livingTime','<=',$input['endTime'].' 23:59:59');
                 }
                 if (isset($input['status']) && !is_null($input['status'])) {
                     $query->where($this->table . '.status', $input['status']);

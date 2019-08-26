@@ -86,24 +86,26 @@ class WarehouseModel
     {
         return DB::table($this->table)
             ->leftJoin('material as m','m.id','=',$this->table.'.materialId')
+            ->leftJoin('material_spec as ms','ms.id','=',$this->table.'.specId')
+            ->leftJoin('supplier as s','s.id','=',$this->table.'.supplierId')
             ->where(function ($query) use($data){
-                if (isset($data['projectId']) && !is_null($data['projectId'])){
-                    $query->where('projectId',$data['projectId']);
-                }
-                if (isset($data['supplierId']) && !is_null($data['supplierId'])){
-                    $query->where('supplierId',$data['supplierId']);
-                }
-                if (isset($data['materialId']) && !is_null($data['materialId'])){
-                    $query->where('materialId',$data['materialId']);
-                }
-                if (isset($data['specId']) && !is_null($data['specId'])){
-                    $query->where('specId',$data['specId']);
-                }
+//                if (isset($data['projectId']) && !is_null($data['projectId'])){
+//                    $query->where('projectId',$data['projectId']);
+//                }
+//                if (isset($data['supplierId']) && !is_null($data['supplierId'])){
+//                    $query->where('supplierId',$data['supplierId']);
+//                }
+//                if (isset($data['materialId']) && !is_null($data['materialId'])){
+//                    $query->where('materialId',$data['materialId']);
+//                }
+//                if (isset($data['specId']) && !is_null($data['specId'])){
+//                    $query->where('specId',$data['specId']);
+//                }
                 if (isset($data['search']) && !is_null($data['search'])){
-                    $query->where('m.name','like','%'.$data['specId'].'%');
+                    $query->where('m.name','like','%'.$data['search'].'%');
                 }
             })
-            ->select($this->table.'.*','m.name as materialName')
+            ->select($this->table.'.*','m.name as materialName','ms.spec','ms.brand','s.name as supplierName')
             ->get()->toArray();
     }
 

@@ -58,8 +58,9 @@ class ProjectGroupAssignmentModel
     {
         return DB::table($this->table)
             ->leftJoin('assignment as a','a.id','=',$this->table.'.assignmentId')
+            ->leftJoin('unit as u','u.id','=','a.unitId')
             ->where($data)
-            ->select($this->table.'.*','a.name as assignmentName')
+            ->select($this->table.'.*','a.name as assignmentName','u.name as unitName')
             ->get()->toArray();
     }
 

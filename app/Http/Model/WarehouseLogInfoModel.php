@@ -55,7 +55,7 @@ class WarehouseLogInfoModel
                 if (isset($input['status']) && !is_null($input['status'])) {
                     $query->where('wl.status', $input['status']);
                 }
-                if (isset($input['startTime']) && !is_null($input['status'])) {
+                if (isset($input['startTime']) && !is_null($input['startTime'])) {
                     $query->where('wl.time', '>=', $input['startTime'] . " 00:00:00");
                 }
                 if (isset($input['endTime']) && !is_null($input['endTime'])) {
@@ -66,9 +66,10 @@ class WarehouseLogInfoModel
                 }
             })
             ->offset($start)->limit($limit)
+            ->orderBy('createTime','desc')
             ->select($this->table . '.*',
                 'm.name as materialName', 'spec.spec', 'spec.brand', 's.name as supplierName',
-                'p.name as projectName', 'p1.name as sourceProjectName', 'e.name as employeeName',
+                'p.name as projectName', 'p1.name as sourceProjectName', 'e.name as sourceEmployeeName',
                 'wl.projectId', 'wl.type', 'wl.sourceEmployeeId', 'wl.sourceProjectId', 'wl.time', 'wl.createTime','wl.status', 'wl.remark', 'wl.recoveryFunds')
             ->get()->toArray();
     }

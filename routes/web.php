@@ -24,7 +24,7 @@ Route::group([
 });
 
 Route::group([
-//    'middleware'=>'apiAuth',
+    'middleware'=>'apiAuth',
 ],function(){
     //登录、审批、工作流等
     Route::group([

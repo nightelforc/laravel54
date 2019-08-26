@@ -55,6 +55,7 @@ class EmployeeMaterialOrderInfoModel
                 }
             })
             ->offset($start)->limit($limit)
+            ->orderBy('createTime','desc')
             ->select($this->table . '.*',
                 'm.name as materialName', 'spec.spec', 'spec.brand', 's.name as supplierName',
                 'p.name as projectName', 'e.name as employeeName',

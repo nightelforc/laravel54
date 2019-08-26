@@ -40,4 +40,30 @@ class EmployeeMaterialOrderModel
         $data['createTime'] = date('Y-m-d H:i:s');
         return DB::table($this->table)->insertGetId($data);
     }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function listsByEmployee(array $data)
+    {
+        return DB::table($this->table)
+            ->where(function ($query) use ($data){
+                $query->where('projectId',$data['projectId'])->where('employeeId',$data['employeeId']);
+                if (!empty($data['month'])){
+                    $startTime = (new \DateTime($data['month']))->format('Y-m-01 00:00:00');
+                    $endTime = (new \DateTime($data['month']))->format('Y-m-t 23:59:59');
+                    $query->where('orderTime','<=',$startTime)->where('orderTime','<=',$endTime);
+                }else{
+                    if(!empty($data['startTime'])){
+                        $query->where('orderTime','<=',$data['startTime']);
+                    }
+                    if(!empty($data['endTime'])){
+                        $query->where('orderTime','<=',$data['endTime']);
+                    }
+                }
+            })
+            ->select($this->table.'.*')
+            ->get()->toArray();
+    }
 }

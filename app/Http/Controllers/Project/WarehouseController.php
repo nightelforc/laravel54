@@ -1579,45 +1579,45 @@ class WarehouseController extends Controller
     public function search(Request $request)
     {
         $rules = [
-            'projectId' => 'nullable|integer',
-            'supplierId' => 'nullable|integer',
-            'materialId' => 'nullable|integer',
-            'specId' => 'nullable|integer',
+//            'projectId' => 'nullable|integer',
+//            'supplierId' => 'nullable|integer',
+//            'materialId' => 'nullable|integer',
+//            'specId' => 'nullable|integer',
         ];
         $message = [
-            'projectId.integer' => '项目参数类型错误',
-            'supplierId.integer' => '供应商参数类型错误',
-            'materialId.integer' => '材料参数类型错误',
-            'specId.integer' => '规格参数类型错误',
+//            'projectId.integer' => '项目参数类型错误',
+//            'supplierId.integer' => '供应商参数类型错误',
+//            'materialId.integer' => '材料参数类型错误',
+//            'specId.integer' => '规格参数类型错误',
         ];
-        $input = $request->only(['projectId', 'supplierId', 'materialId', 'specId', 'search']);
+        $input = $request->only(['search']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $warehouseModel = new WarehouseModel();
             $this->data = $warehouseModel->search($input);
         } else {
-            $failed = $validator->failed();
-            if (key($failed) == 'projectId') {
-                if (key($failed['projectId']) == 'Integer') {
-                    $this->code = 461201;
-                    $this->msg = $validator->errors()->first();
-                }
-            } elseif (key($failed) == 'supplierId') {
-                if (key($failed['supplierId']) == 'Integer') {
-                    $this->code = 461202;
-                    $this->msg = $validator->errors()->first();
-                }
-            } elseif (key($failed) == 'materialId') {
-                if (key($failed['materialId']) == 'Integer') {
-                    $this->code = 461203;
-                    $this->msg = $validator->errors()->first();
-                }
-            } elseif (key($failed) == 'specId') {
-                if (key($failed['specId']) == 'Integer') {
-                    $this->code = 461204;
-                    $this->msg = $validator->errors()->first();
-                }
-            }
+//            $failed = $validator->failed();
+//            if (key($failed) == 'projectId') {
+//                if (key($failed['projectId']) == 'Integer') {
+//                    $this->code = 461201;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//            } elseif (key($failed) == 'supplierId') {
+//                if (key($failed['supplierId']) == 'Integer') {
+//                    $this->code = 461202;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//            } elseif (key($failed) == 'materialId') {
+//                if (key($failed['materialId']) == 'Integer') {
+//                    $this->code = 461203;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//            } elseif (key($failed) == 'specId') {
+//                if (key($failed['specId']) == 'Integer') {
+//                    $this->code = 461204;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//            }
         }
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }

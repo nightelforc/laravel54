@@ -40,6 +40,14 @@ class WarehouseLogModel
                     'remark' => $data['remark'],
                     'type' => $data['type'],
                 ];
+                if (isset($data['sourceEmployeeId'])){
+                    $warehouseLog['sourceEmployeeId'] = $data['sourceEmployeeId'];
+                }
+
+                if (isset($data['sourceProjectId'])){
+                    $warehouseLog['sourceProjectId'] = $data['sourceProjectId'];
+                }
+
                 $insertId = $this->insert($warehouseLog);
                 $warehouseLogInfoModel = new WarehouseLogInfoModel();
                 foreach ($data['data'] as $d){

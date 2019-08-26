@@ -105,4 +105,29 @@ class ProjectGroupSeparateAccountsModel
         return empty($result) ? [] : get_object_vars($result);
     }
 
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function listsByEmployee(array $data){
+        return DB::table($this->table)
+            ->where(function ($query) use ($data){
+                $query->where('projectId',$data['projectId'])->where('employeeId',$data['employeeId']);
+                if (!empty($data['month'])){
+                    $startTime = (new \DateTime($data['month']))->format('Y-m-01 00:00:00');
+                    $endTime = (new \DateTime($data['month']))->format('Y-m-t 23:59:59');
+                    $query->where('separateTime','<=',$startTime)->where('separateTime','<=',$endTime);
+                }else{
+                    if(!empty($data['startTime'])){
+                        $query->where('separateTime','<=',$data['startTime']);
+                    }
+                    if(!empty($data['endTime'])){
+                        $query->where('separateTime','<=',$data['endTime']);
+                    }
+                }
+            })
+            ->select($this->table.'.*')
+            ->get()->toArray();
+    }
+
 }

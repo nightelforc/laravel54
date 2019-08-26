@@ -1412,17 +1412,22 @@ class ProjectController extends Controller
                 }
             }
             if ($continue) {
-                $projectOtherSeparateModel = new ProjectOtherSeparateAccountsModel();
-                $insertId = $projectOtherSeparateModel->insert($input);
-                $input['ids'] = $insertId;
-                $approval = ApprovalController::approval('otherSeparate', $input);
-                if ($approval['status']) {
-                    if ($approval['result']) {
-                        $this->msg = '申请提交成功，请等待审批结果';
-                    } else {
-                        $this->code = 422119;
-                        $this->msg = '保存失败，请稍后重试';
+                if ($input['separateTime'] <= date('Y-m-d')){
+                    $projectOtherSeparateModel = new ProjectOtherSeparateAccountsModel();
+                    $insertId = $projectOtherSeparateModel->insert($input);
+                    $input['ids'] = $insertId;
+                    $approval = ApprovalController::approval('otherSeparate', $input);
+                    if ($approval['status']) {
+                        if ($approval['result']) {
+                            $this->msg = '申请提交成功，请等待审批结果';
+                        } else {
+                            $this->code = 422120;
+                            $this->msg = '保存失败，请稍后重试';
+                        }
                     }
+                }else{
+                    $this->code = 422119;
+                    $this->msg = '记账时间不能超过当前日期';
                 }
             }
         } else {

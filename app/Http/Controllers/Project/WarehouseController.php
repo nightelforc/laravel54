@@ -457,7 +457,7 @@ class WarehouseController extends Controller
                     'materialId' => 'required|integer',
                     'specId' => 'required|integer',
                     'supplierId' => 'required|integer',
-                    'amount' => 'required|integer',
+                    'amount' => 'required|integer|min:0',
                     'price' => 'required|numeric',
                     'totalPrice' => 'required|numeric',
                 ];
@@ -525,25 +525,30 @@ class WarehouseController extends Controller
                                 $this->msg = $validator1->errors()->first();
                                 break;
                             }
-                        } elseif (key($failed1) == 'price') {
-                            if (key($failed1['price']) == 'Required') {
+                            if (key($failed1['amount']) == 'Min') {
                                 $this->code = 460515;
                                 $this->msg = $validator1->errors()->first();
                                 break;
                             }
-                            if (key($failed1['price']) == 'Numeric') {
+                        } elseif (key($failed1) == 'price') {
+                            if (key($failed1['price']) == 'Required') {
                                 $this->code = 460516;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['price']) == 'Numeric') {
+                                $this->code = 460517;
                                 $this->msg = $validator1->errors()->first();
                                 break;
                             }
                         } elseif (key($failed1) == 'totalPrice') {
                             if (key($failed1['totalPrice']) == 'Required') {
-                                $this->code = 460517;
+                                $this->code = 460518;
                                 $this->msg = $validator1->errors()->first();
                                 break;
                             }
                             if (key($failed1['totalPrice']) == 'Numeric') {
-                                $this->code = 460518;
+                                $this->code = 460519;
                                 $this->msg = $validator1->errors()->first();
                                 break;
                             }
@@ -558,7 +563,7 @@ class WarehouseController extends Controller
                     ]);
                     if (empty($warehouseInfo) || $warehouseInfo['amount'] < $i['amount']) {
                         $continue = false;
-                        $this->code = 460519;
+                        $this->code = 460520;
                         $this->msg = '库存不足';
                         break;
                     }
@@ -574,17 +579,17 @@ class WarehouseController extends Controller
                             if ($approval['result']) {
                                 $this->msg = '申请提交成功，请等待审批结果';
                             } else {
-                                $this->code = 460521;
+                                $this->code = 460522;
                                 $this->msg = '保存失败，请稍后重试';
                             }
                         }
                     } else {
-                        $this->code = 460520;
+                        $this->code = 460521;
                         $this->msg = $result;
                     }
                 }
             }else{
-                $this->code = 460522;
+                $this->code = 460523;
                 $this->msg = '所选时间不能超过当前时间';
             }
         } else {

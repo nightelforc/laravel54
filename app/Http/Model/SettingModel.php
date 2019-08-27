@@ -77,11 +77,15 @@ class SettingModel
     /**
      * @param $code
      * @param $projectId
-     * @return mixed
+     * @return int|mixed
      */
     public function get($code, $projectId)
     {
         $info = $this->info(['code'=>$code,'projectId'=>$projectId]);
-        return $info['value'];
+        if (empty($info)){
+            return 0;
+        }else{
+            return $info['value'];
+        }
     }
 }

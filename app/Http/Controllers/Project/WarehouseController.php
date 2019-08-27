@@ -1671,4 +1671,37 @@ class WarehouseController extends Controller
         }
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getRate(Request $request){
+        $rules = [
+            'projectId' => 'required|integer',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数错误',
+            'projectId.integer' => '项目参数类型错误',
+        ];
+        $input = $request->only(['projectId']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $settingModel = new SettingModel();
+            $this->data = ['saleRate'=>$settingModel->get('saleRate',$input['projectId'])];
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 461301;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 461302;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
 }

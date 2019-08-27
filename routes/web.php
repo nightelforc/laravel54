@@ -186,6 +186,7 @@ Route::group([
         Route::post('/warehouse/search', 'WarehouseController@search');
         Route::post('/warehouse/lists', 'WarehouseController@lists');
         Route::post('/warehouse/info', 'WarehouseController@info');
+        Route::post('/warehouse/getRate', 'WarehouseController@getRate');
         Route::post('/warehouse/setRate', 'WarehouseController@setRate');
         Route::post('/warehouse/setSalePrice', 'WarehouseController@setSalePrice');
         Route::post('/warehouse/consume', 'WarehouseController@consume');

@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Model\ProjectAreaModel;
 use App\Http\Model\ProjectBudgetModel;
 use App\Http\Model\ProjectGroupAssignmentModel;
+use App\Http\Model\ProjectGroupMembersModel;
 use App\Http\Model\ProjectGroupModel;
 use App\Http\Model\ProjectGroupSeparateAccountsModel;
 use App\Http\Model\ProjectModel;
@@ -1612,7 +1613,7 @@ class ProjectController extends Controller
             $projectGroupModel = new ProjectGroupModel();
             $this->data = $projectGroupModel->info(['id' => $input['groupId']]);
             $projectGroupAssignmentModel = new ProjectGroupAssignmentModel();
-            $projectGroupSeparateAccountsModel = new ProjectGroupSeparateAccountsModel();
+            $projectGroupMembersModel = new ProjectGroupMembersModel();
 
             //施工项分账记录
             $data = [
@@ -1622,7 +1623,7 @@ class ProjectController extends Controller
             ];
             $this->data['assignment'] = $projectGroupAssignmentModel->lists($data);
             //班组成员分账记录
-            $this->data['separate'] = $projectGroupSeparateAccountsModel->lists($data);
+            $this->data['separate'] = $projectGroupMembersModel->memberSeparateLists($data);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {

@@ -332,7 +332,7 @@ class EmployeeController extends Controller
     {
         $rules = [
             'employeeId' => 'required|integer',
-            'account' => 'required|numeric',
+            'account' => 'required|numeric|min:0',
             'loanTime' => 'required|date_format:Y-m-d',
         ];
         $message = [
@@ -340,6 +340,7 @@ class EmployeeController extends Controller
             'employeeId.integer' => '工人参数类型错误',
             'account.required' => '请填写借款金额',
             'account.numeric' => '借款金额类型错误',
+            'account.min' => '借款金额必须大于 :min',
             'loanTime.required' => '请选择借款时间',
             'loanTime.date_format' => '借款时间格式不正确',
         ];
@@ -362,16 +363,16 @@ class EmployeeController extends Controller
                         if ($approval['result']) {
                             $this->msg = '申请提交成功，请等待审批结果';
                         } else {
-                            $this->code = 410509;
+                            $this->code = 410510;
                             $this->msg = '保存失败，请稍后重试';
                         }
                     }
                 } else {
-                    $this->code = 410508;
+                    $this->code = 410509;
                     $this->msg = '保存失败，请稍后重试';
                 }
             } else {
-                $this->code = 410507;
+                $this->code = 410508;
                 $this->msg = '日期不能晚于当日日期';
             }
         } else {
@@ -394,13 +395,17 @@ class EmployeeController extends Controller
                     $this->code = 410504;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'loanTime') {
-                if (key($failed['loanTime']) == 'Required') {
+                if (key($failed['account']) == 'Min') {
                     $this->code = 410505;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['loanTime']) == 'DateFormat') {
+            } elseif (key($failed) == 'loanTime') {
+                if (key($failed['loanTime']) == 'Required') {
                     $this->code = 410506;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['loanTime']) == 'DateFormat') {
+                    $this->code = 410507;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -419,7 +424,7 @@ class EmployeeController extends Controller
     {
         $rules = [
             'employeeId' => 'required|integer',
-            'account' => 'required|numeric',
+            'account' => 'required|numeric|min:0',
             'type' => 'required|integer|in:1,2',
             'livingTime' => 'required|date_format:Y-m-d',
         ];
@@ -427,10 +432,11 @@ class EmployeeController extends Controller
             'employeeId.required' => '获取工人参数失败',
             'employeeId.integer' => '工人参数类型错误',
             'account.required' => '请填写生活费金额',
-            'account.numeric' => '生活费类型错误',
+            'account.numeric' => '生活费金额类型错误',
+            'account.min' => '生活费金额必须大于 :min',
             'type.required' => '请选择充值或退款',
             'type.integer' => '生活费操作类型错误',
-            'type.in' => '生活费操作类型不正确',
+            'type.in' => '请选择充值或退款',
             'livingTime.required' => '请选择借款时间',
             'livingTime.date_format' => '借款时间格式不正确',
         ];
@@ -454,16 +460,16 @@ class EmployeeController extends Controller
                         if ($approval['result']) {
                             $this->msg = '申请提交成功，请等待审批结果';
                         } else {
-                            $this->code = 410612;
+                            $this->code = 410613;
                             $this->msg = '保存失败，请稍后重试';
                         }
                     }
                 } else {
-                    $this->code = 410611;
+                    $this->code = 410612;
                     $this->msg = '保存失败，请稍后重试';
                 }
             } else {
-                $this->code = 410610;
+                $this->code = 410611;
                 $this->msg = '日期不能晚于当日日期';
             }
         } else {
@@ -486,26 +492,30 @@ class EmployeeController extends Controller
                     $this->code = 410604;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'type') {
-                if (key($failed['type']) == 'Required') {
+                if (key($failed['account']) == 'Min') {
                     $this->code = 410605;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['type']) == 'Integer') {
+            } elseif (key($failed) == 'type') {
+                if (key($failed['type']) == 'Required') {
                     $this->code = 410606;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['type']) == 'In') {
+                if (key($failed['type']) == 'Integer') {
                     $this->code = 410607;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['type']) == 'In') {
+                    $this->code = 410608;
                     $this->msg = $validator->errors()->first();
                 }
             } elseif (key($failed) == 'livingTime') {
                 if (key($failed['livingTime']) == 'Required') {
-                    $this->code = 410608;
+                    $this->code = 410609;
                     $this->msg = $validator->errors()->first();
                 }
                 if (key($failed['livingTime']) == 'DateFormat') {
-                    $this->code = 410609;
+                    $this->code = 410610;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -565,7 +575,7 @@ class EmployeeController extends Controller
         $rules = [
             'employeeId' => 'required|integer',
             'day' => 'required|date_format:Y-m-d',
-            'length' => 'required|numeric'
+            'length' => 'required|numeric|min:0'
         ];
         $message = [
             'employeeId.required' => '获取工人参数失败',
@@ -574,6 +584,7 @@ class EmployeeController extends Controller
             'day.date_format' => '考勤日期格式不正确',
             'length.required' => '请填写工作时长',
             'length.numeric' => '工作时长类型错误',
+            'length.min' => '工作时长必须大于:min',
         ];
         $input = $request->only(['employeeId', 'day', 'length']);
         $validator = Validator::make($input, $rules, $message);
@@ -587,7 +598,7 @@ class EmployeeController extends Controller
                 $employeeAttendanceModel->insert($input);
                 $employeeModel->hasAttendance(['id' => $input['employeeId']]);
             }else{
-                $this->code = 410807;
+                $this->code = 410808;
                 $this->msg = '考勤日期不能超过当前日期';
             }
         } else {
@@ -617,6 +628,10 @@ class EmployeeController extends Controller
                 }
                 if (key($failed['length']) == 'Numeric') {
                     $this->code = 410806;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'Min') {
+                    $this->code = 410807;
                     $this->msg = $validator->errors()->first();
                 }
             }

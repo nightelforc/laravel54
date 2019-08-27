@@ -38,14 +38,10 @@ class ProjectOtherSeparateAccountsModel
     public function lists(array $input)
     {
         $limit = config('yucheng.limit');
-        $start = 0;
+        $start = is_null($input['start']) ? 0 : $input['start'];
 
-        if (isset($input['limit']) && !is_null($input['limit'])) {
-            $limit = $input['limit'];
-        }
-
-        if (isset($input['page']) && !is_null($input['page'])) {
-            $start = ($input['page'] - 1) * $limit;
+        if (isset($input['length']) && !is_null($input['length'])) {
+            $limit = $input['length'];
         }
 
         return DB::table($this->table)
@@ -61,7 +57,7 @@ class ProjectOtherSeparateAccountsModel
                 }
                 if (isset($input['search']) && $input['search'] != 0) {
                     $query->where(function ($query1) use ($input) {
-                        $query1->where('e.name', 'like', $input['search'])->orWhere('e.jobNumber', 'like', $input['search']);
+                        $query1->where('e.name', 'like', '%'.$input['search'].'%')->orWhere('e.jobNumber', 'like', '%'.$input['search'].'%');
                     });
                 }
             })
@@ -79,11 +75,11 @@ class ProjectOtherSeparateAccountsModel
     {
         return DB::table($this->table)
             ->leftJoin('employee as e', 'e.id', '=', $this->table . '.employeeId')
-//            ->leftJoin('project', 'project.id', '=', $this->table . '.projectId')
-//            ->leftJoin('profession as p', 'p.id', '=', $this->table . '.professionId')
-//            ->leftJoin('project_area as pa', 'pa.id', '=', $this->table . '.areaId')
-//            ->leftJoin('project_section as ps', 'ps.id', '=', $this->table . '.sectionId')
-//            ->leftJoin('assignment as a', 'a.id', '=', $this->table . '.assignmentId')
+            ->leftJoin('project', 'project.id', '=', $this->table . '.projectId')
+            ->leftJoin('profession as p', 'p.id', '=', $this->table . '.professionId')
+            ->leftJoin('project_area as pa', 'pa.id', '=', $this->table . '.areaId')
+            ->leftJoin('project_section as ps', 'ps.id', '=', $this->table . '.sectionId')
+            ->leftJoin('assignment as a', 'a.id', '=', $this->table . '.assignmentId')
             ->where(function ($query) use ($input) {
                 if (isset($input['projectId']) && $input['projectId'] != 0) {
                     $query->where($this->table . '.projectId', $input['projectId']);

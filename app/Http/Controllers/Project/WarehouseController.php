@@ -238,138 +238,144 @@ class WarehouseController extends Controller
         $input = $request->only(['projectId', 'sourceEmployeeId', 'time', 'data', 'price', 'remark',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            $rules1 = [
-                'materialId' => 'required|integer',
-                'specId' => 'required|integer',
-                'supplierId' => 'required|integer',
-                'amount' => 'required|integer',
-                'price' => 'required|numeric',
-                'totalPrice' => 'required|numeric',
-            ];
-            $message1 = [
-                'materialId.required' => '请选择材料',
-                'materialId.integer' => '材料参数类型错误',
-                'specId.required' => '请选择材料规格',
-                'specId.integer' => '材料规格参数类型错误',
-                'supplierId.required' => '请选择供应商',
-                'supplierId.integer' => '供应商参数类型错误',
-                'amount.required' => '请填写材料数量',
-                'amount.integer' => '材料数量类型错误',
-                'price.required' => '请填写材料价格',
-                'price.numeric' => '材料价格类型错误',
-                'totalPrice.required' => '请填写材料总价',
-                'totalPrice.numeric' => '材料总价类型错误',
-            ];
-            $input1 = $input['data'];
-            $continue = true;
-            $warehouseModel = new WarehouseModel();
-            foreach ($input1 as $key => $i) {
-                $validator1 = Validator::make($i, $rules1, $message1);
-                if ($validator1->fails()) {
-                    $continue = false;
-                    $failed1 = $validator1->failed();
-                    if (key($failed1) == 'materialId') {
-                        if (key($failed1['materialId']) == 'Required') {
-                            $this->code = 460411;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['materialId']) == 'Integer') {
-                            $this->code = 460412;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'specId') {
-                        if (key($failed1['specId']) == 'Required') {
-                            $this->code = 460413;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['specId']) == 'Integer') {
-                            $this->code = 460414;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'supplierId') {
-                        if (key($failed1['supplierId']) == 'Required') {
-                            $this->code = 460415;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['supplierId']) == 'Integer') {
-                            $this->code = 460416;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'amount') {
-                        if (key($failed1['amount']) == 'Required') {
-                            $this->code = 460417;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['amount']) == 'Integer') {
-                            $this->code = 460418;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'price') {
-                        if (key($failed1['price']) == 'Required') {
-                            $this->code = 460419;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['price']) == 'Numeric') {
-                            $this->code = 460420;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'totalPrice') {
-                        if (key($failed1['totalPrice']) == 'Required') {
-                            $this->code = 460421;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['totalPrice']) == 'Numeric') {
-                            $this->code = 460422;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    }
-                }
-                //检查库存
-                $warehouseInfo = $warehouseModel->info([
-                    'projectId' => $input['projectId'],
-                    'materialId' => $i['materialId'],
-                    'specId' => $i['specId'],
-                    'supplierId' => $i['supplierId'],
-                ]);
-                if (empty($warehouseInfo) || $warehouseInfo['amount'] < $i['amount']) {
-                    $continue = false;
-                    $this->code = 460423;
-                    $this->msg = '库存不足';
-                    break;
-                }
-            }
-            if ($continue) {
-                $materialLogModel = new WarehouseLogModel();
-                $input['type'] = self::CONSUME;
-                $result = $materialLogModel->addLog($input);
-                if (is_int($result)) {
-                    $input['id'] = $result;
-                    $approval = ApprovalController::approval('consume', $input);
-                    if ($approval['status']) {
-                        if ($approval['result']) {
-                            $this->msg = '申请提交成功，请等待审批结果';
-                        } else {
-                            $this->code = 460425;
-                            $this->msg = '保存失败，请稍后重试';
+            if($input['time'] <= date('Y-m-d')){
+                $rules1 = [
+                    'materialId' => 'required|integer',
+                    'specId' => 'required|integer',
+                    'supplierId' => 'required|integer',
+                    'amount' => 'required|integer',
+                    'price' => 'required|numeric',
+                    'totalPrice' => 'required|numeric',
+                ];
+                $message1 = [
+                    'materialId.required' => '请选择材料',
+                    'materialId.integer' => '材料参数类型错误',
+                    'specId.required' => '请选择材料规格',
+                    'specId.integer' => '材料规格参数类型错误',
+                    'supplierId.required' => '请选择供应商',
+                    'supplierId.integer' => '供应商参数类型错误',
+                    'amount.required' => '请填写材料数量',
+                    'amount.integer' => '材料数量类型错误',
+                    'price.required' => '请填写材料价格',
+                    'price.numeric' => '材料价格类型错误',
+                    'totalPrice.required' => '请填写材料总价',
+                    'totalPrice.numeric' => '材料总价类型错误',
+                ];
+                $input1 = $input['data'];
+                $continue = true;
+                $warehouseModel = new WarehouseModel();
+                foreach ($input1 as $key => $i) {
+                    $validator1 = Validator::make($i, $rules1, $message1);
+                    if ($validator1->fails()) {
+                        $continue = false;
+                        $failed1 = $validator1->failed();
+                        if (key($failed1) == 'materialId') {
+                            if (key($failed1['materialId']) == 'Required') {
+                                $this->code = 460411;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['materialId']) == 'Integer') {
+                                $this->code = 460412;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'specId') {
+                            if (key($failed1['specId']) == 'Required') {
+                                $this->code = 460413;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['specId']) == 'Integer') {
+                                $this->code = 460414;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'supplierId') {
+                            if (key($failed1['supplierId']) == 'Required') {
+                                $this->code = 460415;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['supplierId']) == 'Integer') {
+                                $this->code = 460416;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'amount') {
+                            if (key($failed1['amount']) == 'Required') {
+                                $this->code = 460417;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['amount']) == 'Integer') {
+                                $this->code = 460418;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'price') {
+                            if (key($failed1['price']) == 'Required') {
+                                $this->code = 460419;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['price']) == 'Numeric') {
+                                $this->code = 460420;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'totalPrice') {
+                            if (key($failed1['totalPrice']) == 'Required') {
+                                $this->code = 460421;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['totalPrice']) == 'Numeric') {
+                                $this->code = 460422;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
                         }
                     }
-                } else {
-                    $this->code = 460424;
-                    $this->msg = $result;
+                    //检查库存
+                    $warehouseInfo = $warehouseModel->info([
+                        'projectId' => $input['projectId'],
+                        'materialId' => $i['materialId'],
+                        'specId' => $i['specId'],
+                        'supplierId' => $i['supplierId'],
+                    ]);
+                    if (empty($warehouseInfo) || $warehouseInfo['amount'] < $i['amount']) {
+                        $continue = false;
+                        $this->code = 460423;
+                        $this->msg = '库存不足';
+                        break;
+                    }
                 }
+                if ($continue) {
+                    $materialLogModel = new WarehouseLogModel();
+                    $input['type'] = self::CONSUME;
+                    $result = $materialLogModel->addLog($input);
+                    if (is_int($result)) {
+                        $input['id'] = $result;
+                        $approval = ApprovalController::approval('consume', $input);
+                        if ($approval['status']) {
+                            if ($approval['result']) {
+                                $this->msg = '申请提交成功，请等待审批结果';
+                            } else {
+                                $this->code = 460426;
+                                $this->msg = '保存失败，请稍后重试';
+                            }
+                        }
+                    } else {
+                        $this->code = 460425;
+                        $this->msg = $result;
+                    }
+                }
+            }else{
+                $this->code = 460424;
+                $this->msg = '所选时间不能超过当日时间';
             }
+
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {
@@ -446,135 +452,140 @@ class WarehouseController extends Controller
         $input = $request->only(['projectId', 'time', 'data', 'remark',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            $rules1 = [
-                'materialId' => 'required|integer',
-                'specId' => 'required|integer',
-                'supplierId' => 'required|integer',
-                'amount' => 'required|integer',
-                'price' => 'required|numeric',
-                'totalPrice' => 'required|numeric',
-            ];
-            $message1 = [
-                'materialId.required' => '请选择材料',
-                'materialId.integer' => '材料参数类型错误',
-                'specId.required' => '请选择材料规格',
-                'specId.integer' => '材料规格参数类型错误',
-                'supplierId.required' => '请选择供应商',
-                'supplierId.integer' => '供应商参数类型错误',
-                'amount.required' => '请填写材料数量',
-                'amount.integer' => '材料数量类型错误',
-                'totalPrice.required' => '请填写材料总价',
-                'totalPrice.numeric' => '材料总价类型错误',
-            ];
-            $input1 = $input['data'];
-            $continue = true;
-            $warehouseModel = new WarehouseModel();
-            foreach ($input1 as $key => $i) {
-                $validator1 = Validator::make($i, $rules1, $message1);
-                if ($validator1->fails()) {
-                    $continue = false;
-                    $failed1 = $validator1->failed();
-                    if (key($failed1) == 'materialId') {
-                        if (key($failed1['materialId']) == 'Required') {
-                            $this->code = 460507;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['materialId']) == 'Integer') {
-                            $this->code = 460508;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'specId') {
-                        if (key($failed1['specId']) == 'Required') {
-                            $this->code = 460509;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['specId']) == 'Integer') {
-                            $this->code = 460510;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'supplierId') {
-                        if (key($failed1['supplierId']) == 'Required') {
-                            $this->code = 460511;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['supplierId']) == 'Integer') {
-                            $this->code = 460512;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'amount') {
-                        if (key($failed1['amount']) == 'Required') {
-                            $this->code = 460513;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['amount']) == 'Integer') {
-                            $this->code = 460514;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'price') {
-                        if (key($failed1['price']) == 'Required') {
-                            $this->code = 460515;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['price']) == 'Numeric') {
-                            $this->code = 460516;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'totalPrice') {
-                        if (key($failed1['totalPrice']) == 'Required') {
-                            $this->code = 460517;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['totalPrice']) == 'Numeric') {
-                            $this->code = 460518;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    }
-                }
-                //检查库存
-                $warehouseInfo = $warehouseModel->info([
-                    'projectId' => $input['projectId'],
-                    'materialId' => $i['materialId'],
-                    'specId' => $i['specId'],
-                    'supplierId' => $i['supplierId'],
-                ]);
-                if (empty($warehouseInfo) || $warehouseInfo['amount'] < $i['amount']) {
-                    $continue = false;
-                    $this->code = 460519;
-                    $this->msg = '库存不足';
-                    break;
-                }
-            }
-            if ($continue) {
-                $materialLogModel = new WarehouseLogModel();
-                $input['type'] = self::EXPEND;
-                $result = $materialLogModel->addLog($input);
-                if (is_int($result)) {
-                    $input['id'] = $result;
-                    $approval = ApprovalController::approval('expend', $input);
-                    if ($approval['status']) {
-                        if ($approval['result']) {
-                            $this->msg = '申请提交成功，请等待审批结果';
-                        } else {
-                            $this->code = 460521;
-                            $this->msg = '保存失败，请稍后重试';
+            if($input['time'] <= date('Y-m-d')){
+                $rules1 = [
+                    'materialId' => 'required|integer',
+                    'specId' => 'required|integer',
+                    'supplierId' => 'required|integer',
+                    'amount' => 'required|integer',
+                    'price' => 'required|numeric',
+                    'totalPrice' => 'required|numeric',
+                ];
+                $message1 = [
+                    'materialId.required' => '请选择材料',
+                    'materialId.integer' => '材料参数类型错误',
+                    'specId.required' => '请选择材料规格',
+                    'specId.integer' => '材料规格参数类型错误',
+                    'supplierId.required' => '请选择供应商',
+                    'supplierId.integer' => '供应商参数类型错误',
+                    'amount.required' => '请填写材料数量',
+                    'amount.integer' => '材料数量类型错误',
+                    'totalPrice.required' => '请填写材料总价',
+                    'totalPrice.numeric' => '材料总价类型错误',
+                ];
+                $input1 = $input['data'];
+                $continue = true;
+                $warehouseModel = new WarehouseModel();
+                foreach ($input1 as $key => $i) {
+                    $validator1 = Validator::make($i, $rules1, $message1);
+                    if ($validator1->fails()) {
+                        $continue = false;
+                        $failed1 = $validator1->failed();
+                        if (key($failed1) == 'materialId') {
+                            if (key($failed1['materialId']) == 'Required') {
+                                $this->code = 460507;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['materialId']) == 'Integer') {
+                                $this->code = 460508;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'specId') {
+                            if (key($failed1['specId']) == 'Required') {
+                                $this->code = 460509;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['specId']) == 'Integer') {
+                                $this->code = 460510;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'supplierId') {
+                            if (key($failed1['supplierId']) == 'Required') {
+                                $this->code = 460511;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['supplierId']) == 'Integer') {
+                                $this->code = 460512;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'amount') {
+                            if (key($failed1['amount']) == 'Required') {
+                                $this->code = 460513;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['amount']) == 'Integer') {
+                                $this->code = 460514;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'price') {
+                            if (key($failed1['price']) == 'Required') {
+                                $this->code = 460515;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['price']) == 'Numeric') {
+                                $this->code = 460516;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'totalPrice') {
+                            if (key($failed1['totalPrice']) == 'Required') {
+                                $this->code = 460517;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['totalPrice']) == 'Numeric') {
+                                $this->code = 460518;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
                         }
                     }
-                } else {
-                    $this->code = 460520;
-                    $this->msg = $result;
+                    //检查库存
+                    $warehouseInfo = $warehouseModel->info([
+                        'projectId' => $input['projectId'],
+                        'materialId' => $i['materialId'],
+                        'specId' => $i['specId'],
+                        'supplierId' => $i['supplierId'],
+                    ]);
+                    if (empty($warehouseInfo) || $warehouseInfo['amount'] < $i['amount']) {
+                        $continue = false;
+                        $this->code = 460519;
+                        $this->msg = '库存不足';
+                        break;
+                    }
                 }
+                if ($continue) {
+                    $materialLogModel = new WarehouseLogModel();
+                    $input['type'] = self::EXPEND;
+                    $result = $materialLogModel->addLog($input);
+                    if (is_int($result)) {
+                        $input['id'] = $result;
+                        $approval = ApprovalController::approval('expend', $input);
+                        if ($approval['status']) {
+                            if ($approval['result']) {
+                                $this->msg = '申请提交成功，请等待审批结果';
+                            } else {
+                                $this->code = 460521;
+                                $this->msg = '保存失败，请稍后重试';
+                            }
+                        }
+                    } else {
+                        $this->code = 460520;
+                        $this->msg = $result;
+                    }
+                }
+            }else{
+                $this->code = 460522;
+                $this->msg = '所选时间不能超过当前时间';
             }
         } else {
             $failed = $validator->failed();
@@ -644,38 +655,42 @@ class WarehouseController extends Controller
         $input = $request->only(['projectId', 'time', 'remark', 'materialId', 'specId', 'supplierId', 'amount',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            $warehouseModel = new WarehouseModel();
-            //检查库存
-            $warehouseInfo = $warehouseModel->info([
-                'projectId' => $input['projectId'],
-                'materialId' => $input['materialId'],
-                'specId' => $input['specId'],
-                'supplierId' => $input['supplierId'],
-            ]);
-            if (empty($warehouseInfo) || $warehouseInfo['amount'] < $input['amount']) {
-                $this->code = 460620;
-                $this->msg = '库存不足';
-            }
-
-            $materialLogModel = new WarehouseLogModel();
-            $input['type'] = self::BREAKDOWN;
-            $result = $materialLogModel->addLog($input);
-            if (is_int($result)) {
-                $input['id'] = $result;
-                $approval = ApprovalController::approval('breakdown', $input);
-                if ($approval['status']) {
-                    if ($approval['result']) {
-                        $this->msg = '申请提交成功，请等待审批结果';
-                    } else {
-                        $this->code = 460622;
-                        $this->msg = '保存失败，请稍后重试';
-                    }
+            if($input['time'] <= date('Y-m-d')){
+                $warehouseModel = new WarehouseModel();
+                //检查库存
+                $warehouseInfo = $warehouseModel->info([
+                    'projectId' => $input['projectId'],
+                    'materialId' => $input['materialId'],
+                    'specId' => $input['specId'],
+                    'supplierId' => $input['supplierId'],
+                ]);
+                if (empty($warehouseInfo) || $warehouseInfo['amount'] < $input['amount']) {
+                    $this->code = 460620;
+                    $this->msg = '库存不足';
                 }
-            } else {
-                $this->code = 460621;
-                $this->msg = $result;
-            }
 
+                $materialLogModel = new WarehouseLogModel();
+                $input['type'] = self::BREAKDOWN;
+                $result = $materialLogModel->addLog($input);
+                if (is_int($result)) {
+                    $input['id'] = $result;
+                    $approval = ApprovalController::approval('breakdown', $input);
+                    if ($approval['status']) {
+                        if ($approval['result']) {
+                            $this->msg = '申请提交成功，请等待审批结果';
+                        } else {
+                            $this->code = 460622;
+                            $this->msg = '保存失败，请稍后重试';
+                        }
+                    }
+                } else {
+                    $this->code = 460621;
+                    $this->msg = $result;
+                }
+            }else{
+                $this->code = 460623;
+                $this->msg = '所选时间不能超过当前时间';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {
@@ -743,137 +758,142 @@ class WarehouseController extends Controller
         $input = $request->only(['projectId', 'sourceProjectId', 'time', 'data', 'remark',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            $rules1 = [
-                'materialId' => 'required|integer',
-                'specId' => 'required|integer',
-                'supplierId' => 'required|integer',
-                'amount' => 'required|integer',
-                'price' => 'required|numeric',
-                'totalPrice' => 'required|numeric',
-            ];
-            $message1 = [
-                'materialId.required' => '请选择材料',
-                'materialId.integer' => '材料参数类型错误',
-                'specId.required' => '请选择材料规格',
-                'specId.integer' => '材料规格参数类型错误',
-                'supplierId.required' => '请选择供应商',
-                'supplierId.integer' => '供应商参数类型错误',
-                'amount.required' => '请填写材料数量',
-                'amount.integer' => '材料数量类型错误',
-                'price.required' => '请填写材料价格',
-                'price.numeric' => '材料价格类型错误',
-                'totalPrice.required' => '请填写材料总价',
-                'totalPrice.numeric' => '材料总价类型错误',
-            ];
-            $input1 = $input['data'];
-            $continue = true;
-            $warehouseModel = new WarehouseModel();
-            foreach ($input1 as $key => $i) {
-                $validator1 = Validator::make($i, $rules1, $message1);
-                if ($validator1->fails()) {
-                    $continue = false;
-                    $failed1 = $validator1->failed();
-                    if (key($failed1) == 'materialId') {
-                        if (key($failed1['materialId']) == 'Required') {
-                            $this->code = 460711;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['materialId']) == 'Integer') {
-                            $this->code = 460712;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'specId') {
-                        if (key($failed1['specId']) == 'Required') {
-                            $this->code = 460713;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['specId']) == 'Integer') {
-                            $this->code = 460714;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'supplierId') {
-                        if (key($failed1['supplierId']) == 'Required') {
-                            $this->code = 460715;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['supplierId']) == 'Integer') {
-                            $this->code = 460716;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'amount') {
-                        if (key($failed1['amount']) == 'Required') {
-                            $this->code = 460717;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['amount']) == 'Integer') {
-                            $this->code = 460718;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'price') {
-                        if (key($failed1['price']) == 'Required') {
-                            $this->code = 460719;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['price']) == 'Numeric') {
-                            $this->code = 460720;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'totalPrice') {
-                        if (key($failed1['totalPrice']) == 'Required') {
-                            $this->code = 460721;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['totalPrice']) == 'Numeric') {
-                            $this->code = 460722;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    }
-                }
-                //检查库存
-                $warehouseInfo = $warehouseModel->info([
-                    'projectId' => $input['projectId'],
-                    'materialId' => $i['materialId'],
-                    'specId' => $i['specId'],
-                    'supplierId' => $i['supplierId'],
-                ]);
-                if (empty($warehouseInfo) || $warehouseInfo['amount'] < $i['amount']) {
-                    $continue = false;
-                    $this->code = 460723;
-                    $this->msg = '库存不足';
-                    break;
-                }
-            }
-            if ($continue) {
-                $materialLogModel = new WarehouseLogModel();
-                $input['type'] = self::ALLOT;
-                $result = $materialLogModel->addLog($input);
-                if (is_int($result)) {
-                    $input['id'] = $result;
-                    $approval = ApprovalController::approval('allot', $input);
-                    if ($approval['status']) {
-                        if ($approval['result']) {
-                            $this->msg = '申请提交成功，请等待审批结果';
-                        } else {
-                            $this->code = 460725;
-                            $this->msg = '保存失败，请稍后重试';
+            if($input['time'] <= date('Y-m-d')){
+                $rules1 = [
+                    'materialId' => 'required|integer',
+                    'specId' => 'required|integer',
+                    'supplierId' => 'required|integer',
+                    'amount' => 'required|integer',
+                    'price' => 'required|numeric',
+                    'totalPrice' => 'required|numeric',
+                ];
+                $message1 = [
+                    'materialId.required' => '请选择材料',
+                    'materialId.integer' => '材料参数类型错误',
+                    'specId.required' => '请选择材料规格',
+                    'specId.integer' => '材料规格参数类型错误',
+                    'supplierId.required' => '请选择供应商',
+                    'supplierId.integer' => '供应商参数类型错误',
+                    'amount.required' => '请填写材料数量',
+                    'amount.integer' => '材料数量类型错误',
+                    'price.required' => '请填写材料价格',
+                    'price.numeric' => '材料价格类型错误',
+                    'totalPrice.required' => '请填写材料总价',
+                    'totalPrice.numeric' => '材料总价类型错误',
+                ];
+                $input1 = $input['data'];
+                $continue = true;
+                $warehouseModel = new WarehouseModel();
+                foreach ($input1 as $key => $i) {
+                    $validator1 = Validator::make($i, $rules1, $message1);
+                    if ($validator1->fails()) {
+                        $continue = false;
+                        $failed1 = $validator1->failed();
+                        if (key($failed1) == 'materialId') {
+                            if (key($failed1['materialId']) == 'Required') {
+                                $this->code = 460711;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['materialId']) == 'Integer') {
+                                $this->code = 460712;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'specId') {
+                            if (key($failed1['specId']) == 'Required') {
+                                $this->code = 460713;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['specId']) == 'Integer') {
+                                $this->code = 460714;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'supplierId') {
+                            if (key($failed1['supplierId']) == 'Required') {
+                                $this->code = 460715;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['supplierId']) == 'Integer') {
+                                $this->code = 460716;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'amount') {
+                            if (key($failed1['amount']) == 'Required') {
+                                $this->code = 460717;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['amount']) == 'Integer') {
+                                $this->code = 460718;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'price') {
+                            if (key($failed1['price']) == 'Required') {
+                                $this->code = 460719;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['price']) == 'Numeric') {
+                                $this->code = 460720;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'totalPrice') {
+                            if (key($failed1['totalPrice']) == 'Required') {
+                                $this->code = 460721;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['totalPrice']) == 'Numeric') {
+                                $this->code = 460722;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
                         }
                     }
-                } else {
-                    $this->code = 460724;
-                    $this->msg = $result;
+                    //检查库存
+                    $warehouseInfo = $warehouseModel->info([
+                        'projectId' => $input['projectId'],
+                        'materialId' => $i['materialId'],
+                        'specId' => $i['specId'],
+                        'supplierId' => $i['supplierId'],
+                    ]);
+                    if (empty($warehouseInfo) || $warehouseInfo['amount'] < $i['amount']) {
+                        $continue = false;
+                        $this->code = 460723;
+                        $this->msg = '库存不足';
+                        break;
+                    }
                 }
+                if ($continue) {
+                    $materialLogModel = new WarehouseLogModel();
+                    $input['type'] = self::ALLOT;
+                    $result = $materialLogModel->addLog($input);
+                    if (is_int($result)) {
+                        $input['id'] = $result;
+                        $approval = ApprovalController::approval('allot', $input);
+                        if ($approval['status']) {
+                            if ($approval['result']) {
+                                $this->msg = '申请提交成功，请等待审批结果';
+                            } else {
+                                $this->code = 460725;
+                                $this->msg = '保存失败，请稍后重试';
+                            }
+                        }
+                    } else {
+                        $this->code = 460724;
+                        $this->msg = $result;
+                    }
+                }
+            }else{
+                $this->code = 460726;
+                $this->msg = '所选时间不能超过当前时间';
             }
         } else {
             $failed = $validator->failed();
@@ -944,8 +964,8 @@ class WarehouseController extends Controller
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型不正确',
-            'time.required' => '请选择消费时间',
-            'time.date_format' => '消费时间格式不正确',
+            'time.required' => '请选择入库时间',
+            'time.date_format' => '入库时间格式不正确',
             'price.required' => '获取总价失败',
             'price.integer' => '总价参数类型不正确',
             'data.required' => '请填写材料具体信息',
@@ -954,156 +974,161 @@ class WarehouseController extends Controller
         $input = $request->only(['projectId', 'time', 'price', 'data', 'remark']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            $rules1 = [
-                'materialId' => 'required|integer',
-                'specId' => 'required|integer',
-                'supplierId' => 'required|integer',
-                'name' => 'required_if:supplierId,0',
-                'phone' => 'required_if:supplierId,0',
-                'address' => 'required_if:supplierId,0',
-                'amount' => 'required|integer',
-                'price' => 'required|numeric',
-                'totalPrice' => 'required|numeric',
-                'payType' => 'required|integer|in:1,2'
-            ];
-            $message1 = [
-                'materialId.required' => '请选择材料',
-                'materialId.integer' => '材料参数类型错误',
-                'specId.required' => '请选择材料规格',
-                'specId.integer' => '材料规格参数类型错误',
-                'supplierId.required' => '请选择供应商',
-                'supplierId.integer' => '供应商参数类型错误',
-                'name.required_if' => '请填写供应商名称',
-                'phone.required_if' => '请填写供应商电话',
-                'address.required_if' => '请填写供应商地址',
-                'amount.required' => '请填写材料数量',
-                'amount.integer' => '材料数量类型错误',
-                'price.required' => '请填写材料价格',
-                'price.numeric' => '材料价格类型错误',
-                'totalPrice.required' => '请填写材料总价',
-                'totalPrice.numeric' => '材料总价类型错误',
-                'payType.required' => '请选择付款方式',
-                'payType.integer' => '付款方式参数类型错误',
-                'payType.in' => '付款方式参数不正确',
-            ];
-            $input1 = $input['data'];
-            $continue = true;
-            foreach ($input1 as $key => $i) {
-                $validator1 = Validator::make($i, $rules1, $message1);
-                if ($validator1->fails()) {
-                    $continue = false;
-                    $failed1 = $validator1->failed();
-                    if (key($failed1) == 'materialId') {
-                        if (key($failed1['materialId']) == 'Required') {
-                            $this->code = 460809;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['materialId']) == 'Integer') {
-                            $this->code = 460810;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'specId') {
-                        if (key($failed1['specId']) == 'Required') {
-                            $this->code = 460811;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['specId']) == 'Integer') {
-                            $this->code = 460812;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'supplierId') {
-                        if (key($failed1['supplierId']) == 'Required') {
-                            $this->code = 460813;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['supplierId']) == 'Integer') {
-                            $this->code = 460814;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'name') {
-                        if (key($failed1['name']) == 'RequiredIf') {
-                            $this->code = 460815;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'phone') {
-                        if (key($failed1['phone']) == 'RequiredIf') {
-                            $this->code = 460816;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'address') {
-                        if (key($failed1['supplierId']) == 'RequiredIf') {
-                            $this->code = 460817;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'amount') {
-                        if (key($failed1['amount']) == 'Required') {
-                            $this->code = 460818;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['amount']) == 'Integer') {
-                            $this->code = 460819;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'price') {
-                        if (key($failed1['price']) == 'Required') {
-                            $this->code = 460820;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['price']) == 'Numeric') {
-                            $this->code = 460821;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'totalPrice') {
-                        if (key($failed1['totalPrice']) == 'Required') {
-                            $this->code = 460822;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['totalPrice']) == 'Numeric') {
-                            $this->code = 460823;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'payType') {
-                        if (key($failed1['payType']) == 'Required') {
-                            $this->code = 460824;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['payType']) == 'Integer') {
-                            $this->code = 460825;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['payType']) == 'In') {
-                            $this->code = 460826;
-                            $this->msg = $validator1->errors()->first();
-                            break;
+            if($input['time'] <= date('Y-m-d')){
+                $rules1 = [
+                    'materialId' => 'required|integer',
+                    'specId' => 'required|integer',
+                    'supplierId' => 'required|integer',
+                    'name' => 'required_if:supplierId,0',
+                    'phone' => 'required_if:supplierId,0',
+                    'address' => 'required_if:supplierId,0',
+                    'amount' => 'required|integer',
+                    'price' => 'required|numeric',
+                    'totalPrice' => 'required|numeric',
+                    'payType' => 'required|integer|in:1,2'
+                ];
+                $message1 = [
+                    'materialId.required' => '请选择材料',
+                    'materialId.integer' => '材料参数类型错误',
+                    'specId.required' => '请选择材料规格',
+                    'specId.integer' => '材料规格参数类型错误',
+                    'supplierId.required' => '请选择供应商',
+                    'supplierId.integer' => '供应商参数类型错误',
+                    'name.required_if' => '请填写供应商名称',
+                    'phone.required_if' => '请填写供应商电话',
+                    'address.required_if' => '请填写供应商地址',
+                    'amount.required' => '请填写材料数量',
+                    'amount.integer' => '材料数量类型错误',
+                    'price.required' => '请填写材料价格',
+                    'price.numeric' => '材料价格类型错误',
+                    'totalPrice.required' => '请填写材料总价',
+                    'totalPrice.numeric' => '材料总价类型错误',
+                    'payType.required' => '请选择付款方式',
+                    'payType.integer' => '付款方式参数类型错误',
+                    'payType.in' => '付款方式参数不正确',
+                ];
+                $input1 = $input['data'];
+                $continue = true;
+                foreach ($input1 as $key => $i) {
+                    $validator1 = Validator::make($i, $rules1, $message1);
+                    if ($validator1->fails()) {
+                        $continue = false;
+                        $failed1 = $validator1->failed();
+                        if (key($failed1) == 'materialId') {
+                            if (key($failed1['materialId']) == 'Required') {
+                                $this->code = 460809;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['materialId']) == 'Integer') {
+                                $this->code = 460810;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'specId') {
+                            if (key($failed1['specId']) == 'Required') {
+                                $this->code = 460811;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['specId']) == 'Integer') {
+                                $this->code = 460812;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'supplierId') {
+                            if (key($failed1['supplierId']) == 'Required') {
+                                $this->code = 460813;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['supplierId']) == 'Integer') {
+                                $this->code = 460814;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'name') {
+                            if (key($failed1['name']) == 'RequiredIf') {
+                                $this->code = 460815;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'phone') {
+                            if (key($failed1['phone']) == 'RequiredIf') {
+                                $this->code = 460816;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'address') {
+                            if (key($failed1['supplierId']) == 'RequiredIf') {
+                                $this->code = 460817;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'amount') {
+                            if (key($failed1['amount']) == 'Required') {
+                                $this->code = 460818;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['amount']) == 'Integer') {
+                                $this->code = 460819;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'price') {
+                            if (key($failed1['price']) == 'Required') {
+                                $this->code = 460820;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['price']) == 'Numeric') {
+                                $this->code = 460821;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'totalPrice') {
+                            if (key($failed1['totalPrice']) == 'Required') {
+                                $this->code = 460822;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['totalPrice']) == 'Numeric') {
+                                $this->code = 460823;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                        } elseif (key($failed1) == 'payType') {
+                            if (key($failed1['payType']) == 'Required') {
+                                $this->code = 460824;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['payType']) == 'Integer') {
+                                $this->code = 460825;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
+                            if (key($failed1['payType']) == 'In') {
+                                $this->code = 460826;
+                                $this->msg = $validator1->errors()->first();
+                                break;
+                            }
                         }
                     }
                 }
-            }
-            if ($continue) {
-                $input['type'] = self::PURCHASE;
-                $warehouseLogModel = new WarehouseLogModel();
-                $result = $warehouseLogModel->purchase($input);
-                if (!$result) {
-                    $this->code = 460827;
-                    $this->msg = "保存失败，请稍后重试";
+                if ($continue) {
+                    $input['type'] = self::PURCHASE;
+                    $warehouseLogModel = new WarehouseLogModel();
+                    $result = $warehouseLogModel->purchase($input);
+                    if (!$result) {
+                        $this->code = 460827;
+                        $this->msg = "保存失败，请稍后重试";
+                    }
                 }
+            }else{
+                $this->code = 460828;
+                $this->msg = "所选时间不能超过当前时间";
             }
         } else {
             $failed = $validator->failed();
@@ -1165,8 +1190,8 @@ class WarehouseController extends Controller
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型不正确',
-            'time.required' => '请选择消费时间',
-            'time.date_format' => '消费时间格式不正确',
+            'time.required' => '请选择入库时间',
+            'time.date_format' => '入库时间格式不正确',
             'price.required' => '获取总价失败',
             'price.integer' => '总价参数类型不正确',
             'data.required' => '请填写材料具体信息',

@@ -8,6 +8,7 @@
 
 namespace App\Http\Model;
 
+use function Composer\Autoload\includeFile;
 use Illuminate\Support\Facades\DB;
 
 class ProjectGroupMembersModel
@@ -82,10 +83,11 @@ class ProjectGroupMembersModel
     {
         try{
             $result = DB::transaction(function () use ($data){
-                $this->update(['id'=>$data['id']],['isDel'=>1]);
                 $info = $this->info(['id'=>$data['id']]);
-                (new ProjectGroupModel())->updateIsLeader(['groupId'=>$info['groupId'],'groupLeader'=>null]);
-
+                if($info['isLeader'] == 1){
+                    (new ProjectGroupModel())->updateIsLeader(['groupId'=>$info['groupId'],'groupLeader'=>null]);
+                }
+                $this->update(['id'=>$data['id']],['isDel'=>1,'isLeader'=>0]);
                 return true;
             });
             if ($result){
@@ -96,5 +98,24 @@ class ProjectGroupMembersModel
         }catch(\Exception $e){
             return false;
         }
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function memberSeparateLists(array $data)
+    {
+        return DB::table($this->table)
+            ->leftJoin('project_group_separate_accounts as pgsa','pgsa.memberId','=',$this->table.'.id')
+            ->leftJoin('employee as e','e.id','=',$this->table.'.employeeId')
+            ->where($this->table.'.projectId',$data['projectId'])
+            ->where(function ($query) use ($data){
+                $query->where('sectionId',$data['sectionId'])->orWhere('sectionId',null);
+            })
+            ->where($this->table.'.groupId',$data['groupId'])
+            ->where($this->table.'.isDel',0)
+            ->select('pgsa.account','pgsa.remark','pgsa.separateTime','pgsa.status','e.name as employeeName','e.jobNumber',$this->table.'.isLeader',$this->table.'.id as memberId',$this->table.'.employeeId')
+            ->get()->toArray();
     }
 }

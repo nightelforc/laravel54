@@ -371,6 +371,7 @@ class WarehouseLogModel
                     ];
                     $materialInfo = $warehouseModel->info($warehouseData);
                     if (empty($materialInfo)) {
+                        $rate = (new SettingModel())->get('saleRate',$data['projectId']);
                         //创建仓库新的材料库存
                         $warehouseData = [
                             'projectId' => $data['projectId'],
@@ -379,12 +380,13 @@ class WarehouseLogModel
                             'supplierId' => $d['supplierId'],
                             'amount' => $d['amount'],
                             'purchasePrice' => $d['price'],
+                            'salePrice' => $d['price']*(1+$rate),
                             'updateTime' => date('Y-m-d H:i:s')
                         ];
                         $warehouseModel->insert($warehouseData);
                     } else {
                         //更新库存
-                        $warehouseModel->update($materialInfo['id'], ['amount' => $d['amount'], 'updateTime' => date('Y-m-d H:i:s')]);
+                        $warehouseModel->update($materialInfo['id'], ['amount' => $d['amount']+$materialInfo['amount'], 'updateTime' => date('Y-m-d H:i:s')]);
                     }
 
                     unset($data['data'][$key]['name']);
@@ -441,7 +443,7 @@ class WarehouseLogModel
                         $warehouseModel->insert($warehouseData);
                     } else {
                         //更新库存
-                        $warehouseModel->update($materialInfo['id'], ['amount' => $d['amount'], 'updateTime' => date('Y-m-d H:i:s')]);
+                        $warehouseModel->update($materialInfo['id'], ['amount' => $d['amount']+$materialInfo['amount'], 'updateTime' => date('Y-m-d H:i:s')]);
                     }
                 }
                 //增加入库记录

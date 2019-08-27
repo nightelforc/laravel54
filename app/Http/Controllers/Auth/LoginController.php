@@ -129,14 +129,14 @@ class LoginController extends Controller
     {
         $rules = [
             'adminId' => 'required|integer',
-            'oldPwd' => 'required',
+//            'oldPwd' => 'required',
             'password' => 'required|alpha_num|between:6,16',
             'confirmPwd' => 'required|alpha_num|between:6,16|same:password',
         ];
         $message = [
             'adminId.required' => '获取用户参数失败',
             'adminId.integer' => '用户参数类型错误',
-            'oldPwd.required' => '请填写原密码',
+//            'oldPwd.required' => '请填写原密码',
             'password.required' => '请输入新密码',
             'password.alpha_num' => '新密码只允许包含字母或数字',
             'password.between' => '新密码长度必须设置为 :min 到 :max 位',
@@ -150,7 +150,7 @@ class LoginController extends Controller
         if ($validator->passes()) {
             $adminModel = new AdminModel();
             //验证原密码
-            $result = $adminModel->login(['id' => $input['adminId'], 'password' => $input['oldPwd']]);
+            $result = $adminModel->login(['id' => $input['adminId']]);
             if ($result != null) {
                 //保存新密码
                 $data = [

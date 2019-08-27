@@ -10,6 +10,7 @@ namespace App\Http\Controllers\Project;
 
 
 use App\Http\Controllers\Controller;
+use App\Http\Model\EmployeeModel;
 use App\Http\Model\ProjectGroupMembersModel;
 use App\Http\Model\ProjectGroupModel;
 use Illuminate\Http\Request;
@@ -228,7 +229,7 @@ class ProjectGroupController extends Controller
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();
             $info = $projectGroupModel->info(['id'=>$input['id']]);
-            $info = $projectGroupModel->checkRepeat(['projectId'=>$info['projectId'],'name'=>$input['name'],'professionId'=>$input['professionId'],$input['id']]);
+            $info = $projectGroupModel->checkRepeat(['projectId'=>$info['projectId'],'name'=>$input['name'],'professionId'=>$input['professionId']],$input['id']);
             if (empty($info)){
                 $projectGroupModel->update($input);
             }else{
@@ -380,6 +381,8 @@ class ProjectGroupController extends Controller
                         $projectGroupMembersModel->update(['id'=>$info['id']],['isDel'=>0]);
                     }
                 }
+                $employeeModel = new EmployeeModel();
+                $employeeModel->update($input['employeeId'],['groupId'=>$input['groupId']]);
             }else{
                 $this->code = 430707;
                 $this->msg = '工人已经属于班组'.$result['name'];
@@ -435,6 +438,11 @@ class ProjectGroupController extends Controller
         if ($validator->passes()) {
             $projectGroupMembersModel = new ProjectGroupMembersModel();
             $projectGroupMembersModel->delMember($input);
+            $info = $projectGroupMembersModel->info(['id'=>$input['id']]);
+            if (!empty($info)){
+                $employeeModel = new EmployeeModel();
+                $employeeModel->update($info['employeeId'],['groupId'=>null]);
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {

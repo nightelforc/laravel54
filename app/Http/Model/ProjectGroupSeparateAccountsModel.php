@@ -38,7 +38,7 @@ class ProjectGroupSeparateAccountsModel
     public function lists(array $data)
     {
         return DB::table($this->table)
-            ->leftJoin('employee as e','e.id','=',$this->table.'.id')
+            ->leftJoin('employee as e','e.id','=',$this->table.'.employeeId')
             ->leftJoin('project_group_members as pgm','pgm.id','=',$this->table.'.memberId')
             ->where($this->table.'.projectId',$data['projectId'])
             ->where('sectionId',$data['sectionId'])

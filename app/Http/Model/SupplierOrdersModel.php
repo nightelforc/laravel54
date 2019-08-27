@@ -140,5 +140,15 @@ class SupplierOrdersModel
         return DB::table($this->table)->where('supplierId',$supplierId)->count();
     }
 
+    /**
+     * @param $data
+     * @return array
+     */
+    public function info($data)
+    {
+        $result = DB::table($this->table)->where($data)->first();
+        return empty($result) ? [] : get_object_vars($result);
+    }
+
 
 }

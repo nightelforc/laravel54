@@ -510,56 +510,56 @@ class SupplierController extends Controller
                     if (key($failed) == 'materialId') {
                         if (key($failed['materialId']) == 'Required') {
                             $this->code = 440612;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                             break;
                         }
                         if (key($failed['materialId']) == 'Integer') {
                             $this->code = 440613;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                             break;
                         }
                     } elseif (key($failed) == 'specId') {
                         if (key($failed['specId']) == 'Required') {
                             $this->code = 440614;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                             break;
                         }
                         if (key($failed['specId']) == 'Integer') {
                             $this->code = 440615;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                             break;
                         }
                     } elseif (key($failed) == 'amount') {
                         if (key($failed['amount']) == 'Required') {
                             $this->code = 440616;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                             break;
                         }
                         if (key($failed['amount']) == 'Integer') {
                             $this->code = 440617;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                             break;
                         }
                     } elseif (key($failed) == 'price') {
                         if (key($failed['price']) == 'Required') {
                             $this->code = 440618;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                             break;
                         }
                         if (key($failed['price']) == 'Numeric') {
                             $this->code = 440619;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                             break;
                         }
                     } elseif (key($failed) == 'totalPrice') {
                         if (key($failed['totalPrice']) == 'Required') {
                             $this->code = 440620;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                             break;
                         }
                         if (key($failed['totalPrice']) == 'Numeric') {
                             $this->code = 440621;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                             break;
                         }
                     }
@@ -661,13 +661,11 @@ class SupplierController extends Controller
         $input = $request->only(['orderIds', 'supplierId', 'account', 'repayTime', 'remark']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            $orderIds = $input['orderIds'];
-            unset($input['orderIds']);
             $supplierRepaymentModel = new SupplierRepaymentModel();
-            $supplierRepaymentModel->insert($input);
-            $supplierOrdersModel = new SupplierOrdersModel();
-            foreach ($orderIds as $orderId) {
-                $supplierOrdersModel->update($orderId, ['isPay' => 1]);
+            $result = $supplierRepaymentModel->batchRepay($input);
+            if (!$result){
+                $this->code = 440709;
+                $this->msg = '所选订单中存在已还款订单，请刷新后重新选择';
             }
         } else {
             $failed = $validator->failed();

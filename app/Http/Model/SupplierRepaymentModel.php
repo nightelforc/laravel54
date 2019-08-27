@@ -75,4 +75,28 @@ class SupplierRepaymentModel
             ->count();
     }
 
+    /**
+     * @param array $input
+     * @return bool
+     */
+    public function batchRepay(array $input)
+    {
+        $orderIds = $input['orderIds'];
+        unset($input['orderIds']);
+        $supplierOrdersModel = new SupplierOrdersModel();
+
+        foreach ($orderIds as $orderId) {
+            $info = $supplierOrdersModel->info(['id'=>$orderId]);
+            if ($info['isPay'] == 1){
+                return false;
+            }
+        }
+
+        $this->insert($input);
+        foreach ($orderIds as $orderId) {
+            $supplierOrdersModel->update($orderId, ['isPay' => 1]);
+        }
+        return true;
+    }
+
 }

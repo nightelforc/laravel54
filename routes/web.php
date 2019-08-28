@@ -72,6 +72,7 @@ Route::group([
         'prefix'=>'company',
     ],function(){
         //-------------------工人管理-------------------//
+        Route::post('/employee/lists', 'EmployeeController@lists');
         Route::post('/employee/add', 'EmployeeController@add');
         Route::post('/employee/edit', 'EmployeeController@edit');
         Route::post('/employee/dayValueLists', 'EmployeeController@dayValueLists');

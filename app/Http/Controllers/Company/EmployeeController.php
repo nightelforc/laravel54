@@ -22,6 +22,105 @@ class EmployeeController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
+    public function lists(Request $request)
+    {
+        $rules = [
+            'projectId' => 'required|integer',
+            'professionId' => 'nullable|integer',
+            'status' => 'nullable|integer',
+            'draw' => 'required|integer',
+            'length' => 'required|integer|in:10,20,50',
+            'start' => 'required|integer|min:0',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型错误',
+            'professionId.integer' => '工种参数类型错误',
+            'status.integer' => '工作状态参数类型错误',
+            'length.required' => '获取记录条数失败',
+            'length.integer' => '记录条数参数类型错误',
+            'length.in' => '记录条数参数值不正确',
+            'start.required' => '获取起始记录位置失败',
+            'start.integer' => '页码参数类型错误',
+            'start.min' => '页码参数值不小于:min',
+        ];
+        $input = $request->all();
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $employeeModel = new EmployeeModel();
+            $lists = $employeeModel->lists($input,[1,2,3,4]);
+            $countLists = $employeeModel->countLists($input,[1,2,3,4]);
+            $this->data = [
+                "draw" => $input['draw'],
+                "data" => $lists,
+                "recordsFiltered" => $countLists,
+                "recordsTotal" => $countLists,
+            ];
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 310101;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 310102;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'professionId') {
+                if (key($failed['professionId']) == 'Integer') {
+                    $this->code = 310103;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'status') {
+                if (key($failed['status']) == 'Integer') {
+                    $this->code = 310104;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
+                    $this->code = 310105;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['draw']) == 'Integer') {
+                    $this->code = 410106;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'length') {
+                if (key($failed['length']) == 'Required') {
+                    $this->code = 310107;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'Integer') {
+                    $this->code = 310108;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'In') {
+                    $this->code = 310109;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Required') {
+                    $this->code = 310110;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Integer') {
+                    $this->code = 310111;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Min') {
+                    $this->code = 310112;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function add(Request $request){
         $rules = [
             'projectId' => 'required|integer',
@@ -146,7 +245,7 @@ class EmployeeController extends Controller
             'name' => 'required',
             'idcard'=>'required|size:18',
             'jobNumber' => 'required',
-            'gender'=>'nullable|integer|in:1,2',
+            'gender'=>'nullable|integer|in:0,1,2',
             'age'=>'nullable|integer',
             'professionId' => 'required|integer',
         ];
@@ -186,7 +285,9 @@ class EmployeeController extends Controller
             $employeeModel = new EmployeeModel();
             $id = $input['id'];
             $info = $employeeModel->info(['id'=>$id]);
-            unlink('.'.$info['image']);
+            if (!empty($info['image']) &&  fileExists('.'.$info['image'])){
+                unlink('.'.$info['image']);
+            }
             $employeeModel->update($id,$input);
         } else {
             $failed = $validator->failed();

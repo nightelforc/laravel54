@@ -17,9 +17,10 @@ class EmployeeModel extends Model
 
     /**
      * @param array $input
+     * @param array $status
      * @return mixed
      */
-    public function lists(array $input)
+    public function lists(array $input, $status = [1, 3, 4])
     {
         $limit = config('yucheng.limit');
         $start = is_null($input['start']) ? 0 : $input['start'];
@@ -30,8 +31,8 @@ class EmployeeModel extends Model
 
         return DB::table($this->table)
             ->leftJoin('profession as p', 'p.id', '=', $this->table . '.professionId')
-            ->leftJoin('project','project.id','=',$this->table.'.projectId')
-            ->where(function ($query) use ($input) {
+            ->leftJoin('project', 'project.id', '=', $this->table . '.projectId')
+            ->where(function ($query) use ($input, $status) {
                 $query->where('isFinish', 0);
                 if (isset($input['projectId']) && !empty($input['projectId'])) {
                     $query->where('projectId', $input['projectId']);
@@ -42,7 +43,7 @@ class EmployeeModel extends Model
                 if (isset($input['status']) && !is_null($input['status'])) {
                     $query->where($this->table . '.status', $input['status']);
                 } else {
-                    $query->whereIn($this->table . '.status', [1, 3, 4]);
+                    $query->whereIn($this->table . '.status', $status);
                 }
                 if (isset($input['search']) && !is_null($input['search'])) {
                     $query->where(function ($query1) use ($input) {
@@ -51,7 +52,7 @@ class EmployeeModel extends Model
                 }
             })
             ->offset($start)->limit($limit)
-            ->select($this->table . '.*', 'p.name as professionName','project.name as projectName')
+            ->select($this->table . '.*', 'p.name as professionName', 'project.name as projectName')
             ->get()->toArray();
     }
 
@@ -59,12 +60,12 @@ class EmployeeModel extends Model
      * @param array $input
      * @return mixed
      */
-    public function countLists(array $input)
+    public function countLists(array $input, $status = [1, 3, 4])
     {
         return DB::table($this->table)
             ->leftJoin('profession as p', 'p.id', '=', $this->table . '.professionId')
-            ->leftJoin('project','project.id','=',$this->table.'.projectId')
-            ->where(function ($query) use ($input) {
+            ->leftJoin('project', 'project.id', '=', $this->table . '.projectId')
+            ->where(function ($query) use ($input, $status) {
                 $query->where('isFinish', 0);
                 if (isset($input['projectId']) && !empty($input['projectId'])) {
                     $query->where('projectId', $input['projectId']);
@@ -75,7 +76,7 @@ class EmployeeModel extends Model
                 if (isset($input['status']) && !is_null($input['status'])) {
                     $query->where($this->table . '.status', $input['status']);
                 } else {
-                    $query->whereIn($this->table . '.status', [1, 3, 4]);
+                    $query->whereIn($this->table . '.status', $status);
                 }
                 if (isset($input['search']) && !is_null($input['search'])) {
                     $query->where(function ($query1) use ($input) {
@@ -106,7 +107,8 @@ class EmployeeModel extends Model
      * @param array $data
      * @return mixed
      */
-    public function update($pk,array $data){
+    public function update($pk, array $data)
+    {
         return DB::table($this->table)->where('id', $pk)->update($data);
     }
 
@@ -116,7 +118,7 @@ class EmployeeModel extends Model
      */
     public function updateStatus($data)
     {
-        return $this->update($data['id'],['status' => $data['status']]);
+        return $this->update($data['id'], ['status' => $data['status']]);
     }
 
     /**
@@ -172,7 +174,7 @@ class EmployeeModel extends Model
         $wageList = $this->datePeriod($findYear['startTime'], $findYear['endTime'], '1 month', 'Y-m');
         $endTime = (new \DateTime($findYear['endTime']))->format('Y-m');
         end($wageList);
-        if (key($wageList) != $endTime){
+        if (key($wageList) != $endTime) {
             $wageList[$endTime] = '';
         }
         foreach ($wageList as $key => $w) {
@@ -230,7 +232,7 @@ class EmployeeModel extends Model
      */
     public function batchUpdateStatus($pk, $data, $approvalResult)
     {
-        if ($approvalResult != 1){
+        if ($approvalResult != 1) {
             return true;
         }
         $employeeExperienceModel = new EmployeeExperienceModel();
@@ -254,7 +256,7 @@ class EmployeeModel extends Model
      */
     public function batchUpdateProject($pk, $data, $approvalResult)
     {
-        if ($approvalResult != 1){
+        if ($approvalResult != 1) {
             return true;
         }
         $employeeExperienceModel = new EmployeeExperienceModel();
@@ -282,16 +284,23 @@ class EmployeeModel extends Model
      * @param array $data
      * @return mixed
      */
-    public function attendanceEmployee(array $data){
-        return DB::table($this->table)
-            ->leftJoin('profession as p','p.id','=',$this->table.'.professionId')
-            ->leftJoin('project','project.id','=',$this->table.'.projectId')
-            ->where(function ($query) use ($data){
+    public function attendanceEmployee(array $data)
+    {
+        $limit = config('yucheng.limit');
+        $start = is_null($data['start']) ? 0 : $data['start'];
+
+        if (isset($data['length']) && !is_null($data['length'])) {
+            $limit = $data['length'];
+        }
+        $result = DB::table($this->table)
+            ->leftJoin('profession as p', 'p.id', '=', $this->table . '.professionId')
+            ->leftJoin('project', 'project.id', '=', $this->table . '.projectId')
+            ->where(function ($query) use ($data) {
                 $query->where('hasAttendance', 1)->where('isFinish', 0);
-                if (isset($data['projectId']) && !empty($data['projectId'])){
+                if (isset($data['projectId']) && !empty($data['projectId'])) {
                     $query->where('projectId', $data['projectId']);
                 }
-                if (isset($data['professionId']) && !empty($data['professionId'])){
+                if (isset($data['professionId']) && !empty($data['professionId'])) {
                     $query->where('professionId', $data['professionId']);
                 }
                 if (isset($data['search']) && !is_null($data['search'])) {
@@ -301,8 +310,13 @@ class EmployeeModel extends Model
                 }
             })
             ->orderBy('status', 'asc')
-            ->select($this->table.'.*','p.name as professionName','project.name as projectName')
-            ->get()->toArray();
+            ->select($this->table . '.*', 'p.name as professionName', 'project.name as projectName');
+
+            if (isset($data['draw'])) {
+                $result->offset($start)->limit($limit);
+            }
+            $result->get()->toArray();
+        return $result;
     }
 
     /**
@@ -312,12 +326,12 @@ class EmployeeModel extends Model
     private function countAttendanceEmployee(array $data)
     {
         return DB::table($this->table)
-            ->where(function ($query) use ($data){
+            ->where(function ($query) use ($data) {
                 $query->where('hasAttendance', 1)->where('isFinish', 0);
-                if (isset($data['projectId']) && !empty($data['projectId'])){
+                if (isset($data['projectId']) && !empty($data['projectId'])) {
                     $query->where('projectId', $data['projectId']);
                 }
-                if (isset($data['professionId']) && !empty($data['professionId'])){
+                if (isset($data['professionId']) && !empty($data['professionId'])) {
                     $query->where('professionId', $data['professionId']);
                 }
                 if (isset($data['search']) && !is_null($data['search'])) {
@@ -375,8 +389,10 @@ class EmployeeModel extends Model
     public function searchEmployee(array $data)
     {
         return DB::table($this->table)
-            ->where('projectId', $data['projectId'])
             ->where(function ($query) use ($data) {
+                if (isset($data['projectId']) && !empty($data['projectId'])) {
+                    $query->where('projectId', $data['projectId']);
+                }
                 $query->where('name', 'like', '%' . $data['search'] . '%')->orWhere('jobNumber', 'like', '%' . $data['search'] . '%');
             })
             ->whereIn('status', [1, 4])
@@ -388,7 +404,8 @@ class EmployeeModel extends Model
      * @param array $data
      * @return mixed
      */
-    public function dayValueLists(array $data){
+    public function dayValueLists(array $data)
+    {
         $lists = $this->attendanceEmployee($data);
         $employeeAttendanceModel = new EmployeeAttendanceModel();
 
@@ -400,9 +417,9 @@ class EmployeeModel extends Model
             $findYear = get_object_vars($findYear);
         }
 
-        foreach ($lists as $key => $l){
-            $attendance = $employeeAttendanceModel->getAttendancesSum($l->id,$findYear['startTime'],$findYear['endTime']);
-            $lists[$key]->attendance =$attendance->attendance;
+        foreach ($lists as $key => $l) {
+            $attendance = $employeeAttendanceModel->getAttendancesSum($l->id, $findYear['startTime'], $findYear['endTime']);
+            $lists[$key]->attendance = $attendance->attendance;
         }
 
         return $lists;
@@ -426,9 +443,9 @@ class EmployeeModel extends Model
      */
     public function checkJobNumber($param)
     {
-        return  DB::table($this->table)
-            ->where(function ($query) use ($param){
-                $query->where('jobNumber',$param)->where('isFinish', 0);
+        return DB::table($this->table)
+            ->where(function ($query) use ($param) {
+                $query->where('jobNumber', $param)->where('isFinish', 0);
             })
             ->get()->toArray();
     }

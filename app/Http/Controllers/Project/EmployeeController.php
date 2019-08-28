@@ -211,15 +211,29 @@ class EmployeeController extends Controller
         $input = $request->only(['ids', 'status', self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            //审批流程
-            $approval = ApprovalController::approval('batchChangeStatus', $input);
-            if ($approval['status']) {
-                if ($approval['result']) {
-                    $this->msg = '申请提交成功，请等待审批结果';
-                } else {
-                    $this->code = 410306;
-                    $this->msg = '保存失败，请稍后重试';
+            $employeeModel = new EmployeeModel();
+            //验证所有选中的工人是否是在岗状态
+            $option = true;
+            foreach ($input['ids'] as $id) {
+                $info = $employeeModel->info(['id' => $id]);
+                if ($info['status'] != 1 && $info['status'] != 2) {
+                    $option = false;
                 }
+            }
+            if ($option){
+                //审批流程
+                $approval = ApprovalController::approval('batchChangeStatus', $input);
+                if ($approval['status']) {
+                    if ($approval['result']) {
+                        $this->msg = '申请提交成功，请等待审批结果';
+                    } else {
+                        $this->code = 410306;
+                        $this->msg = '保存失败，请稍后重试';
+                    }
+                }
+            }else{
+                $this->code = 410307;
+                $this->msg = '所选工人中有离职或请假状态的工人';
             }
         } else {
             $failed = $validator->failed();
@@ -277,7 +291,7 @@ class EmployeeController extends Controller
             $option = true;
             foreach ($input['ids'] as $id) {
                 $info = $employeeModel->info(['id' => $id]);
-                if ($info['status'] != 1) {
+                if ($info['status'] != 1 && $info['status'] != 2) {
                     $option = false;
                 }
             }
@@ -292,9 +306,9 @@ class EmployeeController extends Controller
                         $this->msg = '保存失败，请稍后重试';
                     }
                 }
-            } else {
-                $this->code = 410405;
-                $this->msg = '请选择在岗员工';
+            } else{
+                $this->code = 410407;
+                $this->msg = '所选工人中有离职或请假状态的工人';
             }
         } else {
             $failed = $validator->failed();

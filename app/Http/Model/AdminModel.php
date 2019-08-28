@@ -38,7 +38,7 @@ class AdminModel
      */
     public function changePwd($data){
         $data = $this->encrypt($data);
-        return DB::table($this->table)->where(['id'=>$data['id']])->update(['password'=>$data['password']]);
+        return DB::table($this->table)->where('id',$data['id'])->update(['password'=>$data['password']]);
     }
 
     /**
@@ -48,9 +48,19 @@ class AdminModel
      * @return array
      */
     public function info($where=[]){
+        $id = '';
+        if(isset($where['id'])){
+            $id = $where['id'];
+            unset($where['id']);
+        }
         $result = DB::table($this->table)
             ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
             ->where($where)
+            ->where(function ($query) use ($id){
+                if (!empty($id)){
+                    $query->where($this->table.'.id',$id);
+                }
+            })
             ->select([$this->table.'.id','username',$this->table.'.name','projectId','phone','lastLoginTime',$this->table.'.status','p.name as projectName'])
             ->first();
         return empty($result) ? [] : get_object_vars($result);

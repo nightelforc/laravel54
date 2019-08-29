@@ -803,7 +803,7 @@ class ProjectController extends Controller
                     $this->code = 421604;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'limit') {
+            } elseif (key($failed) == 'length') {
                 if (key($failed['length']) == 'Required') {
                     $this->code = 421605;
                     $this->msg = $validator->errors()->first();

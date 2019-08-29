@@ -66,7 +66,9 @@ class EmployeeLoanModel
         return DB::table($this->table)
             ->leftJoin('employee as e','e.id','=',$this->table.'.employeeId')
             ->where(function ($query) use ($input) {
-                $query->where($this->table.'.projectId', $input['projectId']);
+                if (isset($input['projectId']) && !empty($input['projectId'])){
+                    $query->where($this->table.'.projectId', $input['projectId']);
+                }
                 if (isset($input['startTime']) && !is_null($input['startTime'])){
                     $query->where('loanTime','>=',$input['startTime'].' 00:00:00');
                 }
@@ -94,6 +96,7 @@ class EmployeeLoanModel
     public function countLists(array $input)
     {
         return DB::table($this->table)
+            ->leftJoin('employee as e','e.id','=',$this->table.'.employeeId')
             ->where(function ($query) use ($input) {
                 $query->where($this->table.'.projectId', $input['projectId']);
                 if (isset($input['startTime']) && !is_null($input['startTime'])){

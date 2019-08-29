@@ -52,8 +52,8 @@ class FinanceController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeModel = new EmployeeModel();
-            $lists = $employeeModel->lists($input);
-            $countLists = $employeeModel->countLists($input);
+            $lists = $employeeModel->lists($input,$employeeModel->employeeStatus);
+            $countLists = $employeeModel->countLists($input,$employeeModel->employeeStatus);
             foreach ($lists as $key => $l) {
                 $wages = $employeeModel->wages($l->id);
 //                $wagesTotal = [
@@ -355,7 +355,7 @@ class FinanceController extends Controller
             'projectId' => 'required|integer',
             'startTime' => 'nullable|date_format:Y-m-d',
             'endTime' => 'nullable|date_format:Y-m-d',
-            'status' => 'nullable|integer|in:0,1',
+            'status' => 'nullable|integer|in:0,1,2',
             'draw' => 'required|integer',
             'length' => 'required|integer|in:10,20,50',
             'start' => 'required|integer|min:0',
@@ -365,8 +365,8 @@ class FinanceController extends Controller
             'projectId.integer' => '项目参数类型不正确',
             'startTime.date_format' => '日期格式不正确',
             'endTime.date_format' => '日期格式不正确',
-            'status.integer' => '付款状态参数类型错误',
-            'status.in' => '付款状态参数值不正确',
+            'status.integer' => '审批状态参数类型错误',
+            'status.in' => '审批状态参数值不正确',
             'length.required' => '获取记录条数失败',
             'length.integer' => '记录条数参数类型错误',
             'length.in' => '记录条数参数值不正确',

@@ -24,7 +24,7 @@ Route::group([
 });
 
 Route::group([
-    'middleware'=>'apiAuth',
+//    'middleware'=>'apiAuth',
 ],function(){
     //登录、审批、工作流等
     Route::group([
@@ -34,13 +34,16 @@ Route::group([
         Route::post('/auth/changePwd', 'LoginController@changePwd');
         //-------------------管理员管理-------------------//
         Route::post('/admin/lists', 'AdminController@lists');
+        Route::post('/admin/selectLists', 'AdminController@selectLists');
         Route::post('/admin/add', 'AdminController@add');
         Route::post('/admin/info', 'AdminController@info');
         Route::post('/admin/edit', 'AdminController@edit');
         Route::post('/admin/editStatus', 'AdminController@editStatus');
+        Route::post('/admin/setRole', 'AdminController@setRole');
         Route::post('/admin/setPermission', 'AdminController@setPermission');
         //-------------------角色管理-------------------//
         Route::post('/role/lists', 'RoleController@lists');
+        Route::post('/role/selectLists', 'RoleController@selectLists');
         Route::post('/role/add', 'RoleController@add');
         Route::post('/role/info', 'RoleController@info');
         Route::post('/role/edit', 'RoleController@edit');

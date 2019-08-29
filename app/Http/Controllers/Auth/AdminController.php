@@ -28,7 +28,7 @@ class AdminController extends Controller
         $rules = [
             'projectId' => 'nullable|integer',
             'length' => 'nullable|integer|in:10,20,50',
-            'length' => 'nullable|integer|min:1',
+            'start' => 'nullable|integer|min:0',
         ];
         $message = [
             'projectId.integer' => '项目参数类型错误',
@@ -349,6 +349,53 @@ class AdminController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
+    public function setRole(Request $request){
+        $rules = [
+            'adminId' => 'required|integer',
+            'roleId' => 'required|integer',
+        ];
+        $message = [
+            'adminId.required' => '获取管理员参数失败',
+            'adminId.integer' => '管理员参数类型错误',
+            'roleId.required' => '请选择角色',
+            'roleId.integer' => '角色参数类型错误',
+        ];
+        $input = $request->only(['adminId','roleId']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $adminRoleModel = new AdminRoleModel();
+            $adminRoleModel->delete(['adminId'=>$input['adminId']]);
+            $result = $adminRoleModel->insert($input);
+            $this->msg = '成功设置 '.$result.' 条功能的权限';
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'adminId') {
+                if (key($failed['adminId']) == 'Required') {
+                    $this->code = 120601;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['adminId']) == 'Integer') {
+                    $this->code = 120602;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'roleId') {
+                if (key($failed['roleId']) == 'Required') {
+                    $this->code = 120603;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['roleId']) == 'Integer') {
+                    $this->code = 120604;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function setPermission(Request $request){
         $rules = [
             'adminId' => 'required|integer',
@@ -369,16 +416,49 @@ class AdminController extends Controller
             $failed = $validator->failed();
             if (key($failed) == 'adminId') {
                 if (key($failed['adminId']) == 'Required') {
-                    $this->code = 120601;
+                    $this->code = 120701;
                     $this->msg = $validator->errors()->first();
                 }
                 if (key($failed['adminId']) == 'Integer') {
-                    $this->code = 120602;
+                    $this->code = 120702;
                     $this->msg = $validator->errors()->first();
                 }
             }elseif (key($failed) == 'permissions') {
                 if (key($failed['permissions']) == 'array') {
-                    $this->code = 120603;
+                    $this->code = 120703;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function selectLists(Request $request){
+        $rules = [
+            'projectId' => 'required|integer',
+        ];
+        $message = [
+            'projectId.required' => '获取管理员参数失败',
+            'projectId.integer' => '管理员参数类型错误',
+        ];
+        $input = $request->only(['projectId']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $adminModel = new AdminModel();
+            $this->data = $adminModel->selectLists($input);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 120801;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 120802;
                     $this->msg = $validator->errors()->first();
                 }
             }

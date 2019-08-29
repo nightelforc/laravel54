@@ -339,13 +339,13 @@ class MaterialController extends Controller
         $rules = [
             'materialId' => 'required|integer',
             'spec' => 'required',
-            'brand' => 'required',
+            'brand' => 'nullable',
         ];
         $message = [
             'materialId.required' => '获取材料参数失败',
             'materialId.integer' => '材料参数类型错误',
             'spec.required' => '请填写规格',
-            'brand.integer' => '请填写品牌',
+            'brand.required' => '请填写品牌',
         ];
         $input = $request->only(['materialId','spec','brand']);
         $validator = Validator::make($input, $rules, $message);

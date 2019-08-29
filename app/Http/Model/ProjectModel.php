@@ -86,6 +86,10 @@ class ProjectModel
     }
 
 
+    /**
+     * @param array $data
+     * @return mixed
+     */
     public function countLists(array $data)
     {
         return DB::table($this->table)

@@ -16,9 +16,36 @@ class RoleModel
     private $table = 'role';
 
     /**
+     * @param array $input
      * @return mixed
      */
-    public function lists(){
+    public function lists(array $input){
+        $limit = config('yucheng.limit');
+        $start = is_null($input['start']) ? 0 : $input['start'];
+
+        if (isset($input['length']) && !is_null($input['length'])) {
+            $limit = $input['length'];
+        }
+
+        return DB::table($this->table)
+            ->offset($start)->limit($limit)
+            ->select($this->table.'.*')
+            ->get()->toArray();
+    }
+
+    /**
+     * @param array $input
+     * @return mixed
+     */
+    public function countLists(array $input)
+    {
+        return DB::table($this->table)->count();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function selectLists(){
         return DB::table($this->table)->get()->toArray();
     }
 
@@ -60,13 +87,11 @@ class RoleModel
         try{
             DB::transaction(function () use ($data) {
                 DB::table($this->table)->where($data)->delete();
-                (new RolePermissionModel())->delete($data);
+                (new RolePermissionModel())->delete(['roleId'=>$data['id']]);
             });
             return true;
         }catch(\Exception $e){
             return false;
         }
     }
-
-
 }

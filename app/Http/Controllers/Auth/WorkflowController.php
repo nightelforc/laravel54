@@ -204,35 +204,26 @@ class WorkflowController extends Controller
     public function nodeLists(Request $request)
     {
         $rules = [
-            'projectId' => 'required|integer',
             'workflowId' => 'required|integer',
         ];
         $message = [
-            'projectId.required' => '获取项目参数失败',
-            'projectId.integer' => '项目参数类型错误',
             'workflowId.required' => '获取审批参数失败',
             'workflowId.integer' => '审批参数类型错误',
         ];
-        $input = $request->only(['projectId', 'workflowId']);
+        $input = $request->only(['search', 'workflowId']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $workflowNodeModel = new WorkflowNodeModel();
             $this->data = $workflowNodeModel->showLists($input);
         } else {
             $failed = $validator->failed();
-            if (key($failed) == 'id') {
-                if (key($failed['id']) == 'Required') {
+            if (key($failed) == 'workflowId') {
+                if (key($failed['workflowId']) == 'Required') {
                     $this->code = 150501;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['id']) == 'Integer') {
+                if (key($failed['workflowId']) == 'Integer') {
                     $this->code = 150502;
-                    $this->msg = $validator->errors()->first();
-                }
-            }
-            if (key($failed) == 'name') {
-                if (key($failed['name']) == 'Required') {
-                    $this->code = 150503;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -266,9 +257,70 @@ class WorkflowController extends Controller
             'order.integer' => '审批节点参数类型错误',
             'order.min' => '审批节点参数数据不正确',
         ];
-        $input = $request->only(['projectId', 'workflowId', 'handler', 'order']);
-        $validator = Validator::make($input, $rules, $message);
-        if ($validator->passes()) {
+        $input = $request->only(['data']);
+        $continue = true;
+        foreach ($input['data'] as $d){
+            $validator = Validator::make($d, $rules, $message);
+            if ($validator->fails()) {
+                $continue = false;
+                $failed = $validator->failed();
+                if (key($failed) == 'projectId') {
+                    if (key($failed['projectId']) == 'Required') {
+                        $this->code = 150601;
+                        $this->msg = $validator->errors()->first();
+                        break;
+                    }
+                    if (key($failed['projectId']) == 'Integer') {
+                        $this->code = 150602;
+                        $this->msg = $validator->errors()->first();
+                        break;
+                    }
+                }
+                if (key($failed) == 'workflowId') {
+                    if (key($failed['workflowId']) == 'Required') {
+                        $this->code = 150603;
+                        $this->msg = $validator->errors()->first();
+                        break;
+                    }
+                    if (key($failed['workflowId']) == 'Integer') {
+                        $this->code = 150604;
+                        $this->msg = $validator->errors()->first();
+                        break;
+                    }
+                }
+                if (key($failed) == 'handler') {
+                    if (key($failed['handler']) == 'Required') {
+                        $this->code = 150605;
+                        $this->msg = $validator->errors()->first();
+                        break;
+                    }
+                    if (key($failed['handler']) == 'Integer') {
+                        $this->code = 150606;
+                        $this->msg = $validator->errors()->first();
+                        break;
+                    }
+                }
+                if (key($failed) == 'order') {
+                    if (key($failed['order']) == 'Required') {
+                        $this->code = 150607;
+                        $this->msg = $validator->errors()->first();
+                        break;
+                    }
+                    if (key($failed['order']) == 'Integer') {
+                        $this->code = 150608;
+                        $this->msg = $validator->errors()->first();
+                        break;
+                    }
+                    if (key($failed['order']) == 'Min') {
+                        $this->code = 150609;
+                        $this->msg = $validator->errors()->first();
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ($continue) {
             $workflowNodeModel = new WorkflowNodeModel();
             //检查审批人是否已经存在
             $checkNodeExist = $workflowNodeModel->checkNodeExist($input);
@@ -289,54 +341,7 @@ class WorkflowController extends Controller
                 $this->code = 150610;
                 $this->msg = '当前审批流程下，已存在此审批人，请重新选择审批人';
             }
-        } else {
-            $failed = $validator->failed();
-            if (key($failed) == 'projectId') {
-                if (key($failed['projectId']) == 'Required') {
-                    $this->code = 150601;
-                    $this->msg = $validator->errors()->first();
-                }
-                if (key($failed['projectId']) == 'Integer') {
-                    $this->code = 150602;
-                    $this->msg = $validator->errors()->first();
-                }
-            }
-            if (key($failed) == 'workflowId') {
-                if (key($failed['workflowId']) == 'Required') {
-                    $this->code = 150603;
-                    $this->msg = $validator->errors()->first();
-                }
-                if (key($failed['workflowId']) == 'Integer') {
-                    $this->code = 150604;
-                    $this->msg = $validator->errors()->first();
-                }
-            }
-            if (key($failed) == 'handler') {
-                if (key($failed['handler']) == 'Required') {
-                    $this->code = 150605;
-                    $this->msg = $validator->errors()->first();
-                }
-                if (key($failed['handler']) == 'Integer') {
-                    $this->code = 150606;
-                    $this->msg = $validator->errors()->first();
-                }
-            }
-            if (key($failed) == 'order') {
-                if (key($failed['order']) == 'Required') {
-                    $this->code = 150607;
-                    $this->msg = $validator->errors()->first();
-                }
-                if (key($failed['order']) == 'Integer') {
-                    $this->code = 150608;
-                    $this->msg = $validator->errors()->first();
-                }
-                if (key($failed['order']) == 'Min') {
-                    $this->code = 150609;
-                    $this->msg = $validator->errors()->first();
-                }
-            }
         }
-
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
 

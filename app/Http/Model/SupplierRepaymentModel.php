@@ -35,8 +35,8 @@ class SupplierRepaymentModel
         $limit = config('yucheng.limit');
         $start = is_null($data['start']) ? 0 : $data['start'];
 
-        if (isset($input['limit']) && !is_null($data['limit'])) {
-            $limit = $data['limit'];
+        if (isset($input['length']) && !is_null($data['length'])) {
+            $limit = $data['length'];
         }
 
         if (empty($data['month'])){

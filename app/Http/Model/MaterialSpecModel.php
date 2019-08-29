@@ -24,8 +24,8 @@ class MaterialSpecModel
         $limit = config('yucheng.limit');
         $start = is_null($data['start']) ? 0 : $data['start'];
 
-        if (isset($data['limit']) && !is_null($data['limit'])) {
-            $limit = $data['limit'];
+        if (isset($data['length']) && !is_null($data['length'])) {
+            $limit = $data['length'];
         }
 
         return DB::table($this->table)

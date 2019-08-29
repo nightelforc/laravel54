@@ -18,9 +18,80 @@ use Illuminate\Support\Facades\Validator;
 class RoleController extends Controller
 {
     /**
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function lists()
+    public function lists(Request $request)
+    {
+        $rules = [
+            'draw' => 'required|integer',
+            'length' => 'required|integer|in:10,20,50',
+            'start' => 'required|integer|min:0',
+        ];
+        $message = [
+            'length.integer' => '记录条数参数类型错误',
+            'length.in' => '记录条数参数值不正确',
+            'start.integer' => '页码参数类型错误',
+            'start.min' => '页码参数值不小于:min',
+        ];
+        $input = $request->all();
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $roleModel = new RoleModel();
+            $lists = $roleModel->lists($input);
+            $countLists = $roleModel->countLists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>$countLists,
+                "recordsTotal"=>$countLists,
+            ];
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
+                    $this->code = 130701;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['draw']) == 'Integer') {
+                    $this->code = 130702;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'length') {
+                if (key($failed['length']) == 'Required') {
+                    $this->code = 130703;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'Integer') {
+                    $this->code = 130704;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'In') {
+                    $this->code = 130705;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Required') {
+                    $this->code = 130706;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Integer') {
+                    $this->code = 130707;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Min') {
+                    $this->code = 130708;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @return \Illuminate\Http\Response
+     */
+    public function selectLists()
     {
         $roleModel = new RoleModel();
         $this->data = $roleModel->lists();
@@ -36,11 +107,11 @@ class RoleController extends Controller
     {
         $rules = [
             'name' => 'required',
-            'code' => 'required',
+//            'code' => 'required',
         ];
         $message = [
             'name.required' => '请填写角色名称',
-            'code.required' => '请填写角色识别码',
+//            'code.required' => '请填写角色识别码',
         ];
         $input = $request->only(['name', 'code', 'remark']);
         $validator = Validator::make($input, $rules, $message);
@@ -107,13 +178,13 @@ class RoleController extends Controller
         $rules = [
             'id' => 'required|integer',
             'name' => 'required',
-            'code' => 'required',
+//            'code' => 'required',
         ];
         $message = [
             'id.required' => '获取角色参数失败',
             'id.integer' => '角色参数类型错误',
             'name.required' => '请填写角色名称',
-            'code.required' => '请填写角色识别码',
+//            'code.required' => '请填写角色识别码',
         ];
         $input = $request->only(['id', 'name', 'code', 'remark']);
         $validator = Validator::make($input, $rules, $message);
@@ -121,7 +192,7 @@ class RoleController extends Controller
             $roleModel = new RoleModel();
             $id = $input['id'];
             unset($input['id']);
-            $this->data = $roleModel->update($id, $input);
+            $roleModel->update($id, $input);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
@@ -161,7 +232,7 @@ class RoleController extends Controller
             $roleModel = new RoleModel();
             $id = $input['id'];
             unset($input['id']);
-            $this->data = $roleModel->update($id, $input);
+            $roleModel->update($id, $input);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {

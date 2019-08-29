@@ -21,14 +21,18 @@ class WorkflowNodeModel extends Model
      */
     public function showLists(array $data)
     {
-        $field = [$this->table.'.*','a.name as adminName','p.name as projectName'];
         return DB::table($this->table)
             ->leftJoin('admin as a','a.id','=',$this->table.'.handler')
             ->leftJoin('project as p','a.projectId','=','p.id')
-            ->orderBy('order','asc')
             ->where($this->table.'.workflowId',$data['workflowId'])
-            ->where($this->table.'.projectId',$data['projectId'])
-            ->get($field)->toArray();
+            ->where(function ($query) use ($data){
+                if (!empty($data['search'])){
+                    $query->where('p.name','like','%'.$data['search'].'%');
+                }
+            })
+            ->groupBy($this->table.'.projectId')
+            ->select(DB::raw($this->table.".*,p.name as projectName, GROUP_CONCAT(a.username order by `order` SEPARATOR '->') as handlerNameList,GROUP_CONCAT(handler order by `order`) as handlerList"))
+            ->get()->toArray();
     }
 
     /**

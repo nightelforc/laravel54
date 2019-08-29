@@ -609,6 +609,10 @@ class EmployeeController extends Controller
                 $info = $employeeModel->info(['id' => $input['employeeId']]);
                 $input['projectId'] = $info['projectId'];
                 $employeeAttendanceModel = new EmployeeAttendanceModel();
+                $attendanceInfo = $employeeAttendanceModel->info(['employeeId'=>$input['employeeId'],'day'=>$input['day'],'projectId'=>$input['projectId']]);
+                if (!empty($attendanceInfo)){
+                    $employeeAttendanceModel->delete(['employeeId'=>$input['employeeId'],'day'=>$input['day'],'projectId'=>$input['projectId']]);
+                }
                 $employeeAttendanceModel->insert($input);
                 $employeeModel->hasAttendance(['id' => $input['employeeId']]);
             }else{

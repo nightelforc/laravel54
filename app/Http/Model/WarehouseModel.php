@@ -20,8 +20,8 @@ class WarehouseModel
         $limit = config('yucheng.limit');
         $start = is_null($input['start']) ? 0 : $input['start'];
 
-        if (isset($input['limit']) && !is_null($input['limit'])) {
-            $limit = $input['limit'];
+        if (isset($input['length']) && !is_null($input['length'])) {
+            $limit = $input['length'];
         }
 
         return DB::table($this->table)

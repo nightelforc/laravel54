@@ -651,13 +651,15 @@ class ProjectController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupAssignmentModel = new ProjectGroupAssignmentModel();
+            $projectBudgetModel = new ProjectBudgetModel();
             $result = $projectGroupAssignmentModel->isAssignment(['sectionId' => $input['id']]);
-            if ($result == 0) {
+            $result1 =$projectBudgetModel->info(['sectionId' => $input['id']]);
+            if ($result == 0 && empty($result1)) {
                 $projectSectionModel = new ProjectSectionModel();
                 $projectSectionModel->delete($input);
             } else {
                 $this->code = 421303;
-                $this->msg = '该楼层下已建立记录分账，不能删除';
+                $this->msg = '该楼层下已建立记录分账或预算信息，不能删除';
             }
         } else {
             $failed = $validator->failed();

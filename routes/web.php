@@ -83,6 +83,7 @@ Route::group([
         Route::post('/project/info', 'ProjectController@info');
         Route::post('/project/edit', 'ProjectController@edit');
         Route::post('/project/editStatus', 'ProjectController@editStatus');
+        Route::post('/project/delete', 'ProjectController@delete');
 
         Route::post('/project/editBudget', 'ProjectController@editBudget');
     });

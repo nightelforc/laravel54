@@ -50,9 +50,10 @@ class EmployeeLeaveModel
             })
             ->leftJoin('employee as e','e.id','=',$this->table.'.employeeId')
             ->leftJoin('profession as p','p.id','=','e.professionId')
+            ->leftJoin('project','project.id','=','e.projectId')
             ->offset($start)->limit($limit)
             ->orderBy('createTime','desc')
-            ->select($this->table.'.*','e.name as employeeName','e.jobNumber','p.name as professionName','e.status as employeeStatus')
+            ->select($this->table.'.*','e.name as employeeName','e.jobNumber','p.name as professionName','e.status as employeeStatus','project.name as projectName')
             ->get()->toArray();
     }
 

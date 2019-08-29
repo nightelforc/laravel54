@@ -36,6 +36,7 @@ class ProjectModel
                     });
                 }
             })
+            ->orderBy('createTime','desc')
             ->offset($start)->limit($limit)
             ->get()->toArray();
     }
@@ -97,5 +98,34 @@ class ProjectModel
                 }
             })
             ->count();
+    }
+
+    /**
+     * @param array $input
+     * @return bool
+     */
+    public function delete(array $input)
+    {
+        //检查该项目下是否导入人员
+        $employeeModel = new EmployeeModel();
+        $counts = $employeeModel->countLists(['projectId'=>$input['id']],$employeeModel->employeeStatus);
+        if ($counts != 0){
+            return false;
+        }
+        //检查该项目下是否设置施工区
+        $projectAreaModel = new ProjectAreaModel();
+        $counts = $projectAreaModel->countLists(['projectId'=>$input['id']]);
+        if ($counts != 0){
+            return false;
+        }
+        //检查该项目下是否有供应商货单
+        $supplierOrderModel = new SupplierOrdersModel();
+        $counts = $supplierOrderModel->countLists(['projectId'=>$input['id']]);
+        if ($counts != 0){
+            return false;
+        }
+
+        DB::table($this->table)->where($input)->delete();
+        return true;
     }
 }

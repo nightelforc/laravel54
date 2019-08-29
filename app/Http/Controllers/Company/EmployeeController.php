@@ -13,7 +13,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Model\EmployeeExperienceModel;
 use App\Http\Model\EmployeeModel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class EmployeeController extends Controller
@@ -48,8 +47,8 @@ class EmployeeController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeModel = new EmployeeModel();
-            $lists = $employeeModel->lists($input,[1,2,3,4]);
-            $countLists = $employeeModel->countLists($input,[1,2,3,4]);
+            $lists = $employeeModel->lists($input,$employeeModel->employeeStatus);
+            $countLists = $employeeModel->countLists($input,$employeeModel->employeeStatus);
             $this->data = [
                 "draw" => $input['draw'],
                 "data" => $lists,

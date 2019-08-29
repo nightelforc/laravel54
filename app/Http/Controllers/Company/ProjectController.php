@@ -245,19 +245,20 @@ class ProjectController extends Controller
     public function editStatus(Request $request){
         $rules = [
             'id'=>'required|integer',
-            'status' => 'required|integer|in:2',
+//            'status' => 'required|integer|in:2',
         ];
         $message = [
             'id.required' => '获取项目参数失败',
             'id.integer' => '项目参数类型错误',
-            'status.required' => '获取项目状态参数失败',
-            'status.integer' => '项目状态参数类型错误',
-            'status.in' => '项目状态参数不正确',
+//            'status.required' => '获取项目状态参数失败',
+//            'status.integer' => '项目状态参数类型错误',
+//            'status.in' => '项目状态参数不正确',
         ];
         $input = $request->only(['id','status']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectModel = new ProjectModel();
+            $input['status'] = 2;
             $projectModel->updateStatus($input);
         } else {
             $failed = $validator->failed();
@@ -270,20 +271,21 @@ class ProjectController extends Controller
                     $this->code = 320502;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'status') {
-                if (key($failed['status']) == 'Required') {
-                    $this->code = 320503;
-                    $this->msg = $validator->errors()->first();
-                }
-                if (key($failed['status']) == 'Integer') {
-                    $this->code = 320504;
-                    $this->msg = $validator->errors()->first();
-                }
-                if (key($failed['status']) == 'In') {
-                    $this->code = 320505;
-                    $this->msg = $validator->errors()->first();
-                }
             }
+//            elseif (key($failed) == 'status') {
+//                if (key($failed['status']) == 'Required') {
+//                    $this->code = 320503;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//                if (key($failed['status']) == 'Integer') {
+//                    $this->code = 320504;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//                if (key($failed['status']) == 'In') {
+//                    $this->code = 320505;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//            }
         }
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
@@ -336,38 +338,38 @@ class ProjectController extends Controller
                     if (key($failed) == 'professionId') {
                         if (key($failed['professionId']) == 'Required') {
                             $this->code = 320609;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                         }
                         if (key($failed['professionId']) == 'Integer') {
                             $this->code = 320610;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                         }
                     } elseif (key($failed) == 'amount') {
                         if (key($failed['amount']) == 'Required') {
                             $this->code = 320611;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                         }
                         if (key($failed['amount']) == 'Numeric') {
                             $this->code = 320612;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                         }
                     } elseif (key($failed) == 'price') {
                         if (key($failed['price']) == 'Required') {
                             $this->code = 320613;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                         }
                         if (key($failed['price']) == 'Numeric') {
                             $this->code = 320614;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                         }
                     } elseif (key($failed) == 'totalPrice') {
                         if (key($failed['totalPrice']) == 'Required') {
                             $this->code = 320615;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                         }
                         if (key($failed['totalPrice']) == 'Numeric') {
                             $this->code = 320616;
-                            $this->msg = $validator->errors()->first();
+                            $this->msg = $validator1->errors()->first();
                         }
                     }
                     $continue = false;
@@ -415,6 +417,40 @@ class ProjectController extends Controller
                 }
                 if (key($failed['data']) == 'Array') {
                     $this->code = 320608;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    public function delete(Request $request){
+        $rules = [
+            'id'=>'required|integer',
+
+        ];
+        $message = [
+            'id.required' => '获取项目参数失败',
+            'id.integer' => '项目参数类型错误',
+        ];
+        $input = $request->only(['id']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $projectModel = new ProjectModel();
+            $result = $projectModel->delete($input);
+            if (!$result){
+                $this->code = 320703;
+                $this->msg = '该项目下已经导入工人，或已设置楼层等信息，不能被删除';
+            }
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'id') {
+                if (key($failed['id']) == 'Required') {
+                    $this->code = 320701;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['id']) == 'Integer') {
+                    $this->code = 320702;
                     $this->msg = $validator->errors()->first();
                 }
             }

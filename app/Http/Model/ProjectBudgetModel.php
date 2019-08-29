@@ -21,10 +21,12 @@ class ProjectBudgetModel
      */
     public function budgetLists(array $data)
     {
-        return DB::table($this->table)
-            ->leftJoin('profession as p','p.id','=',$this->table.'.professionId')
-            ->where('sectionId', $data['sectionId'])
-            ->get([$this->table.'.*','p.name as professionName'])->toArray();
+        return DB::table('profession')
+            ->leftJoin($this->table,'profession.id','=',$this->table.'.professionId')
+            ->where(function ($query) use ($data){
+                $query->where($this->table.'.sectionId', $data['sectionId'])->orWhere($this->table.'.sectionId', null);
+            })
+            ->get([$this->table.'.*','profession.name as professionName','profession.id as professionid'])->toArray();
     }
 
     /**
@@ -51,6 +53,12 @@ class ProjectBudgetModel
                 'professionId'=>$d['professionId'],
             ]);
             if (empty($info)){
+                DB::table($this->table)->where([
+                    'projectId'=>$data['projectId'],
+                    'areaId'=>$data['areaId'],
+                    'sectionId'=>$data['sectionId'],
+                    'professionId'=>$d['professionId'],
+                ])->delete();
                 DB::table($this->table)->insert($insertData);
             }else{
                 DB::table($this->table)->where('id',$info['id'])->update($insertData);

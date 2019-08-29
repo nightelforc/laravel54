@@ -11,9 +11,13 @@ namespace App\Http\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property  employeeStatus
+ */
 class EmployeeModel extends Model
 {
     private $table = 'employee';
+    public $employeeStatus = [1,2,3,4];
 
     /**
      * @param array $input
@@ -58,6 +62,7 @@ class EmployeeModel extends Model
 
     /**
      * @param array $input
+     * @param array $status
      * @return mixed
      */
     public function countLists(array $input, $status = [1, 3, 4])
@@ -286,12 +291,6 @@ class EmployeeModel extends Model
      */
     public function attendanceEmployee(array $data)
     {
-        $limit = config('yucheng.limit');
-        $start = is_null($data['start']) ? 0 : $data['start'];
-
-        if (isset($data['length']) && !is_null($data['length'])) {
-            $limit = $data['length'];
-        }
         $result = DB::table($this->table)
             ->leftJoin('profession as p', 'p.id', '=', $this->table . '.professionId')
             ->leftJoin('project', 'project.id', '=', $this->table . '.projectId')
@@ -313,9 +312,15 @@ class EmployeeModel extends Model
             ->select($this->table . '.*', 'p.name as professionName', 'project.name as projectName');
 
             if (isset($data['draw'])) {
-                $result->offset($start)->limit($limit);
+                $limit = config('yucheng.limit');
+                $start = is_null($data['start']) ? 0 : $data['start'];
+
+                if (isset($data['length']) && !is_null($data['length'])) {
+                    $limit = $data['length'];
+                }
+                $result = $result->offset($start)->limit($limit);
             }
-            $result->get()->toArray();
+        $result = $result->get()->toArray();
         return $result;
     }
 

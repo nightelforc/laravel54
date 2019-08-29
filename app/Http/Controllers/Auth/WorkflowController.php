@@ -161,7 +161,7 @@ class WorkflowController extends Controller
             'status.integer' => '审批状态参数类型错误',
             'status.in' => '审批状态参数值不正确',
         ];
-        $input = $request->only(['id','status']);
+        $input = $request->only(['id', 'status']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $workflowModel = new WorkflowModel();
@@ -244,7 +244,7 @@ class WorkflowController extends Controller
             'projectId' => 'required|integer',
             'workflowId' => 'required|integer',
             'handler' => 'required|integer',
-            'order' => 'required|integer|min:0',
+//            'order' => 'required|integer|min:0',
         ];
         $message = [
             'projectId.required' => '获取项目参数失败',
@@ -253,13 +253,13 @@ class WorkflowController extends Controller
             'workflowId.integer' => '审批参数类型错误',
             'handler.required' => '获取审批人参数失败',
             'handler.integer' => '审批人参数类型错误',
-            'order.required' => '获取审批节点参数失败',
-            'order.integer' => '审批节点参数类型错误',
-            'order.min' => '审批节点参数数据不正确',
+//            'order.required' => '获取审批节点参数失败',
+//            'order.integer' => '审批节点参数类型错误',
+//            'order.min' => '审批节点参数数据不正确',
         ];
         $input = $request->only(['data']);
         $continue = true;
-        foreach ($input['data'] as $d){
+        foreach ($input['data'] as $d) {
             $validator = Validator::make($d, $rules, $message);
             if ($validator->fails()) {
                 $continue = false;
@@ -275,8 +275,7 @@ class WorkflowController extends Controller
                         $this->msg = $validator->errors()->first();
                         break;
                     }
-                }
-                if (key($failed) == 'workflowId') {
+                } elseif (key($failed) == 'workflowId') {
                     if (key($failed['workflowId']) == 'Required') {
                         $this->code = 150603;
                         $this->msg = $validator->errors()->first();
@@ -287,8 +286,7 @@ class WorkflowController extends Controller
                         $this->msg = $validator->errors()->first();
                         break;
                     }
-                }
-                if (key($failed) == 'handler') {
+                } elseif (key($failed) == 'handler') {
                     if (key($failed['handler']) == 'Required') {
                         $this->code = 150605;
                         $this->msg = $validator->errors()->first();
@@ -300,47 +298,34 @@ class WorkflowController extends Controller
                         break;
                     }
                 }
-                if (key($failed) == 'order') {
-                    if (key($failed['order']) == 'Required') {
-                        $this->code = 150607;
-                        $this->msg = $validator->errors()->first();
-                        break;
-                    }
-                    if (key($failed['order']) == 'Integer') {
-                        $this->code = 150608;
-                        $this->msg = $validator->errors()->first();
-                        break;
-                    }
-                    if (key($failed['order']) == 'Min') {
-                        $this->code = 150609;
-                        $this->msg = $validator->errors()->first();
-                        break;
-                    }
-                }
+//                if (key($failed) == 'order') {
+//                    if (key($failed['order']) == 'Required') {
+//                        $this->code = 150607;
+//                        $this->msg = $validator->errors()->first();
+//                        break;
+//                    }
+//                    if (key($failed['order']) == 'Integer') {
+//                        $this->code = 150608;
+//                        $this->msg = $validator->errors()->first();
+//                        break;
+//                    }
+//                    if (key($failed['order']) == 'Min') {
+//                        $this->code = 150609;
+//                        $this->msg = $validator->errors()->first();
+//                        break;
+//                    }
+//                }
             }
         }
 
         if ($continue) {
             $workflowNodeModel = new WorkflowNodeModel();
-            //检查审批人是否已经存在
-            $checkNodeExist = $workflowNodeModel->checkNodeExist($input);
-            if ($checkNodeExist == 0) {
-                //检查节点序列是否有重复
-                $checkNodeOrder = $workflowNodeModel->checkNodeOrder($input);
-                if ($checkNodeOrder == 0) {
-                    $result = $workflowNodeModel->insert($input);
-                    if (!$result) {
-                        $this->code = 150612;
-                        $this->msg = '保存失败，请稍后重试';
-                    }
-                } else {
-                    $this->code = 150611;
-                    $this->msg = '审批流程序列' . $input['order'] . '已经存在，请重新设置序列大小';
-                }
-            } else {
-                $this->code = 150610;
-                $this->msg = '当前审批流程下，已存在此审批人，请重新选择审批人';
+            $result = $workflowNodeModel->insert($input['data']);
+            if (!$result) {
+                $this->code = 150612;
+                $this->msg = '保存失败，请稍后重试';
             }
+
         }
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
@@ -349,7 +334,8 @@ class WorkflowController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function nodeDel(Request $request){
+    public function nodeDel(Request $request)
+    {
         $rules = [
             'projectId' => 'required|integer',
             'workflowId' => 'required|integer',
@@ -362,7 +348,7 @@ class WorkflowController extends Controller
             'workflowId.integer' => '流程参数类型错误',
             'handlerList.required' => '获取节点参数失败',
         ];
-        $input = $request->only(['projectId','workflowId','handlerList']);
+        $input = $request->only(['projectId', 'workflowId', 'handlerList']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $workflowNodeModel = new WorkflowNodeModel();
@@ -387,7 +373,7 @@ class WorkflowController extends Controller
                     $this->code = 150704;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'handlerList') {
+            } elseif (key($failed) == 'handlerList') {
                 if (key($failed['handlerList']) == 'Required') {
                     $this->code = 150705;
                     $this->msg = $validator->errors()->first();

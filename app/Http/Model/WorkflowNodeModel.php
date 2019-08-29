@@ -23,7 +23,7 @@ class WorkflowNodeModel extends Model
     {
         return DB::table($this->table)
             ->leftJoin('admin as a','a.id','=',$this->table.'.handler')
-            ->leftJoin('project as p','a.projectId','=','p.id')
+            ->leftJoin('project as p',$this->table.'.projectId','=','p.id')
             ->where($this->table.'.workflowId',$data['workflowId'])
             ->where(function ($query) use ($data){
                 if (!empty($data['search'])){
@@ -55,6 +55,7 @@ class WorkflowNodeModel extends Model
     {
         $i = 0;
         foreach ($data as $key=>$d){
+            DB::table($this->table)->where(['projectId'=>$d['projectId'],'workflowId'=>$d['workflowId']])->delete();
             $data[$key]['order'] = $i++;
         }
         return DB::table($this->table)->insert($data);

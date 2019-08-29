@@ -53,6 +53,10 @@ class WorkflowNodeModel extends Model
      */
     public function insert(array $data)
     {
+        $i = 0;
+        foreach ($data as $key=>$d){
+            $data[$key]['order'] = $i++;
+        }
         return DB::table($this->table)->insert($data);
     }
 
@@ -84,8 +88,23 @@ class WorkflowNodeModel extends Model
         return DB::table($this->table)->where($where)->count();
     }
 
-    public function del(array $data)
+    /**
+     * @param array $input
+     * @return bool
+     */
+    public function delete(array $input)
     {
-        return DB::table($this->table)->where($data)->delete();
+        $handlerList = explode(',',$input['handlerList']);
+        if (!empty($handlerList)){
+            foreach ($handlerList as $h){
+                $data = [
+                    'projectId'=>$input['projectId'],
+                    'workflowId'=>$input['workflowId'],
+                    'handler'=>$h,
+                ];
+                DB::table($this->table)->where($data)->delete();
+            }
+        }
+        return true;
     }
 }

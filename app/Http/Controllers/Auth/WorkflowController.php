@@ -351,26 +351,45 @@ class WorkflowController extends Controller
      */
     public function nodeDel(Request $request){
         $rules = [
-            'id' => 'required|integer',
+            'projectId' => 'required|integer',
+            'workflowId' => 'required|integer',
+            'handlerList' => 'required',
         ];
         $message = [
-            'id.required' => '获取审批节点参数失败',
-            'id.integer' => '审批参数类型错误',
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型错误',
+            'workflowId.required' => '获取流程参数失败',
+            'workflowId.integer' => '流程参数类型错误',
+            'handlerList.required' => '获取节点参数失败',
         ];
-        $input = $request->only('id');
+        $input = $request->only(['projectId','workflowId','handlerList']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $workflowNodeModel = new WorkflowNodeModel();
-            $workflowNodeModel->del($input);
+            $workflowNodeModel->delete($input);
         } else {
             $failed = $validator->failed();
-            if (key($failed) == 'id') {
-                if (key($failed['id']) == 'Required') {
-                    $this->code = 150401;
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 150701;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['id']) == 'Integer') {
-                    $this->code = 150402;
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 150702;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'workflowId') {
+                if (key($failed['workflowId']) == 'Required') {
+                    $this->code = 150703;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['workflowId']) == 'Integer') {
+                    $this->code = 150704;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'handlerList') {
+                if (key($failed['handlerList']) == 'Required') {
+                    $this->code = 150705;
                     $this->msg = $validator->errors()->first();
                 }
             }

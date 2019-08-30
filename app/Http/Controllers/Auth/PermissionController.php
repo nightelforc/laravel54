@@ -22,31 +22,27 @@ class PermissionController extends Controller
      */
     public function lists(Request $request){
         $rules = [
-            'type' => 'required|integer',
+            'isProject' => 'required|integer',
         ];
         $message = [
-            'type.required' => '获取角色参数失败',
-            'type.integer' => '角色参数类型错误',
+            'isProject.required' => '获取角色参数失败',
+            'isProject.integer' => '角色参数类型错误',
         ];
-        $input = $request->only(['type']);
+        $input = $request->only(['isProject']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $permissionModel = new PermissionModel();
-            $this->data = $permissionModel->lists($input);
+            $lists = $permissionModel->lists($input);
+            $this->data = $this->listToTree($lists);
         } else {
             $failed = $validator->failed();
-            if (key($failed) == 'roleId') {
-                if (key($failed['roleId']) == 'Required') {
-                    $this->code = 130601;
+            if (key($failed) == 'isProject') {
+                if (key($failed['isProject']) == 'Required') {
+                    $this->code = 140101;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['roleId']) == 'Integer') {
-                    $this->code = 130602;
-                    $this->msg = $validator->errors()->first();
-                }
-            }elseif (key($failed) == 'permissions') {
-                if (key($failed['permissions']) == 'array') {
-                    $this->code = 130603;
+                if (key($failed['isProject']) == 'Integer') {
+                    $this->code = 140102;
                     $this->msg = $validator->errors()->first();
                 }
             }

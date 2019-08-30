@@ -28,6 +28,14 @@ class RoleModel
         }
 
         return DB::table($this->table)
+            ->where(function ($query) use ($input){
+                if (isset($input['isProject']) && !is_null($input['isProject'])){
+                    $query->where('isProject',$input['isProject']);
+                }
+                if (!empty($input['search'])){
+                    $query->where('name','like','%'.$input['search'].'%');
+                }
+            })
             ->offset($start)->limit($limit)
             ->select($this->table.'.*')
             ->get()->toArray();
@@ -43,10 +51,13 @@ class RoleModel
     }
 
     /**
+     * @param array $data
      * @return mixed
      */
-    public function selectLists(){
-        return DB::table($this->table)->get()->toArray();
+    public function selectLists(array $data){
+        return DB::table($this->table)
+            ->where($data)
+            ->get()->toArray();
     }
 
     /**
@@ -96,11 +107,19 @@ class RoleModel
     }
 
     /**
-     * @param array $data
-     * @return mixed
+     * @param array $check
+     * @param $id
+     * @return array
      */
-    public function checkRepeat(array $data)
+    public function checkRepeat(array $check, $id = 0)
     {
-        return DB::table($this->table)->where('name',$data['name'])->where('type',$data['type'])->count();
+        $result = DB::table($this->table)->where($check)
+            ->where(function ($query) use ($id){
+                if ($id != 0){
+                    $query->where('id','!=',$id);
+                }
+            })
+            ->first();
+        return empty($result) ? [] : get_object_vars($result);
     }
 }

@@ -53,6 +53,7 @@ class RolePermissionModel
             ->leftJoin('permission as p','p.id','=',$this->table.'.permissionId')
             ->where('roleId',$roleId)
             ->where('r.status',1)
+            ->where('p.status',1)
             ->select('p.name as permissionName','p.code','p.type','p.url','p.isMenu')
             ->get()->toArray();
     }

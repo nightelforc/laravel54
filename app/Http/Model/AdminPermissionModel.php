@@ -24,7 +24,8 @@ class AdminPermissionModel
         return DB::table($this->table)
             ->leftJoin('permission as p','p.id','=',$this->table.'.permissionId')
             ->where('adminId',$id)
-            ->select('p.name as permissionName','p.code','p.type','p.url','p.isMenu')
+            ->where('p.status',1)
+            ->select('p.name as permissionName','p.code','p.type','p.url','p.isProject')
             ->get()->toArray();
     }
 

@@ -103,4 +103,21 @@ class Controller extends BaseController
         return substr($method,$pos+1);
     }
 
+    /**
+     * @param $arr
+     * @param int $pid
+     * @return array
+     */
+    protected function listToTree($arr,$pid=0) {
+        $ret = array();
+        foreach($arr as $k => $v) {
+            if($v->pid == $pid) {
+                $tmp = $arr[$k];unset($arr[$k]);
+                $tmp->children = $this->listToTree($arr,$v->id);
+                $ret[] = $tmp;
+            }
+        }
+        return $ret;
+    }
+
 }

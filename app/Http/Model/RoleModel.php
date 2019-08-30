@@ -94,4 +94,13 @@ class RoleModel
             return false;
         }
     }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function checkRepeat(array $data)
+    {
+        return DB::table($this->table)->where('name',$data['name'])->where('type',$data['type'])->count();
+    }
 }

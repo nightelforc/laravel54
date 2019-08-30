@@ -107,17 +107,25 @@ class RoleController extends Controller
     {
         $rules = [
             'name' => 'required',
-//            'code' => 'required',
+            'type' => 'required|integer',
         ];
         $message = [
             'name.required' => '请填写角色名称',
-//            'code.required' => '请填写角色识别码',
+            'type.required' => '请选择角色类型',
+            'type.integer' => '角色类型参数类型错误',
         ];
-        $input = $request->only(['name', 'code', 'remark']);
+        $input = $request->only(['name', 'type', 'remark']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $roleModel = new RoleModel();
-            $this->data = $roleModel->insert($input);
+            $result = $roleModel->checkRepeat($input);
+            if ($result == 0){
+                $roleModel->insert($input);
+            }else{
+                $this->code = 130104;
+                $this->msg = '相同类型下已经存在相同名称的角色，请勿重复设置';
+            }
+
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'name') {
@@ -125,9 +133,13 @@ class RoleController extends Controller
                     $this->code = 130101;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'code') {
+            } elseif (key($failed) == 'type') {
                 if (key($failed['code']) == 'Required') {
                     $this->code = 130102;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['code']) == 'Integer') {
+                    $this->code = 130103;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -178,15 +190,16 @@ class RoleController extends Controller
         $rules = [
             'id' => 'required|integer',
             'name' => 'required',
-//            'code' => 'required',
+            'type' => 'required|integer',
         ];
         $message = [
             'id.required' => '获取角色参数失败',
             'id.integer' => '角色参数类型错误',
             'name.required' => '请填写角色名称',
-//            'code.required' => '请填写角色识别码',
+            'type.required' => '请选择角色类型',
+            'type.integer' => '角色类型参数类型错误',
         ];
-        $input = $request->only(['id', 'name', 'code', 'remark']);
+        $input = $request->only(['id', 'name', 'type', 'remark']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $roleModel = new RoleModel();
@@ -202,6 +215,15 @@ class RoleController extends Controller
                 }
                 if (key($failed['id']) == 'Integer') {
                     $this->code = 130302;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'type') {
+                if (key($failed['code']) == 'Required') {
+                    $this->code = 130303;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['code']) == 'Integer') {
+                    $this->code = 130304;
                     $this->msg = $validator->errors()->first();
                 }
             }

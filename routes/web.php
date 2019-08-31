@@ -50,6 +50,7 @@ Route::group([
         Route::post('/role/editStatus', 'RoleController@editStatus');
         Route::post('/role/delete', 'RoleController@delete');
         Route::post('/role/setPermission', 'RoleController@setPermission');
+        Route::post('/role/getPermission', 'RoleController@getPermission');
         //-------------------权限管理-------------------//
         Route::post('/permission/lists', 'PermissionController@lists');
         //-------------------审批流程管理-------------------//

@@ -31,6 +31,7 @@ class RolePermissionModel
     public function insert(array $input)
     {
         $i = 0;
+        $this->delete(['roleId'=>$input['roleId']]);
         foreach ($input['permission'] as $p){
             if (intval($p) && intval($p) > 0){
                 DB::table($this->table)->insert(['roleId'=>$input['roleId'],'permissionId'=>intval($p)]);
@@ -54,7 +55,7 @@ class RolePermissionModel
             ->where('roleId',$roleId)
             ->where('r.status',1)
             ->where('p.status',1)
-            ->select('p.name as permissionName','p.code','p.type','p.url','p.isMenu')
+            ->select('p.*')
             ->get()->toArray();
     }
 
@@ -77,5 +78,14 @@ class RolePermissionModel
         }else{
             return false;
         }
+    }
+
+    /**
+     * @param array $input
+     * @return mixed
+     */
+    public function lists(array $input)
+    {
+        return DB::table($this->table)->where($input)->get()->toArray();
     }
 }

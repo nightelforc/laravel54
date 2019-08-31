@@ -73,6 +73,7 @@ class LoginController extends Controller
                         //获取用户权限
                         $roleId = isset($result['role']['roleId']) ? $result['role']['roleId'] : 0;
                         $result['permission'] = (new AdminController())->getPermission($result['id'], $roleId);
+                        $result['menu'] = (new AdminController())->getMenu($result['permission']);
                         $token = $this->tokenGenerator();
                         $result['token'] = $token;
                         AdminSessionModel::put($token, $result['id'], $result['projectId']);
@@ -357,6 +358,7 @@ class LoginController extends Controller
                         //获取用户权限
                         $roleId = isset($result['role']['roleId']) ? $result['role']['roleId'] : 0;
                         $result['permission'] = (new AdminController())->getPermission($result['id'], $roleId);
+                        $result['menu'] = (new AdminController())->getMenu($result['permission']);
                         $token = $this->tokenGenerator();
                         $result['token'] = $token;
                         AdminSessionModel::put($token, $result['id'], $result['projectId']);

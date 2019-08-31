@@ -368,14 +368,14 @@ class RoleController extends Controller
     public function setPermission(Request $request){
         $rules = [
             'roleId' => 'required|integer',
-            'permissions' => 'array',
+            'permission' => 'array',
         ];
         $message = [
             'roleId.required' => '获取角色参数失败',
             'roleId.integer' => '角色参数类型错误',
-            'permissions.array' => '权限参数类型错误',
+            'permission.array' => '权限参数类型错误',
         ];
-        $input = $request->only(['roleId','permissions']);
+        $input = $request->only(['roleId','permission']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $rolePermissionModel = new RolePermissionModel();
@@ -392,9 +392,42 @@ class RoleController extends Controller
                     $this->code = 130602;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'permissions') {
-                if (key($failed['permissions']) == 'array') {
+            }elseif (key($failed) == 'permission') {
+                if (key($failed['permission']) == 'array') {
                     $this->code = 130603;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getPermission(Request $request){
+        $rules = [
+            'roleId' => 'required|integer',
+        ];
+        $message = [
+            'roleId.required' => '获取角色参数失败',
+            'roleId.integer' => '角色参数类型错误',
+        ];
+        $input = $request->only(['roleId']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $rolePermissionModel = new RolePermissionModel();
+            $this->data = $rolePermissionModel->lists($input);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'roleId') {
+                if (key($failed['roleId']) == 'Required') {
+                    $this->code = 130901;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['roleId']) == 'Integer') {
+                    $this->code = 130902;
                     $this->msg = $validator->errors()->first();
                 }
             }

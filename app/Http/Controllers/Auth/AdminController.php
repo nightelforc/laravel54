@@ -465,4 +465,24 @@ class AdminController extends Controller
         }
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
+
+    /**
+     * @param array $permission
+     * @return array
+     */
+    public function getMenu(array $permission)
+    {
+        $menuLists = [];
+        foreach($permission as $p){
+            if ($p->type == 1){
+                $menuLists[] = $p;
+            }
+        }
+        if (!empty($menuLists)){
+            return $this->listToTree($menuLists);
+        }else{
+            return [];
+        }
+
+    }
 }

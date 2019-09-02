@@ -50,18 +50,32 @@ class WarehouseLogModel
 
                 $insertId = $this->insert($warehouseLog);
                 $warehouseLogInfoModel = new WarehouseLogInfoModel();
-                foreach ($data['data'] as $d){
+                if (isset($data['data'])){
+                    foreach ($data['data'] as $d){
+                        $warehouseLogInfo = [
+                            'logId' => $insertId,
+                            'materialId' => $d['materialId'],
+                            'specId' => $d['specId'],
+                            'supplierId' => $d['supplierId'],
+                            'amount' => $d['amount'],
+                            'price' => $d['price'],
+                            'totalPrice' => $d['totalPrice'],
+                        ];
+                        $warehouseLogInfoModel->insert($warehouseLogInfo);
+                    }
+                }else{
                     $warehouseLogInfo = [
                         'logId' => $insertId,
-                        'materialId' => $d['materialId'],
-                        'specId' => $d['specId'],
-                        'supplierId' => $d['supplierId'],
-                        'amount' => $d['amount'],
-                        'price' => $d['price'],
-                        'totalPrice' => $d['totalPrice'],
+                        'materialId' => $data['materialId'],
+                        'specId' => $data['specId'],
+                        'supplierId' => $data['supplierId'],
+                        'amount' => $data['amount'],
+                        'price' => $data['price'],
+                        'totalPrice' => $data['totalPrice'],
                     ];
                     $warehouseLogInfoModel->insert($warehouseLogInfo);
                 }
+
 
                 return $insertId;
             });
@@ -237,7 +251,7 @@ class WarehouseLogModel
                     'supplierId' => $data['supplierId'],
                 ]);
                 if (empty($warehouseInfo) || $warehouseInfo['amount'] < $data['amount']) {
-                    throw new \Exception('库存不足', 'consume1');
+                    throw new \Exception('库存不足', '500');
                 }
 
                 DB::transaction(function () use ($data, $warehouseModel, $pk, $approvalResult) {

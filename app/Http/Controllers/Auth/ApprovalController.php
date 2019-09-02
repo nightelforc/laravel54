@@ -219,12 +219,12 @@ class ApprovalController extends Controller
             'id.required' => '获取审批参数失败',
             'id.integer' => '项目参数类型不正确',
         ];
-        $input = $request->only(['id']);
+        $input = $request->only(['id',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $WorkflowItemModel = new WorkflowItemModel();
-            $adminId = $request->session()->get(parent::pasn)['id'];
-            $result = $WorkflowItemModel->accept($input,$adminId);
+            $session = AdminSessionModel::get($input[self::$token]);
+            $result = $WorkflowItemModel->accept($input,$session['adminId']);
             if (!$result){
                 $this->code = 160203;
                 $this->msg = '审批发生错误';
@@ -257,12 +257,12 @@ class ApprovalController extends Controller
             'id.required' => '获取项目参数失败',
             'id.integer' => '项目参数类型不正确',
         ];
-        $input = $request->only(['id','remark']);
+        $input = $request->only(['id','remark',self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $WorkflowItemModel = new WorkflowItemModel();
-            $adminId = $request->session()->get(parent::pasn)['id'];
-            $result = $WorkflowItemModel->reject($input,$adminId);
+            $session = AdminSessionModel::get($input[self::$token]);
+            $result = $WorkflowItemModel->reject($input,$session['adminId']);
             if (!$result){
                 $this->code = 160303;
                 $this->msg = '审批发生错误';
@@ -276,6 +276,106 @@ class ApprovalController extends Controller
                 }
                 if (key($failed['id']) == 'Integer') {
                     $this->code = 160302;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function myApprovalLists(Request $request){
+        $rules = [
+            'startTime' => 'nullable|date_format:Y-m-d',
+            'endTime' => 'nullable|date_format:Y-m-d',
+            'status' => 'nullable|integer|in:0,1,2,3,4',
+            'draw' => 'required|integer',
+            'length' => 'required|integer|in:10,20,50',
+            'start' => 'required|integer|min:0',
+        ];
+        $message = [
+            'startTime.date_format' =>'日期格式不正确',
+            'endTime.date_format' =>'日期格式不正确',
+            'status.integer' => '付款状态参数类型错误',
+            'status.in' => '付款状态参数值不正确',
+            'length.required' => '获取记录条数失败',
+            'length.integer' => '记录条数参数类型错误',
+            'length.in' => '记录条数参数值不正确',
+            'start.required' => '获取起始记录位置失败',
+            'start.integer' => '页码参数类型错误',
+            'start.min' => '页码参数值不小于:min',
+        ];
+        $input = $request->only(['startTime','endTime','status','draw', 'length', 'start',self::$token]);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $WorkflowItemModel = new WorkflowItemModel();
+            $session = AdminSessionModel::get($input[self::$token]);
+            $input['adminId'] = $session['adminId'];
+            $lists = $WorkflowItemModel->myApprovalLists($input);
+            $countLists = $WorkflowItemModel->myApprovalCountLists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>$countLists,
+                "recordsTotal"=>$countLists,
+            ];
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'startTime') {
+                if (key($failed['startTime']) == 'DateFormat') {
+                    $this->code = 160103;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'endTime') {
+                if (key($failed['endTime']) == 'DateFormat') {
+                    $this->code = 160104;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'status') {
+                if (key($failed['status']) == 'Integer') {
+                    $this->code = 160105;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['status']) == 'In') {
+                    $this->code = 160106;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
+                    $this->code = 160107;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['draw']) == 'Integer') {
+                    $this->code = 160108;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'length') {
+                if (key($failed['length']) == 'Required') {
+                    $this->code = 160109;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'Integer') {
+                    $this->code = 160109;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['length']) == 'In') {
+                    $this->code = 160110;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'start') {
+                if (key($failed['start']) == 'Required') {
+                    $this->code = 160412;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Integer') {
+                    $this->code = 160412;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['start']) == 'Min') {
+                    $this->code = 160412;
                     $this->msg = $validator->errors()->first();
                 }
             }

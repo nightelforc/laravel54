@@ -66,6 +66,7 @@ Route::group([
         Route::post('/workflowNode/del', 'WorkflowController@nodeDel');
 
         Route::post('/approval/lists', 'ApprovalController@lists');
+        Route::post('/approval/myApprovalLists', 'ApprovalController@myApprovalLists');
         Route::post('/approval/accept', 'ApprovalController@accept');
         Route::post('/approval/reject', 'ApprovalController@reject');
     });

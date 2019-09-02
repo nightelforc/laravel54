@@ -30,6 +30,9 @@ class WarehouseModel
             ->leftJoin('supplier as s','s.id','=',$this->table.'.supplierId')
             ->leftJoin('unit as u','u.id','=',$this->table.'.unitId')
             ->where(function ($query) use ($input) {
+                if (isset($input['projectId']) && !is_null($input['projectId'])) {
+                    $query->where($this->table.'.projectId', $input['projectId']);
+                }
                 if (isset($input['search']) && !is_null($input['search'])) {
                     $query->where('m.name', 'like', '%' . $input['search'] . '%');
                 }

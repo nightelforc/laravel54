@@ -21,7 +21,7 @@ class PermissionModel
      * @param array $data
      * @return mixed
      */
-    public function lists(array $data)
+    public function lists(array $data =[])
     {
         return DB::table($this->table)
             ->where(function ($query) use ($data){

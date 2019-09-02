@@ -43,25 +43,29 @@ class ApprovalController extends Controller
 
         $workflowModel = new WorkflowModel();
         $info = $workflowModel->info(['code' => $code]);
-        $callBackClass = $info['className'];
-        $callBackMethod = $info['methodName'];
-        if (!$info['status']) {
-            $approval['status'] = false;
-            self::afterApproval($callBackClass, $callBackMethod, $pk, $data,1);
-            return $approval;
-        }
 
         $workflowNodeModel = new WorkflowNodeModel();
         //加载审批流程当前全流程节点
         $processList = $workflowNodeModel->handlerLists(['workflowId' => $info['id'], 'projectId' => $session['projectId']]);
 
+        $callBackClass = $info['className'];
+        $callBackMethod = $info['methodName'];
+
+        //审批流程停用或审批流程节点为空，都不进行审批
+        if (!$info['status'] || empty($processList)) {
+            $approval['status'] = false;
+            self::afterApproval($callBackClass, $callBackMethod, $pk, $data,1);
+            return $approval;
+        }
+
+        $process = json_encode($processList);
         $approvalData = [
             'workflowId' => $info['id'],
             'projectId' => $session['projectId'],
             'adminId' => $session['adminId'],
             'joinTime' => date('Y-m-d H:i:s'),
             'curnode' => (isset($processList[0]) && !empty($processList[0]))?$processList[0]:0,
-            'process' => json_encode($processList),
+            'process' =>$process,
             'callBackClass' => $callBackClass,
             'callBackMethod' => $callBackMethod,
             'pk' => $pk,
@@ -133,7 +137,14 @@ class ApprovalController extends Controller
             $WorkflowItemModel = new WorkflowItemModel();
             $session = AdminSessionModel::get($input[self::$token]);
             $input['curnode'] = $session['adminId'];
-            $this->data = $WorkflowItemModel->lists($input);
+            $lists = $WorkflowItemModel->lists($input);
+            $countLists = $WorkflowItemModel->countLists($input);
+            $this->data = [
+                "draw"=>$input['draw'],
+                "data"=>$lists,
+                "recordsFiltered"=>$countLists,
+                "recordsTotal"=>$countLists,
+            ];
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {

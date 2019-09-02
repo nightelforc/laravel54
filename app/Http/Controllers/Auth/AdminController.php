@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Model\AdminModel;
 use App\Http\Model\AdminPermissionModel;
 use App\Http\Model\AdminRoleModel;
+use App\Http\Model\PermissionModel;
 use App\Http\Model\RolePermissionModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -204,7 +205,7 @@ class AdminController extends Controller
         $rules = [
             'id' => 'required|integer',
             'username' => 'required',
-            'roleId' => 'required|integer',
+//            'roleId' => 'required|integer',
             'name' => 'required',
             'projectId' => 'required|integer',
             'phone' => 'required',
@@ -213,14 +214,14 @@ class AdminController extends Controller
             'id.required' => '获取用户参数失败',
             'id.integer' => '用户参数类型错误',
             'username.required' => '请填写用户名',
-            'roleId.required' => '请选择角色',
-            'roleId.integer' => '角色参数类型错误',
+//            'roleId.required' => '请选择角色',
+//            'roleId.integer' => '角色参数类型错误',
             'name.required' => '请填写姓名',
             'projectId.required' => '请选择账号所属项目',
             'projectId.integer' => '项目参数类型错误',
             'phone.required' => '请填写联系方式',
         ];
-        $input = $request->only(['id', 'username', 'roleId', 'name', 'projectId', 'phone']);
+        $input = $request->only(['id', 'username', 'name', 'projectId', 'phone']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $adminModel = new AdminModel();
@@ -245,16 +246,18 @@ class AdminController extends Controller
                     $this->code = 120403;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'roleId') {
-                if (key($failed['roleId']) == 'Required') {
-                    $this->code = 120404;
-                    $this->msg = $validator->errors()->first();
-                }
-                if (key($failed['roleId']) == 'Integer') {
-                    $this->code = 120405;
-                    $this->msg = $validator->errors()->first();
-                }
-            } elseif (key($failed) == 'name') {
+            }
+//            elseif (key($failed) == 'roleId') {
+//                if (key($failed['roleId']) == 'Required') {
+//                    $this->code = 120404;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//                if (key($failed['roleId']) == 'Integer') {
+//                    $this->code = 120405;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//            }
+            elseif (key($failed) == 'name') {
                 if (key($failed['name']) == 'Integer') {
                     $this->code = 120406;
                     $this->msg = $validator->errors()->first();
@@ -329,10 +332,11 @@ class AdminController extends Controller
 
     /**
      * @param $adminId
-     * @param $roleId
+     * @param int $roleId
+     * @param $isProject
      * @return array
      */
-    public function getPermission($adminId, $roleId = 0)
+    public function getPermission($adminId, $roleId = 0,$isProject = 1)
     {
         $rolePermission = [];
         if ($roleId != 0) {
@@ -340,8 +344,16 @@ class AdminController extends Controller
             $rolePermission = $rolePermissionModel->getPermission($roleId);
         }
         //获取用户特有权限
-        $adminPermissionModel = new AdminPermissionModel();
-        $adminPermission = $adminPermissionModel->getPermission($adminId);
+
+        if ($adminId == 1){
+            $permissionModel = new PermissionModel();
+            $adminPermission = $permissionModel->lists(['isProject'=>$isProject]);
+        }else{
+            $adminPermissionModel = new AdminPermissionModel();
+            $adminPermission = $adminPermissionModel->getPermission($adminId);
+        }
+
+
         return array_merge($rolePermission, $adminPermission);
     }
 
@@ -365,8 +377,7 @@ class AdminController extends Controller
         if ($validator->passes()) {
             $adminRoleModel = new AdminRoleModel();
             $adminRoleModel->delete(['adminId'=>$input['adminId']]);
-            $result = $adminRoleModel->insert($input);
-            $this->msg = '成功设置 '.$result.' 条功能的权限';
+            $adminRoleModel->insert($input);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'adminId') {

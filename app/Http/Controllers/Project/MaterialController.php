@@ -104,7 +104,13 @@ class MaterialController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $materialModel = new MaterialModel();
-            $materialModel->add($input);
+            $result = $materialModel->checkRepeat($input);
+            if (empty($result)){
+                $materialModel->add($input);
+            }else{
+                $this->code = 450202;
+                $this->msg = '请勿重复建立材料物资';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'name') {
@@ -171,7 +177,14 @@ class MaterialController extends Controller
             $materialModel = new MaterialModel();
             $id = $input['id'];
             unset($input['id']);
-            $materialModel->update($id,$input);
+
+            $result = $materialModel->checkRepeat($input,$id);
+            if (empty($result)){
+                $materialModel->update($id,$input);
+            }else{
+                $this->code = 450404;
+                $this->msg = '请勿重复建立材料物资';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
@@ -351,7 +364,13 @@ class MaterialController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $materialSpecModel = new MaterialSpecModel();
-            $materialSpecModel->add($input);
+            $result = $materialSpecModel->checkRepeat($input);
+            if (empty($result)){
+                $materialSpecModel->add($input);
+            }else{
+                $this->code = 450705;
+                $this->msg = '请勿重复建立相同品牌和规格';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'materialId') {
@@ -400,7 +419,14 @@ class MaterialController extends Controller
             $materialSpecModel = new MaterialSpecModel();
             $id = $input['id'];
             unset($input['id']);
-            $materialSpecModel->update($id,$input);
+
+            $result = $materialSpecModel->checkRepeat($input,$id);
+            if (empty($result)){
+                $materialSpecModel->update($id,$input);
+            }else{
+                $this->code = 450805;
+                $this->msg = '请勿重复建立相同品牌和规格';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {

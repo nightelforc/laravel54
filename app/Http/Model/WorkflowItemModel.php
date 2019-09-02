@@ -140,4 +140,32 @@ class WorkflowItemModel extends Model
             return $e->getMessage();
         }
     }
+
+    /**
+     * @param array $input
+     * @return mixed
+     */
+    public function countLists(array $input)
+    {
+        return DB::table($this->table)
+            ->leftJoin('workflow as wf','wf.id','=',$this->table.'.workflowId')
+            ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
+            ->leftJoin('admin as a','a.id','=',$this->table.'.adminId')
+            ->where(function ($query) use ($input){
+                $query->where($this->table.'.curnode',$input['curnode']);
+                if (isset($input['projectId']) && !empty($input['projectId'])){
+                    $query->where($this->table.'.projectId',$input['projectId']);
+                }
+                if (isset($input['startTime']) && !is_null($input['startTime'])){
+                    $query->where('joinTime','>=',$input['startTime'].' 00:00:00');
+                }
+                if (isset($input['endTime']) && !is_null($input['endTime'])){
+                    $query->where('joinTime','<=',$input['endTime'].' 23:59:59');
+                }
+                if (isset($input['status']) && !is_null($input['status'])) {
+                    $query->where($this->table . '.status', $input['status']);
+                }
+            })
+            ->count();
+    }
 }

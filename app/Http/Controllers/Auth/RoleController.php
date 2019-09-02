@@ -24,11 +24,13 @@ class RoleController extends Controller
     public function lists(Request $request)
     {
         $rules = [
+            'isProject' => 'nullable|integer',
             'draw' => 'required|integer',
             'length' => 'required|integer|in:10,20,50',
             'start' => 'required|integer|min:0',
         ];
         $message = [
+            'isProject.integer' => '角色类型参数类型错误',
             'length.integer' => '记录条数参数类型错误',
             'length.in' => '记录条数参数值不正确',
             'start.integer' => '页码参数类型错误',
@@ -81,6 +83,11 @@ class RoleController extends Controller
                 }
                 if (key($failed['start']) == 'Min') {
                     $this->code = 130708;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'isProject') {
+                if (key($failed['isProject']) == 'Integer') {
+                    $this->code = 130709;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -232,14 +239,18 @@ class RoleController extends Controller
             $roleModel = new RoleModel();
             $id = $input['id'];
             unset($input['id']);
-            $result = $roleModel->checkRepeat(['name'=>$input['name'],'isProject'=>$input['isProject']],$id);
-            if (empty($result)){
-                $roleModel->update($id, $input);
+            if ($id != 1){
+                $result = $roleModel->checkRepeat(['name'=>$input['name'],'isProject'=>$input['isProject']],$id);
+                if (empty($result)){
+                    $roleModel->update($id, $input);
+                }else{
+                    $this->code = 130307;
+                    $this->msg = '相同类型下已经存在相同名称的角色，请勿重复设置';
+                }
             }else{
                 $this->code = 130306;
-                $this->msg = '相同类型下已经存在相同名称的角色，请勿重复设置';
+                $this->msg = '不能修改超级管理员角色';
             }
-
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
@@ -293,7 +304,12 @@ class RoleController extends Controller
             $roleModel = new RoleModel();
             $id = $input['id'];
             unset($input['id']);
-            $roleModel->update($id, $input);
+            if($id != 1){
+                $roleModel->update($id, $input);
+            }else{
+                $this->code = 130406;
+                $this->msg = '不能停用超级管理员角色';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
@@ -307,15 +323,15 @@ class RoleController extends Controller
                 }
             } elseif (key($failed) == 'id') {
                 if (key($failed['id']) == 'Required') {
-                    $this->code = 130401;
+                    $this->code = 130403;
                     $this->msg = $validator->errors()->first();
                 }
                 if (key($failed['id']) == 'Integer') {
-                    $this->code = 130402;
+                    $this->code = 130404;
                     $this->msg = $validator->errors()->first();
                 }
                 if (key($failed['id']) == 'In') {
-                    $this->code = 130402;
+                    $this->code = 130405;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -340,10 +356,15 @@ class RoleController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $roleModel = new RoleModel();
-            $result = $roleModel->delete($input);
-            if (!$result){
-                $this->code = 130503;
-                $this->msg = '删除失败';
+            if($input['id'] != 1){
+                $result = $roleModel->delete($input);
+                if (!$result){
+                    $this->code = 130503;
+                    $this->msg = '删除失败';
+                }
+            }else{
+                $this->code = 130504;
+                $this->msg = '不能删除超级管理员角色';
             }
         } else {
             $failed = $validator->failed();
@@ -378,9 +399,14 @@ class RoleController extends Controller
         $input = $request->only(['roleId','permission']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            $rolePermissionModel = new RolePermissionModel();
-            $result = $rolePermissionModel->insert($input);
-            $this->msg = '成功设置 '.$result.' 条功能的权限';
+            if($input['roleId'] != 1){
+                $rolePermissionModel = new RolePermissionModel();
+                $result = $rolePermissionModel->insert($input);
+                $this->msg = '成功设置 '.$result.' 条功能的权限';
+            }else{
+                $this->code = 130604;
+                $this->msg = '不能设置超级管理员角色权限';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'roleId') {

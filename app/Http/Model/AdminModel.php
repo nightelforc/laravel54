@@ -131,7 +131,7 @@ class AdminModel
                 }
             })
             ->offset($start)->limit($limit)
-            ->select($this->table.'.*','p.name as projectName','r.name as roleName')
+            ->select($this->table.'.id',$this->table.'.username',$this->table.'.name',$this->table.'.projectId',$this->table.'.phone',$this->table.'.lastLoginTime',$this->table.'.status','p.name as projectName','r.name as roleName')
             ->get()->toArray();
     }
 
@@ -205,18 +205,18 @@ class AdminModel
         try{
             DB::transaction(function () use($data){
                 $id = $data['id'];
-                $roleId = $data['roleId'];
+//                $roleId = $data['roleId'];
                 unset($data['id']);
-                unset($data['roleId']);
+//                unset($data['roleId']);
                 $this->update($id,$data);
-                $adminRoleModel = new AdminRoleModel();
-                $info = $adminRoleModel->info(['adminId'=>$id,'roleId'=>$roleId]);
-                if (empty($info)){
-                    $adminRoleModel->delete(['adminId'=>$id]);
-                    $adminRoleModel->insert(['adminId'=>$id,'roleId'=>$roleId]);
-                }else{
-                    $adminRoleModel->update($id,['roleId'=>$roleId]);
-                }
+//                $adminRoleModel = new AdminRoleModel();
+//                $info = $adminRoleModel->info(['adminId'=>$id,'roleId'=>$roleId]);
+//                if (empty($info)){
+//                    $adminRoleModel->delete(['adminId'=>$id]);
+//                    $adminRoleModel->insert(['adminId'=>$id,'roleId'=>$roleId]);
+//                }else{
+//                    $adminRoleModel->update($id,['roleId'=>$roleId]);
+//                }
             });
         }catch (\Exception $e){
             return $e->getMessage();

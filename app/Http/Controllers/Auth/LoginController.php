@@ -4,14 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Model\AdminModel;
-use App\Http\Model\AdminPermissionModel;
-use App\Http\Model\AdminRoleModel;
 use App\Http\Model\AdminSessionModel;
-use App\Http\Model\RolePermissionModel;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
@@ -72,7 +68,7 @@ class LoginController extends Controller
                         $result['role'] = (new AdminController())->getRole($result['id']);
                         //获取用户权限
                         $roleId = isset($result['role']['roleId']) ? $result['role']['roleId'] : 0;
-                        $result['permission'] = (new AdminController())->getPermission($result['id'], $roleId);
+                        $result['permission'] = (new AdminController())->getPermission($result['id'], $roleId,2);
                         $result['menu'] = (new AdminController())->getMenu($result['permission']);
                         $token = $this->tokenGenerator();
                         $result['token'] = $token;
@@ -357,7 +353,7 @@ class LoginController extends Controller
                         $result['role'] = (new AdminController())->getRole($result['id']);
                         //获取用户权限
                         $roleId = isset($result['role']['roleId']) ? $result['role']['roleId'] : 0;
-                        $result['permission'] = (new AdminController())->getPermission($result['id'], $roleId);
+                        $result['permission'] = (new AdminController())->getPermission($result['id'], $roleId,1);
                         $result['menu'] = (new AdminController())->getMenu($result['permission']);
                         $token = $this->tokenGenerator();
                         $result['token'] = $token;

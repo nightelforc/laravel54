@@ -10,6 +10,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Model\AdminSessionModel;
+use App\Http\Model\AssignmentModel;
+use App\Http\Model\ProfessionModel;
+use App\Http\Model\ProjectAreaModel;
+use App\Http\Model\ProjectGroupModel;
+use App\Http\Model\ProjectModel;
+use App\Http\Model\ProjectSectionModel;
 use App\Http\Model\WorkflowItemModel;
 use App\Http\Model\WorkflowItemProcessModel;
 use App\Http\Model\WorkflowModel;
@@ -138,6 +144,7 @@ class ApprovalController extends Controller
             $session = AdminSessionModel::get($input[self::$token]);
             $input['curnode'] = $session['adminId'];
             $lists = $WorkflowItemModel->lists($input);
+            $lists = $this->descFormat($lists);
             $countLists = $WorkflowItemModel->countLists($input);
             $this->data = [
                 "draw"=>$input['draw'],
@@ -315,7 +322,7 @@ class ApprovalController extends Controller
             $session = AdminSessionModel::get($input[self::$token]);
             $input['adminId'] = $session['adminId'];
             $lists = $WorkflowItemModel->myApprovalLists($input);
-//            $lists = $this->descFormat($lists);
+            $lists = $this->descFormat($lists);
             $countLists = $WorkflowItemModel->myApprovalCountLists($input);
             $this->data = [
                 "draw"=>$input['draw'],
@@ -392,17 +399,51 @@ class ApprovalController extends Controller
     {
         foreach ($lists as $key => $l){
             $methodName = $l->code.'Desc';
-            $lists[$key]->desc = $this->$methodName($l->data);
+            if(method_exists($this,$methodName)){
+                $lists[$key]->desc = $this->$methodName($l->data);
+            }else{
+                $lists[$key]->desc = '';
+            }
         }
         return $lists;
     }
 
+    /**
+     * @param $data
+     * @return mixed|string
+     */
     private function unitDesc($data){
-        $model = '计量单位申请：申请的单位名称<b>:name</b>，单位缩写<b>:shortname</b>';
-        $data = json_decode($data);
-        foreach ($data as $key => $d){
-            $model = str_replace(':'.$key,$d,$model);
-        }
+        $data = json_decode($data,true);
+        $model = <<<EOF
+        申请增加新计量单位，单位名称 <b>$data[name]</b>，单位缩写 <b>$data[shortname]</b>
+EOF;
+
         return $model;
+    }
+
+    private function addAssignmentDesc($data){
+        $data = json_decode($data,true);
+        $projectName = ProjectModel::getValue(['id'=>$data['projectId']],'name');
+        $areaName = ProjectAreaModel::getValue(['id'=>$data['areaId']],'name');
+        $sectionName = ProjectSectionModel::getValue(['id'=>$data['areaId']],'name');
+        $professionName = ProfessionModel::getValue(['id'=>$data['professionId']],'name');
+        $groupName = ProjectGroupModel::getValue(['id'=>$data['groupId']],'name');
+        $model = <<<EOF
+        项目 <b>$projectName</b>，施工区 <b>$areaName</b>，施工段 <b>$sectionName</b>，工种 <b>$professionName</b>，
+        班组 <b>$groupName</b>
+EOF;
+        $tr = '';
+        $i = 0;
+        foreach($data['data'] as $key => $d){
+            $i++;
+            $assignmentName = AssignmentModel::getValue(['id'=>$d['assignmentId']],'name');
+            $tr .= <<<EOF
+<tr><th>$i</th><th>$assignmentName</th><th>$d[amount]</th><th>$d[price]</th><th>$d[totalPrice]</th></tr>
+EOF;
+        }
+        $table = "<table><thead><tr><th></th><th>施工量</th><th>工程量</th><th>单价</th><th>总价</th></tr></thead>
+            <tbody>$tr</tbody></table>";
+
+        return $model.$table;
     }
 }

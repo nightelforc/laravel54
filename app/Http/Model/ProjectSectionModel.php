@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 class ProjectSectionModel
 {
     private $table = 'project_section';
+    const TABLE = 'project_section';
 
     /**
      * @param array $data
@@ -144,5 +145,13 @@ class ProjectSectionModel
         return DB::table($this->table)->where('areaId',$areaId)->sum('area');
     }
 
-
+    /**
+     * @param array $data
+     * @param $string
+     * @return mixed
+     */
+    public static function getValue(array $data, $string)
+    {
+        return DB::table(self::TABLE)->where($data)->value($string);
+    }
 }

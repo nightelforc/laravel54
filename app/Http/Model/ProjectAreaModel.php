@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 class ProjectAreaModel
 {
     private $table = 'project_area';
+    const TABLE = 'project_area';
 
     /**
      * @param array $input
@@ -148,5 +149,15 @@ class ProjectAreaModel
     {
         $areaArea = (new ProjectSectionModel)->sumArea($areaId);
         return $this->update(['id'=>$areaId,'area'=>$areaArea]);
+    }
+
+    /**
+     * @param array $data
+     * @param $string
+     * @return mixed
+     */
+    public static function getValue(array $data, $string)
+    {
+        return DB::table(self::TABLE)->where($data)->value($string);
     }
 }

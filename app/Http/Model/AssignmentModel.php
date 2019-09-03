@@ -13,6 +13,17 @@ use Illuminate\Support\Facades\DB;
 class AssignmentModel
 {
     private $table = 'assignment';
+    const TABLE = 'assignment';
+
+    /**
+     * @param array $data
+     * @param $string
+     * @return mixed
+     */
+    public static function getValue(array $data, $string)
+    {
+        return DB::table(self::TABLE)->where($data)->value($string);
+    }
 
     /**
      * @param array $data

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 class ProfessionModel
 {
     private $table = 'profession';
+    const TABLE = 'profession';
 
     /**
      * @return mixed
@@ -80,5 +81,15 @@ class ProfessionModel
             })
             ->first();
         return empty($result) ? [] : get_object_vars($result);
+    }
+
+    /**
+     * @param array $data
+     * @param $string
+     * @return mixed
+     */
+    public static function getValue(array $data, $string)
+    {
+        return DB::table(self::TABLE)->where($data)->value($string);
     }
 }

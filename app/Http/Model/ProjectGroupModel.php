@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 class ProjectGroupModel
 {
     private $table = 'project_group';
+    const TABLE = 'project_group';
     private $startTime = '';
     private $endTime = '';
     public function __construct()
@@ -143,5 +144,13 @@ class ProjectGroupModel
         return empty($result) ? [] : get_object_vars($result);
     }
 
-
+    /**
+     * @param array $data
+     * @param $string
+     * @return mixed
+     */
+    public static function getValue(array $data, $string)
+    {
+        return DB::table(self::TABLE)->where($data)->value($string);
+    }
 }

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 class ProjectModel
 {
     private $table = 'project';
+    const TABLE = 'project';
 
     /**
      * @param array $data
@@ -131,5 +132,15 @@ class ProjectModel
 
         DB::table($this->table)->where($input)->delete();
         return true;
+    }
+
+    /**
+     * @param array $data
+     * @param $string
+     * @return mixed
+     */
+    public static function getValue(array $data, $string)
+    {
+        return DB::table(self::TABLE)->where($data)->value($string);
     }
 }

@@ -137,4 +137,16 @@ class ProjectAreaModel
             ->first();
         return empty($result) ? [] : get_object_vars($result);
     }
+
+    /**
+     * 更新施工区的面积
+     *
+     * @param $areaId
+     * @return mixed
+     */
+    public function updateAreaArea($areaId)
+    {
+        $areaArea = (new ProjectSectionModel)->sumArea($areaId);
+        return $this->update(['id'=>$areaId,'area'=>$areaArea]);
+    }
 }

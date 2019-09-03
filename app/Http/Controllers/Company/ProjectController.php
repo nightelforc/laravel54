@@ -10,8 +10,10 @@ namespace App\Http\Controllers\Company;
 
 
 use App\Http\Controllers\Controller;
+use App\Http\Model\ProjectAreaModel;
 use App\Http\Model\ProjectBudgetModel;
 use App\Http\Model\ProjectModel;
+use App\Http\Model\ProjectSectionModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -380,6 +382,14 @@ class ProjectController extends Controller
             if ($continue){
                 $projectBudgetModel = new ProjectBudgetModel();
                 $projectBudgetModel->editBudget($input);
+                //更新施工段预算
+                $sumSectionBudget = $projectBudgetModel->sumBudget(['sectionId'=>$input['sectionId']]);
+                $projectSectionModel = new ProjectSectionModel();
+                $projectSectionModel->update(['id'=>$input['sectionId'],'budget'=>$sumSectionBudget]);
+                //更新施工区预算
+                $sumSectionBudget = $projectBudgetModel->sumBudget(['areaId'=>$input['areaId']]);
+                $projectAreaModel = new ProjectAreaModel();
+                $projectAreaModel->update(['id'=>$input['areaId'],'budget'=>$sumSectionBudget]);
             }
         } else {
             $failed = $validator->failed();

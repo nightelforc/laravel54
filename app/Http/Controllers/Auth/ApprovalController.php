@@ -315,6 +315,7 @@ class ApprovalController extends Controller
             $session = AdminSessionModel::get($input[self::$token]);
             $input['adminId'] = $session['adminId'];
             $lists = $WorkflowItemModel->myApprovalLists($input);
+//            $lists = $this->descFormat($lists);
             $countLists = $WorkflowItemModel->myApprovalCountLists($input);
             $this->data = [
                 "draw"=>$input['draw'],
@@ -381,5 +382,27 @@ class ApprovalController extends Controller
             }
         }
         return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param $lists
+     * @return mixed
+     */
+    private function descFormat($lists)
+    {
+        foreach ($lists as $key => $l){
+            $methodName = $l->code.'Desc';
+            $lists[$key]->desc = $this->$methodName($l->data);
+        }
+        return $lists;
+    }
+
+    private function unitDesc($data){
+        $model = '计量单位申请：申请的单位名称<b>:name</b>，单位缩写<b>:shortname</b>';
+        $data = json_decode($data);
+        foreach ($data as $key => $d){
+            $model = str_replace(':'.$key,$d,$model);
+        }
+        return $model;
     }
 }

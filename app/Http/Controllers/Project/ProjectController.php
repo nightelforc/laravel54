@@ -437,22 +437,26 @@ class ProjectController extends Controller
         $rules = [
             'projectId' => 'required|integer',
             'areaId' => 'required|integer',
+            'area' => 'nullable|numeric',
             'name' => 'required',
         ];
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型错误',
-            'areaId.required' => '获取施工区参数失败',
-            'areaId.integer' => '施工区参数类型错误',
+            'areaId.required' => '获取施工段参数失败',
+            'areaId.integer' => '施工段参数类型错误',
+            'area.numeric' => '施工段面积参数类型错误',
             'name.required' => '请填写项目名称',
         ];
-        $input = $request->only(['projectId', 'areaId', 'name', 'remark']);
+        $input = $request->only(['projectId', 'areaId', 'name', 'area','remark']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectSectionModel = new ProjectSectionModel();
             $info = $projectSectionModel->checkRepeat(['projectId' => $input['projectId'],'areaId' => $input['areaId'], 'name' => $input['name']]);
             if (empty($info)) {
                 $projectSectionModel->insert($input);
+                $projectAreaModel = new ProjectAreaModel();
+                $projectAreaModel->updateAreaArea($input['areaId']);
             } else {
                 $this->code = 420906;
                 $this->msg = '已存在相同名称的施工段';
@@ -480,6 +484,11 @@ class ProjectController extends Controller
             } elseif (key($failed) == 'name') {
                 if (key($failed['name']) == 'Required') {
                     $this->code = 420905;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'area') {
+                if (key($failed['area']) == 'Numeric') {
+                    $this->code = 420906;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -600,19 +609,23 @@ class ProjectController extends Controller
         $rules = [
             'id' => 'required',
             'name' => 'required',
+            'area' => 'nullable|numeric',
         ];
         $message = [
             'id.required' => '获取施工区参数失败',
             'name.required' => '请填写项目名称',
+            'area.numeric' => '施工段面积参数类型错误',
         ];
-        $input = $request->only(['id', 'name', 'remark']);
+        $input = $request->only(['id', 'name','area', 'remark']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectSectionModel = new ProjectSectionModel();
             $info = $projectSectionModel->info(['id'=>$input['id']]);
-            $info = $projectSectionModel->checkRepeat(['projectId' => $info['projectId'],'areaId' => $info['areaId'], 'name' => $input['name']],$input['id']);
-            if (empty($info)) {
+            $repeat = $projectSectionModel->checkRepeat(['projectId' => $info['projectId'],'areaId' => $info['areaId'], 'name' => $input['name']],$input['id']);
+            if (empty($repeat)) {
                 $projectSectionModel->update($input);
+                $projectAreaModel = new ProjectAreaModel();
+                $projectAreaModel->updateAreaArea($info['areaId']);
             } else {
                 $this->code = 421203;
                 $this->msg = '已存在相同名称的施工段';
@@ -627,6 +640,11 @@ class ProjectController extends Controller
             } elseif (key($failed) == 'name') {
                 if (key($failed['name']) == 'Required') {
                     $this->code = 421202;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'area') {
+                if (key($failed['area']) == 'Numeric') {
+                    $this->code = 421203;
                     $this->msg = $validator->errors()->first();
                 }
             }

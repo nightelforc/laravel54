@@ -82,7 +82,7 @@ class WorkflowItemModel extends Model
                 }
             })
             ->offset($start)->limit($limit)
-            ->select($this->table . '.*','wf.name as workflowName','p.name as projectName','a.name as adminName')
+            ->select($this->table . '.*','wf.code','wf.name as workflowName','p.name as projectName','a.name as adminName')
             ->get()->toArray();
     }
 
@@ -203,7 +203,7 @@ class WorkflowItemModel extends Model
                 }
             })
             ->offset($start)->limit($limit)
-            ->select($this->table . '.*','wf.name as workflowName','p.name as projectName','a.name as adminName')
+            ->select($this->table . '.*','wf.code','wf.name as workflowName','p.name as projectName','a.name as adminName')
             ->get()->toArray();
     }
 

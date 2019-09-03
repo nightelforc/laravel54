@@ -102,6 +102,12 @@ class ProjectGroupAssignmentModel
         foreach ($data['ids'] as $id){
             DB::table($this->table)->where('id',$id)->update(['status'=>$approvalResult]);
         }
+        //更新施工段成本
+        $cost = $this->sumCost(['sectionId'=>$data['sectionId']]);
+        (new ProjectSectionModel())->update(['id'=>$data['sectionId'],'cost'=>$cost]);
+        //更新施工区成本
+        $cost = $this->sumCost(['areaId'=>$data['areaId']]);
+        (new ProjectAreaModel())->update(['id'=>$data['areaId'],'cost'=>$cost]);
     }
 
     /**
@@ -150,5 +156,14 @@ class ProjectGroupAssignmentModel
         }catch (\Exception $e){
             return false;
         }
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    private function sumCost(array $data)
+    {
+        return DB::table($this->table)->where($data)->sum('totalPrice');
     }
 }

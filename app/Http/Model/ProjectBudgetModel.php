@@ -75,4 +75,13 @@ class ProjectBudgetModel
         $result = DB::table($this->table)->where($data)->first();
         return empty($result) ? [] : get_object_vars($result);
     }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function sumBudget(array $data)
+    {
+        return DB::table($this->table)->where($data)->sum('totalPrice');
+    }
 }

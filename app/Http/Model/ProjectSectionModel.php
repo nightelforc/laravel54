@@ -133,5 +133,16 @@ class ProjectSectionModel
         return empty($result) ? [] : get_object_vars($result);
     }
 
+    /**
+     * 对施工段面积求和
+     *
+     * @param $areaId
+     * @return mixed
+     */
+    public function sumArea($areaId)
+    {
+        return DB::table($this->table)->where('areaId',$areaId)->sum('area');
+    }
+
 
 }

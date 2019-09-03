@@ -157,7 +157,7 @@ class WarehouseLogModel
                             'amount' => $d['amount'],
                             'purchasePrice' => $d['purchasePrice'],
                             'salePrice' => $d['salePrice'],
-                            'totalPrice' => $d['price'],
+                            'totalPrice' => $d['totalPrice'],
                             'saleTime' => $data['time'],
                         ];
                     }

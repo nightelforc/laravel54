@@ -128,7 +128,7 @@ class WorkflowItemModel extends Model
                 $node = array_search($workflowItemInfo['curnode'], $process);
                 if ($node == (count($process) - 1)) {
                     $this->update($id, ['curnode' => 0, 'status' => self::ACCEPT]);
-                    ApprovalController::afterApproval($workflowItemInfo['callBackClass'], $workflowItemInfo['callBackMethod'], $workflowItemInfo['pk'], $workflowItemInfo['data'], 1);
+                    ApprovalController::afterApproval($workflowItemInfo['callBackClass'], $workflowItemInfo['callBackMethod'], $workflowItemInfo['pk'], json_decode($workflowItemInfo['data'],true), 1);
                 } else {
                     $this->update($id, ['curnode' => $process[$node + 1], 'status' => self::PROCESSING]);
                 }

@@ -14,6 +14,17 @@ use Illuminate\Support\Facades\DB;
 class MaterialModel
 {
     private $table = 'material';
+    const TABLE = 'material';
+
+    /**
+     * @param array $data
+     * @param $string
+     * @return mixed
+     */
+    public static function getValue(array $data, $string)
+    {
+        return DB::table(self::TABLE)->where($data)->value($string);
+    }
 
     /**
      * @param array $input

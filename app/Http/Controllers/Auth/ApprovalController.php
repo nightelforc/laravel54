@@ -11,11 +11,15 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Model\AdminSessionModel;
 use App\Http\Model\AssignmentModel;
+use App\Http\Model\EmployeeModel;
+use App\Http\Model\MaterialModel;
+use App\Http\Model\MaterialSpecModel;
 use App\Http\Model\ProfessionModel;
 use App\Http\Model\ProjectAreaModel;
 use App\Http\Model\ProjectGroupModel;
 use App\Http\Model\ProjectModel;
 use App\Http\Model\ProjectSectionModel;
+use App\Http\Model\SupplierModel;
 use App\Http\Model\WorkflowItemModel;
 use App\Http\Model\WorkflowItemProcessModel;
 use App\Http\Model\WorkflowModel;
@@ -421,6 +425,10 @@ EOF;
         return $model;
     }
 
+    /**
+     * @param $data
+     * @return string
+     */
     private function addAssignmentDesc($data){
         $data = json_decode($data,true);
         $projectName = ProjectModel::getValue(['id'=>$data['projectId']],'name');
@@ -442,6 +450,60 @@ EOF;
 EOF;
         }
         $table = "<table><thead><tr><th></th><th>施工量</th><th>工程量</th><th>单价</th><th>总价</th></tr></thead>
+            <tbody>$tr</tbody></table>";
+
+        return $model.$table;
+    }
+
+    /**
+     * @param $data
+     * @return string
+     */
+    private function batchChangeStatusDesc($data){
+        $data = json_decode($data,true);
+        $model = '';
+        foreach($data['ids'] as $key => $d){
+            $employeeName = EmployeeModel::getValue(['id'=>$d],'name');
+            $model .= $employeeName.' ，';
+        }
+        switch ($data['status']){
+            case 1:
+                $status = '恢复在岗状态';
+                break;
+            case 2:
+                $status = '调整为待岗状态';
+                break;
+            case 3:
+                $status = '调整为请假状态';
+                break;
+            case 4:
+                $status = '调整为离职状态';
+                break;
+        }
+        $model .= '申请'.$status;
+        return $model;
+    }
+
+    public function consumeDesc($data){
+        $data = json_decode($data,true);
+        $model = '';
+        $projectName = ProjectModel::getValue(['id'=>$data['projectId']],'name');
+        $employeeName = EmployeeModel::getValue(['id'=>$data['sourceEmployeeId']],'name');
+        $model = <<<EOF
+        项目 <b>$projectName</b>，工人 <b>$employeeName</b>，在 <b>$data[time]</b>，购买总价 <b>$data[price]</b>元的物资材料。
+EOF;
+        $tr = '';
+        $i = 0;
+        foreach($data['data'] as $key => $d){
+            $i++;
+            $materialName = MaterialModel::getValue(['id'=>$d['materialId']],'name');
+            $specName = MaterialSpecModel::getValue(['id'=>$d['materialId']],'spec');
+            $supplierName = SupplierModel::getValue(['id'=>$d['supplierId']],'name');
+            $tr .= <<<EOF
+<tr><th>$i</th><th>$materialName</th><th>$specName</th><th>$supplierName</th><th>$d[amount]</th><th>$d[price]</th><th>$d[totalPrice]</th></tr>
+EOF;
+        }
+        $table = "<table><thead><tr><th></th><th>材料名称</th><th>规格</th><th>供应商</th><th>数量</th><th>单价</th><th>总价</th></tr></thead>
             <tbody>$tr</tbody></table>";
 
         return $model.$table;

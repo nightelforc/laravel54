@@ -17,7 +17,18 @@ use Illuminate\Support\Facades\DB;
 class EmployeeModel extends Model
 {
     private $table = 'employee';
+    const TABLE = 'employee';
     public $employeeStatus = [1,2,3,4];
+
+    /**
+     * @param array $data
+     * @param $string
+     * @return mixed
+     */
+    public static function getValue(array $data, $string)
+    {
+        return DB::table(self::TABLE)->where($data)->value($string);
+    }
 
     /**
      * @param array $input

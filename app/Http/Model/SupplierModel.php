@@ -15,6 +15,18 @@ class SupplierModel
 {
     private $table = 'supplier';
 
+    const TABLE = 'supplier';
+
+    /**
+     * @param array $data
+     * @param $string
+     * @return mixed
+     */
+    public static function getValue(array $data, $string)
+    {
+        return DB::table(self::TABLE)->where($data)->value($string);
+    }
+
     /**
      * @param array $data
      * @return mixed

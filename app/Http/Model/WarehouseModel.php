@@ -49,7 +49,11 @@ class WarehouseModel
     public function countLists(array $input)
     {
         return DB::table($this->table)
+            ->leftJoin('material as m','m.id','=',$this->table.'.materialId')
             ->where(function ($query) use ($input) {
+                if (isset($input['projectId']) && !is_null($input['projectId'])) {
+                    $query->where($this->table.'.projectId', $input['projectId']);
+                }
                 if (isset($input['search']) && !is_null($input['search'])) {
                     $query->where('m.name', 'like', '%' . $input['search'] . '%');
                 }
@@ -92,9 +96,9 @@ class WarehouseModel
             ->leftJoin('material_spec as ms','ms.id','=',$this->table.'.specId')
             ->leftJoin('supplier as s','s.id','=',$this->table.'.supplierId')
             ->where(function ($query) use($data){
-//                if (isset($data['projectId']) && !is_null($data['projectId'])){
-//                    $query->where('projectId',$data['projectId']);
-//                }
+                if (isset($data['projectId']) && !is_null($data['projectId'])){
+                    $query->where('projectId',$data['projectId']);
+                }
 //                if (isset($data['supplierId']) && !is_null($data['supplierId'])){
 //                    $query->where('supplierId',$data['supplierId']);
 //                }

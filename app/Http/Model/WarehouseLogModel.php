@@ -64,14 +64,20 @@ class WarehouseLogModel
                         $warehouseLogInfoModel->insert($warehouseLogInfo);
                     }
                 }else{
+                    $warehouseModel = new WarehouseModel();
+                    $info = $warehouseModel->info([
+                        'materialId' => $data['materialId'],
+                        'specId' => $data['specId'],
+                        'supplierId' => $data['supplierId']
+                    ]);
                     $warehouseLogInfo = [
                         'logId' => $insertId,
                         'materialId' => $data['materialId'],
                         'specId' => $data['specId'],
                         'supplierId' => $data['supplierId'],
                         'amount' => $data['amount'],
-                        'price' => $data['price'],
-                        'totalPrice' => $data['totalPrice'],
+                        'price' => isset($data['price'])?$data['price']:$info['purchasePrice'],
+                        'totalPrice' => isset($data['totalPrice'])?$data['totalPrice']:($info['purchasePrice']*$data['amount']),
                     ];
                     $warehouseLogInfoModel->insert($warehouseLogInfo);
                 }
@@ -81,6 +87,12 @@ class WarehouseLogModel
             });
             return $insertId;
         } catch (\Exception $e) {
+            $logFile = fopen(
+                storage_path('warehouse_consume.log'),
+                'a+'
+            );
+            fwrite($logFile, 'approval[' . $e->getLine() . ']' . $e->getMessage());
+            fclose($logFile);
             return $e->getMessage();
         }
     }
@@ -347,6 +359,7 @@ class WarehouseLogModel
                 $supplierOrdersInfoModel = new SupplierOrdersInfoModel();
                 $warehouseModel = new WarehouseModel();
                 foreach ($data['data'] as $key => $d) {
+                    $supplierId = $d['supplierId'];
                     //检查供应商
                     if ($d['supplierId'] == 0) {
                         $newSupplier = [
@@ -359,7 +372,7 @@ class WarehouseLogModel
                     }
                     //增加供应商货单记录
                     $supplierOrder = [
-                        'supplierId' => $d['supplierId'],
+                        'supplierId' => $supplierId,
                         'projectId' => $data['projectId'],
                         'totalPrice' => $d['totalPrice'],
                         'deliveryTime' => $data['time'],
@@ -370,7 +383,7 @@ class WarehouseLogModel
                         'orderId' => $supplierOrderId,
                         'materialId' => $d['materialId'],
                         'specId' => $d['specId'],
-                        'supplierId' => $d['supplierId'],
+                        'supplierId' => $supplierId,
                         'amount' => $d['amount'],
                         'price' => $d['price'],
                         'totalPrice' => $d['totalPrice'],
@@ -381,7 +394,7 @@ class WarehouseLogModel
                         'projectId' => $data['projectId'],
                         'materialId' => $d['materialId'],
                         'specId' => $d['specId'],
-                        'supplierId' => $d['supplierId'],
+                        'supplierId' => $supplierId,
                     ];
                     $materialInfo = $warehouseModel->info($warehouseData);
                     if (empty($materialInfo)) {
@@ -391,10 +404,10 @@ class WarehouseLogModel
                             'projectId' => $data['projectId'],
                             'materialId' => $d['materialId'],
                             'specId' => $d['specId'],
-                            'supplierId' => $d['supplierId'],
+                            'supplierId' => $supplierId,
                             'amount' => $d['amount'],
                             'purchasePrice' => $d['price'],
-                            'salePrice' => $d['price']*(1+$rate),
+                            'salePrice' => 0,
                             'updateTime' => date('Y-m-d H:i:s')
                         ];
                         $warehouseModel->insert($warehouseData);

@@ -1635,30 +1635,31 @@ class WarehouseController extends Controller
     public function search(Request $request)
     {
         $rules = [
-//            'projectId' => 'nullable|integer',
+            'projectId' => 'nullable|integer',
 //            'supplierId' => 'nullable|integer',
 //            'materialId' => 'nullable|integer',
 //            'specId' => 'nullable|integer',
         ];
         $message = [
-//            'projectId.integer' => '项目参数类型错误',
-//            'supplierId.integer' => '供应商参数类型错误',
+            'projectId.integer' => '项目参数类型错误',
+            'supplierId.integer' => '供应商参数类型错误',
 //            'materialId.integer' => '材料参数类型错误',
 //            'specId.integer' => '规格参数类型错误',
         ];
-        $input = $request->only(['search']);
+        $input = $request->only(['projectId','search']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $warehouseModel = new WarehouseModel();
             $this->data = $warehouseModel->search($input);
         } else {
-//            $failed = $validator->failed();
-//            if (key($failed) == 'projectId') {
-//                if (key($failed['projectId']) == 'Integer') {
-//                    $this->code = 461201;
-//                    $this->msg = $validator->errors()->first();
-//                }
-//            } elseif (key($failed) == 'supplierId') {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 461201;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+//              elseif (key($failed) == 'supplierId') {
 //                if (key($failed['supplierId']) == 'Integer') {
 //                    $this->code = 461202;
 //                    $this->msg = $validator->errors()->first();
@@ -1698,7 +1699,7 @@ class WarehouseController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $settingModel = new SettingModel();
-            $settingModel->set('saleRate',$input['rate'],$input['projectId']);
+            $settingModel->set('saleRate',$input['rate']/100,$input['projectId']);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {
@@ -1744,7 +1745,14 @@ class WarehouseController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $settingModel = new SettingModel();
-            $this->data = ['saleRate'=>$settingModel->get('saleRate',$input['projectId'])];
+            $saleRate = $settingModel->get('saleRate',$input['projectId']);
+            if ($saleRate >0){
+                $this->data = ['saleRate'=>$saleRate*100];
+            }else{
+                $this->code = 461303;
+                $this->msg = '请先设置加价率';
+                $this->data = ['saleRate'=>$saleRate*100];
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {

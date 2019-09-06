@@ -497,7 +497,7 @@ EOF;
         foreach($data['data'] as $key => $d){
             $i++;
             $materialName = MaterialModel::getValue(['id'=>$d['materialId']],'name');
-            $specName = MaterialSpecModel::getValue(['id'=>$d['materialId']],'spec');
+            $specName = MaterialSpecModel::getValue(['id'=>$d['specId']],'spec');
             $supplierName = SupplierModel::getValue(['id'=>$d['supplierId']],'name');
             $tr .= <<<EOF
 <tr><th>$i</th><th>$materialName</th><th>$specName</th><th>$supplierName</th><th>$d[amount]</th><th>$d[price]</th><th>$d[totalPrice]</th></tr>

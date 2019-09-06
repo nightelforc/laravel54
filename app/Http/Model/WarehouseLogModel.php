@@ -398,7 +398,7 @@ class WarehouseLogModel
                     ];
                     $materialInfo = $warehouseModel->info($warehouseData);
                     if (empty($materialInfo)) {
-                        $rate = (new SettingModel())->get('saleRate',$data['projectId']);
+
                         //创建仓库新的材料库存
                         $warehouseData = [
                             'projectId' => $data['projectId'],
@@ -412,8 +412,17 @@ class WarehouseLogModel
                         ];
                         $warehouseModel->insert($warehouseData);
                     } else {
+                        $newPrice = ($materialInfo['amount']*$materialInfo['purchasePrice']+$d['amount']*$d['price'])/($materialInfo['amount']+$d['amount']);
                         //更新库存
-                        $warehouseModel->update($materialInfo['id'], ['amount' => $d['amount']+$materialInfo['amount'], 'updateTime' => date('Y-m-d H:i:s')]);
+                        $settingModel = new SettingModel();
+                        $saleRate = $settingModel->get('saleRate',$data['projectId']);
+                        $salePrice = $newPrice*(1+$saleRate);
+                        $data =[
+                            'amount' => $d['amount']+$materialInfo['amount'],
+                            'purchasePrice' => $newPrice,
+                            'salePrice' => $salePrice,
+                            'updateTime' => date('Y-m-d H:i:s')];
+                        $warehouseModel->update($materialInfo['id'], $data);
                     }
 
                     unset($data['data'][$key]['name']);
@@ -434,6 +443,12 @@ class WarehouseLogModel
                 return false;
             }
         } catch (\Exception $e) {
+            $logFile = fopen(
+                storage_path('warehouse.log'),
+                'a+'
+            );
+            fwrite($logFile, 'purchase[' . $e->getLine() . ']' . $e->getMessage());
+            fclose($logFile);
             return false;
         }
     }

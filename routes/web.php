@@ -21,6 +21,8 @@ Route::group([
     Route::post('/forgetPwd', 'LoginController@forgetPwd');
     Route::post('/resetPwd', 'LoginController@resetPwd');
 
+    Route::post('/system/info', 'AdminController@systemInfo');
+
 });
 
 Route::group([

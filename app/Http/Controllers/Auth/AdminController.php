@@ -496,4 +496,24 @@ class AdminController extends Controller
         }
 
     }
+
+    /**
+     * @return \Illuminate\Http\Response
+     */
+    public function systemInfo(){
+        $laravel = app();
+        $con=mysqli_connect(env('DB_HOST'),env("DB_USERNAME"),env("DB_PASSWORD"),env("DB_DATABASE"));
+        $this->data = [
+            'softVersion'=>env('version'),
+            'server'=>php_uname('s').' '.php_uname('r').' '.php_uname('m'),
+            'PHPVersion'=>PHP_VERSION,
+            'laravelVersion'=>$laravel::VERSION,
+            'time'=>date("Y-m-d H:i:s"),
+            'env'=>$_SERVER["SERVER_SOFTWARE"],
+            'host'=>$_SERVER["HTTP_HOST"],
+            'cgi'=>php_sapi_name(),
+            'mysqlVersion'=>mysqli_get_server_info($con),
+        ];
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
 }

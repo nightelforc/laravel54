@@ -105,8 +105,8 @@ class RoleController extends Controller
             'projectId' => 'required|integer',
         ];
         $message = [
-            'projectId.required' => '获取角色参数失败',
-            'projectId.integer' => '角色参数类型错误',
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型错误',
         ];
         $input = $request->only(['projectId']);
         $validator = Validator::make($input, $rules, $message);

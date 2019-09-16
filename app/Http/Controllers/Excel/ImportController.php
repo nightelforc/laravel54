@@ -8,9 +8,8 @@
 
 namespace App\Http\Controllers\Excel;
 
-
-
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -18,14 +17,14 @@ class ImportController extends Controller
 {
 
 
-    public function iEmployeeLists(){
-        $file = './public/t.xlsx';
+    public function iEmployeeLists(Request $request){
+        $file = $request->file('file');
         $result = (new ImportHandleController())->employeeLists($file);
         $count  = count($result);
         if ($count > 0){
             $filename = $this->storeExcel($result);
             $this->code = 510101;
-            $this->msg = '共有 '.$count . ' 条数据导入失败，点击<a href="./excel/download?name='.$filename . '">链接</a>';
+            $this->msg = '共有 '.$count . ' 条数据导入失败，点击<a href="http://'.$_SERVER['HTTP_HOST'].'/excel/download?name='.$filename . '&token='.$request->input(self::$token).'">链接</a>查看失败的数据';
         }
 
         return $this->ajaxResult($this->code, $this->msg, $this->data);

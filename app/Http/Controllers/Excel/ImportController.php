@@ -42,7 +42,14 @@ class ImportController extends Controller
         $extensions = 'xlsx';
         Excel::create($fileName,function($excel) use ($data){
             $excel->sheet('sheet1',function($sheet) use ($data){
-                $sheet->rows($data);
+//                $sheet->rows($data);
+                $sheet->fromArray($data,null, 'A1', true, false);
+                $count = count($data);
+                $sheet->setColumnFormat(
+                    array(
+                        'A1:K'.$count=>'@',
+                    )
+                );
             });
         })->store($extensions);
 

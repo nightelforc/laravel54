@@ -33,18 +33,12 @@ class EmployeeModel extends Model
     /**
      * @param array $input
      * @param array $status
+     * @param bool $exports
      * @return mixed
      */
-    public function lists(array $input, $status = [1, 3, 4])
+    public function lists(array $input, $status = [1, 3, 4],$exports = false)
     {
-        $limit = config('yucheng.limit');
-        $start = is_null($input['start']) ? 0 : $input['start'];
-
-        if (isset($input['length']) && !is_null($input['length'])) {
-            $limit = $input['length'];
-        }
-
-        return DB::table($this->table)
+        $result = DB::table($this->table)
             ->leftJoin('profession as p', 'p.id', '=', $this->table . '.professionId')
             ->leftJoin('project', 'project.id', '=', $this->table . '.projectId')
             ->where(function ($query) use ($input, $status) {
@@ -65,10 +59,19 @@ class EmployeeModel extends Model
                         $query1->where($this->table . '.name', 'like', '%' . $input['search'] . '%')->orWhere('jobNumber', 'like', '%' . $input['search'] . '%');
                     });
                 }
-            })
-            ->offset($start)->limit($limit)
-            ->select($this->table . '.*', 'p.name as professionName', 'project.name as projectName')
+            });
+            if(!$exports){
+                $limit = config('yucheng.limit');
+                $start = is_null($input['start']) ? 0 : $input['start'];
+
+                if (isset($input['length']) && !is_null($input['length'])) {
+                    $limit = $input['length'];
+                }
+                $result = $result->offset($start)->limit($limit);
+            }
+            $result = $result->select($this->table . '.*', 'p.name as professionName', 'project.name as projectName')
             ->get()->toArray();
+            return $result;
     }
 
     /**
@@ -473,6 +476,104 @@ class EmployeeModel extends Model
     public function countDayValueLists(array $data)
     {
         return $this->countAttendanceEmployee($data);
+    }
+
+    /**
+     * @param $id
+     * @return bool
+     */
+    public function delete($id)
+    {
+        try{
+            $info = (new EmployeeAttendanceModel())->info(['employeeId'=>$id]);
+            if (!empty($info)){
+                throw new \Exception("",1);
+            }
+//            $info = (new EmployeeExperienceModel())->info(['employeeId'=>$id]);
+//            if (!empty($info)){
+//                throw new \Exception("",2);
+//            }
+            $info = (new EmployeeLeaveModel())->info(['employeeId'=>$id]);
+            if (!empty($info)){
+                throw new \Exception("",3);
+            }
+            $info = (new EmployeeLivingModel())->info(['employeeId'=>$id]);
+            if (!empty($info)){
+                throw new \Exception("",4);
+            }
+            $info = (new EmployeeLoanModel())->info(['employeeId'=>$id]);
+            if (!empty($info)){
+                throw new \Exception("",5);
+            }
+            $info = (new EmployeeMaterialOrderModel())->info(['employeeId'=>$id]);
+            if (!empty($info)){
+                throw new \Exception("",6);
+            }
+            $info = (new EmployeeOtherFeesModel())->info(['employeeId'=>$id]);
+            if (!empty($info)){
+                throw new \Exception("",7);
+            }
+            $info = (new ProjectGroupMembersModel())->info(['employeeId'=>$id]);
+            if (!empty($info)){
+                throw new \Exception("",8);
+            }
+            $info = (new ProjectGroupSeparateAccountsModel())->info(['employeeId'=>$id]);
+            if (!empty($info)){
+                throw new \Exception("",9);
+            }
+            $info = (new ProjectOtherSeparateAccountsModel())->info(['employeeId'=>$id]);
+            if (!empty($info)){
+                throw new \Exception("",10);
+            }
+            $info = (new WarehouseLogModel())->info(['sourceEmployeeId'=>$id]);
+            if (!empty($info)){
+                throw new \Exception("",11);
+            }
+
+            DB::table($this->table)->where(['id'=>$id])->delete();
+            return true;
+        }catch(\Exception $e){
+            $code = $e->getCode();
+            switch ($code){
+                case 1:
+                    $msg = '已记录考勤，不能删除';
+                    break;
+                case 2:
+                    $msg = '已记录考勤，不能删除';
+                    break;
+                case 3:
+                    $msg = '已有请假记录，不能删除';
+                    break;
+                case 4:
+                    $msg = '已有生活费充值记录，不能删除';
+                    break;
+                case 5:
+                    $msg = '已有借款记录，不能删除';
+                    break;
+                case 6:
+                    $msg = '已有材料费记录，不能删除';
+                    break;
+                case 7:
+                    $msg = '已有其他费用记录，不能删除';
+                    break;
+                case 8:
+                    $msg = '已被分配进入班组，不能删除';
+                    break;
+                case 9:
+                    $msg = '已进行人员分账，不能删除';
+                    break;
+                case 10:
+                    $msg = '已进行杂工分账，不能删除';
+                    break;
+                case 11:
+                    $msg = '已存在出入库记录，不能删除';
+                    break;
+                default:
+                    $msg = '不能删除';
+            }
+            return $msg;
+        }
+
     }
 
 

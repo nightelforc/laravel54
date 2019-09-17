@@ -127,7 +127,15 @@ class EmployeeLeaveModel
 
     }
 
-
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function info($data = [])
+    {
+        $result = DB::table($this->table)->where($data)->first();
+        return empty($result) ? [] : get_object_vars($result);
+    }
 
 
 }

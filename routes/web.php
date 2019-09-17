@@ -82,6 +82,7 @@ Route::group([
         Route::post('/employee/lists', 'EmployeeController@lists');
         Route::post('/employee/add', 'EmployeeController@add');
         Route::post('/employee/edit', 'EmployeeController@edit');
+        Route::post('/employee/delete', 'EmployeeController@delete');
         Route::post('/employee/dayValueLists', 'EmployeeController@dayValueLists');
         Route::post('/employee/editDayValue', 'EmployeeController@editDayValue');
 
@@ -252,6 +253,8 @@ Route::group([
         'prefix'=>'excel',
     ],function(){
         Route::post('/import/iEmployeeLists', 'ImportController@iEmployeeLists');
+
+        Route::post('/export/eEmployeeLists', 'ExportController@eEmployeeLists');
 
         Route::get('/download', 'ExportController@download');
     });

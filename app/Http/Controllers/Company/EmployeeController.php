@@ -499,4 +499,41 @@ class EmployeeController extends Controller
         }
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function delete(Request $request){
+        $rules = [
+            'id' => 'required|integer',
+        ];
+        $message = [
+            'id.required' => '获取工人参数失败',
+            'id.integer' => '工人参数类型错误',
+        ];
+        $input = $request->only(['id']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $employeeModel = new EmployeeModel();
+            $result = $employeeModel->delete($input['id']);
+            if (is_string($result)){
+                $this->code = 310403;
+                $this->msg = $validator->errors()->first();
+            }
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'id') {
+                if (key($failed['id']) == 'Required') {
+                    $this->code = 310401;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['id']) == 'Integer') {
+                    $this->code = 310402;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
 }

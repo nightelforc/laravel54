@@ -26,14 +26,24 @@ class ExportController extends Controller
             return chr($ascii);
 //        }
     }
+
+    private function downloadURL($filename,$request){
+        return '点击<a target="_blank" href="http://'.$_SERVER['HTTP_HOST'].'/excel/download?name='.$filename . '&token='.$request->input(self::$token).'">链接</a>开始下载';
+    }
+
     /**
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     * @return string|\Symfony\Component\HttpFoundation\BinaryFileResponse
      */
     public function download(Request $request){
         $input = $request->only(['name']);
         $path = self::PATH . $input['name'];
-        return response()->download($path);
+        if (file_exists($path)){
+            return response()->download($path);
+        }else{
+            return "文件不存在,请尝试重新下载";
+        }
+
     }
 
     /**
@@ -110,7 +120,7 @@ class ExportController extends Controller
                 });
             })->store($extensions);
             $filename = $fileName.'.'.$extensions;
-            $this->msg = '点击<a href="http://'.$_SERVER['HTTP_HOST'].'/excel/download?name='.$filename . '&token='.$request->input(self::$token).'">链接</a>开始下载';
+            $this->msg =$this->downloadURL($filename,$request);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {
@@ -180,7 +190,7 @@ class ExportController extends Controller
                 });
             })->store($extensions);
             $filename = $fileName.'.'.$extensions;
-            $this->msg = '点击<a href="http://'.$_SERVER['HTTP_HOST'].'/excel/download?name='.$filename . '&token='.$request->input(self::$token).'">链接</a>开始下载';
+            $this->msg =$this->downloadURL($filename,$request);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {

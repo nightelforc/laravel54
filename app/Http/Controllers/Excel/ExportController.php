@@ -19,6 +19,13 @@ class ExportController extends Controller
 {
     CONST PATH = '../storage/exports/';
 
+    private function columns(array $data){
+        $num = count($data[0]);
+//        if ($num <27){
+            $ascii = $num+64;
+            return chr($ascii);
+//        }
+    }
     /**
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
@@ -29,6 +36,10 @@ class ExportController extends Controller
         return response()->download($path);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function eEmployeeLists(Request $request){
         $rules = [
             'projectId' => 'required|integer',
@@ -89,9 +100,10 @@ class ExportController extends Controller
                     }
                     $sheet->fromArray($cellData,null, 'A1', true, false);
                     $count = count($cellData);
+                    $column = $this->columns($cellData);
                     $sheet->setColumnFormat(
                         array(
-                            'A1:K'.$count=>'@',
+                            'A1:'.$column.$count=>'@',
                         )
                     );
                     $sheet->setAutoSize(true);
@@ -118,6 +130,66 @@ class ExportController extends Controller
             } elseif (key($failed) == 'status') {
                 if (key($failed['status']) == 'Integer') {
                     $this->code = 520104;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     * @throws \Exception
+     */
+    public function eEmployeeWage(Request $request){
+        $rules = [
+            'id' => 'required|integer',
+        ];
+        $message = [
+            'id.required' => '获取工人参数失败',
+            'id.integer' => '工人参数类型错误',
+        ];
+        $input = $request->only('id');
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $employeeModel = new EmployeeModel();
+            $info = $employeeModel->employeeInfo($input);
+
+            $fileName = $info['baseInfo']['name'].'工资列表';
+//            $fileNameGBK = iconv('utf-8','gbk',$fileName);
+            $extensions = 'xlsx';
+            Excel::create($fileName,function($excel) use ($info){
+                $excel->sheet('sheet1',function($sheet) use ($info){
+                    $data = $info['wages'];
+                    $cellData = [["时间","工资小计","包工费","杂工费","考勤工资","材料费","借款","生活费","奖金","罚款"]];
+                    foreach ($data as $key=>$d){
+                        $total = $d['separateAccounts']+$d['otherSeparateAccounts']+$info['baseInfo']['dayValue']*$d['attendance']-$d['materialOrder']-$d['loan']+$d['living']+$d['bonus']-$d['fine'];
+                        $rowData = [$key,$total,$d['separateAccounts'],$d['otherSeparateAccounts'],$info['baseInfo']['dayValue']*$d['attendance'],$d['materialOrder'],$d['loan'],$d['living'],$d['bonus'],$d['fine']];
+                        array_push($cellData,$rowData);
+                    }
+                    $sheet->fromArray($cellData,null, 'A1', true, false);
+                    $count = count($cellData);
+                    $column = $this->columns($cellData);
+                    $sheet->setColumnFormat(
+                        array(
+                            'A1:'.$column.$count=>'@',
+                        )
+                    );
+                    $sheet->setAutoSize(true);
+                });
+            })->store($extensions);
+            $filename = $fileName.'.'.$extensions;
+            $this->msg = '点击<a href="http://'.$_SERVER['HTTP_HOST'].'/excel/download?name='.$filename . '&token='.$request->input(self::$token).'">链接</a>开始下载';
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'id') {
+                if (key($failed['id']) == 'Required') {
+                    $this->code = 410201;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['id']) == 'Integer') {
+                    $this->code = 410202;
                     $this->msg = $validator->errors()->first();
                 }
             }

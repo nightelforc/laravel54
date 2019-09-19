@@ -179,8 +179,9 @@ class ProjectController extends Controller
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型错误',
-            'amount.required' => '获取批量生成数量失败',
-            'amount.integer' => '批量生成参数类型错误',
+            'amount.required' => '请填写批量增加数量',
+            'amount.integer' => '批量增加数量数据类型错误',
+            'amount.min' => '批量增加数量不能小于:min',
         ];
         $input = $request->only(['projectId', 'amount']);
         $validator = Validator::make($input, $rules, $message);
@@ -506,15 +507,20 @@ class ProjectController extends Controller
             'projectId' => 'required|integer',
             'areaId' => 'required|integer',
             'amount' => 'required|integer|min:1',
+            'area' => 'required|numeric',
         ];
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型错误',
             'areaId.required' => '获取施工区参数失败',
             'areaId.integer' => '施工区参数类型错误',
-            'amount.required' => '获取项目参数失败',
+            'amount.required' => '请填写批量增加数量',
+            'amount.integer' => '批量增加数量数据类型错误',
+            'amount.min' => '批量增加数量不能小于:min',
+            'area.required' => '请填写施工区面积',
+            'area.numeric' => '施工区面积数据类型错误',
         ];
-        $input = $request->only(['projectId', 'areaId', 'amount']);
+        $input = $request->only(['projectId', 'areaId', 'amount','area']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectSectionModel = new ProjectSectionModel();
@@ -558,6 +564,15 @@ class ProjectController extends Controller
                 }
                 if (key($failed['amount']) == 'Min') {
                     $this->code = 421007;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'area') {
+                if (key($failed['area']) == 'Required') {
+                    $this->code = 421008;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['area']) == 'Numeric') {
+                    $this->code = 421009;
                     $this->msg = $validator->errors()->first();
                 }
             }

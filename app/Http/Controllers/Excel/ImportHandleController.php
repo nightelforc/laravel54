@@ -108,6 +108,16 @@ class ImportHandleController extends Controller
                             $insertData[$t] = 0;
                         }
                         break;
+                    case 'contractTime':
+                        if (!empty($$t)){
+                            $insertData['isContract'] = 1;
+                        }
+                        break;
+                    case 'eduTime':
+                        if (!empty($$t)){
+                            $insertData['isEdu'] = 1;
+                        }
+                        break;
                     default:
                         $insertData[$t] = $$t;
                         break;

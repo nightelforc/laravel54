@@ -173,6 +173,12 @@ class EmployeeController extends Controller
             $input['image'] = $imagePath;
             $employeeModel = new EmployeeModel();
             $employeeExperienceModel = new EmployeeExperienceModel();
+            if(!empty($input['contractTime'])){
+                $input['isContract'] = 1;
+            }
+            if(!empty($input['eduTime'])){
+                $input['isEdu'] = 1;
+            }
             $insertId = $employeeModel->insert($input);
             if (is_int($insertId)){
                 $data = [
@@ -334,6 +340,13 @@ class EmployeeController extends Controller
             $info = $employeeModel->info(['id'=>$id]);
             if (!empty($info['image']) &&  fileExists('.'.$info['image'])){
                 unlink('.'.$info['image']);
+            }
+
+            if(!empty($input['contractTime'])){
+                $input['isContract'] = 1;
+            }
+            if(!empty($input['eduTime'])){
+                $input['isEdu'] = 1;
             }
             $employeeModel->update($id,$input);
         } else {

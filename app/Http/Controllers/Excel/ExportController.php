@@ -51,7 +51,7 @@ class ExportController extends Controller
             $extensions = 'xlsx';
             Excel::create($fileName,function($excel) use ($data){
                 $excel->sheet('sheet1',function($sheet) use ($data){
-                    $cellData = [["姓名","项目","工种","工号","身份证号","性别","年龄","民族","联系方式","家庭住址","银行卡号"]];
+                    $cellData = [["姓名","项目","工种","工号","身份证号","性别","年龄","民族","联系方式","家庭住址","银行卡号","是否签订合同","签合同时间","是否入场教育","入场教育时间"]];
                     foreach ($data as $d){
                         switch ($d->gender){
                             case 1:
@@ -63,7 +63,27 @@ class ExportController extends Controller
                             default:
                                 $gender = '';
                         }
-                        $rowData = [$d->name,$d->projectName,$d->professionName,$d->jobNumber,$d->idcard,$gender,$d->age,$d->nation,$d->phone,$d->homeAddress,$d->bankNumber];
+                        switch ($d->isContract){
+                            case 1:
+                                $isContract = '是';
+                                break;
+                            case 0:
+                                $isContract = '否';
+                                break;
+                            default:
+                                $isContract = '';
+                        }
+                        switch ($d->isEdu){
+                            case 1:
+                                $isEdu = '是';
+                                break;
+                            case 0:
+                                $isEdu = '否';
+                                break;
+                            default:
+                                $isEdu = '';
+                        }
+                        $rowData = [$d->name,$d->projectName,$d->professionName,$d->jobNumber,$d->idcard,$gender,$d->age,$d->nation,$d->phone,$d->homeAddress,$d->bankNumber,$isContract,$d->contractTime,$isEdu,$d->eduTime];
                         array_push($cellData,$rowData);
 
                     }

@@ -18,7 +18,7 @@ use Maatwebsite\Excel\Facades\Excel;
 class ImportHandleController extends Controller
 {
     private $template = [
-        'employeeLists' => ['name', 'project', 'profession', 'jobNumber', 'idcard', 'gender', 'age', 'nation', 'phone', 'homeAddress', 'bankNumber']
+        'employeeLists' => ['name', 'project', 'profession', 'jobNumber', 'idcard', 'gender', 'age', 'nation', 'phone', 'homeAddress', 'bankNumber','isContract','contractTime','isEdu','eduTime']
     ];
 
     /**
@@ -98,6 +98,14 @@ class ImportHandleController extends Controller
                         } else {
                             $insert = false;
                             break 2;
+                        }
+                        break;
+                    case 'isContract':
+                    case 'isEdu':
+                        if ($$t == 1 || preg_match('/\x{662F}/u', $$t)) {
+                            $insertData[$t] = 1;
+                        } elseif ($$t == 0 || preg_match('/\x{5426}/u', $$t)) {
+                            $insertData[$t] = 0;
                         }
                         break;
                     default:

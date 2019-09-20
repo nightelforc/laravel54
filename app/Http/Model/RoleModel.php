@@ -28,6 +28,7 @@ class RoleModel
         }
 
         return DB::table($this->table)
+            ->leftJoin('profession as p','p.id','=',$this->table.'.professionId')
             ->where(function ($query) use ($input){
                 if (isset($input['isProject']) && !is_null($input['isProject'])){
                     $query->where('isProject',$input['isProject']);
@@ -37,7 +38,7 @@ class RoleModel
                 }
             })
             ->offset($start)->limit($limit)
-            ->select($this->table.'.*')
+            ->select($this->table.'.*','p.name as professionName')
             ->get()->toArray();
     }
 

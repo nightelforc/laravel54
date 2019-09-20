@@ -531,8 +531,10 @@ class ProjectController extends Controller
                 $start = intval(substr($batchInfo['name'], 0, -2)) + 1;
             }
             for ($i = $start; $i < $start+$input['amount']; $i++) {
-                $projectSectionModel->insert(['areaId' => $input['areaId'], 'name' => $i . '层']);
+                $projectSectionModel->insert(['areaId' => $input['areaId'], 'name' => $i . '层','area'=>$input['area']]);
             }
+            $projectAreaModel = new ProjectAreaModel();
+            $projectAreaModel->updateAreaArea($input['areaId']);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'projectId') {

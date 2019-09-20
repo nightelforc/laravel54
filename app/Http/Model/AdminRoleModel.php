@@ -50,9 +50,10 @@ class AdminRoleModel
     {
         $result = DB::table($this->table)
             ->leftJoin('role as r','r.id','=',$this->table.'.roleId')
+            ->leftJoin('profession as p','p.id','=',$this->table.'.professionId')
             ->where('r.status',1)
             ->where('adminId',$id)
-            ->select('r.id as roleId','r.name as roleName')
+            ->select('r.id as roleId','r.name as roleName','r.professionId','p.name as professionName')
             ->first();
         return empty($result) ? [] : get_object_vars($result);
     }

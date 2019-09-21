@@ -85,6 +85,7 @@ Route::group([
         Route::post('/employee/delete', 'EmployeeController@delete');
         Route::post('/employee/dayValueLists', 'EmployeeController@dayValueLists');
         Route::post('/employee/editDayValue', 'EmployeeController@editDayValue');
+        Route::post('/employee/batchEditDayValue', 'EmployeeController@batchEditDayValue');
 
         Route::post('/project/lists', 'ProjectController@lists');
         Route::post('/project/add', 'ProjectController@add');

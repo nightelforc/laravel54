@@ -600,7 +600,7 @@ class EmployeeController extends Controller
             'dayValue' => 'required|integer',
         ];
         $i = 0;
-        foreach ($input as $d){
+        foreach ($input['data'] as $d){
             $validator = Validator::make($d, $rules);
             if ($validator->passes()) {
                 $employeeModel = new EmployeeModel();

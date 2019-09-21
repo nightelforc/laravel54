@@ -604,7 +604,7 @@ class EmployeeController extends Controller
             $validator = Validator::make($d, $rules);
             if ($validator->passes()) {
                 $employeeModel = new EmployeeModel();
-                $info = $employeeModel->info(['id'=>$input['employeeId']]);
+                $info = $employeeModel->info(['id'=>$d['employeeId']]);
                 if ($info['hasAttendance'] == 1){
                     $employeeModel->update($d['employeeId'],['dayValue'=>$d['dayValue']]);
                     $i++;

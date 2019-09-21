@@ -593,6 +593,36 @@ class EmployeeController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
+    public function batchEditDayValue(Request $request){
+        $input = $request->only(['data']);
+        $rules = [
+            'employeeId' => 'required|integer',
+            'dayValue' => 'required|integer',
+        ];
+        $i = 0;
+        foreach ($input as $d){
+            $validator = Validator::make($d, $rules);
+            if ($validator->passes()) {
+                $employeeModel = new EmployeeModel();
+                $info = $employeeModel->info(['id'=>$input['employeeId']]);
+                if ($info['hasAttendance'] == 1){
+                    $employeeModel->update($d['employeeId'],['dayValue'=>$d['dayValue']]);
+                    $i++;
+                }else{
+                    continue;
+                }
+            }else{
+                continue;
+            }
+        }
+        $this->msg = '共'.$i.'个日工值保存成功';
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
     public function delete(Request $request){
         $rules = [
             'id' => 'required|integer',
@@ -607,18 +637,18 @@ class EmployeeController extends Controller
             $employeeModel = new EmployeeModel();
             $result = $employeeModel->delete($input['id']);
             if (is_string($result)){
-                $this->code = 310603;
-                $this->msg = $validator->errors()->first();
+                $this->code = 310703;
+                $this->msg = '删除失败，该工人已经参与考勤或分账等';
             }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
                 if (key($failed['id']) == 'Required') {
-                    $this->code = 310601;
+                    $this->code = 310701;
                     $this->msg = $validator->errors()->first();
                 }
                 if (key($failed['id']) == 'Integer') {
-                    $this->code = 310602;
+                    $this->code = 310702;
                     $this->msg = $validator->errors()->first();
                 }
             }

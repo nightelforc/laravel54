@@ -12,7 +12,7 @@
         })
 
 		$(document).ajaxSend(function(){
-        	console.log('start')
+        	console.log('send')
         })
         $(document).ajaxSuccess(function(){
         	console.log('success')
@@ -31,11 +31,17 @@
 				username: '房明明00001',
 				password: '123456'
 			},
+			beforeSend:function(){
+				console.log('beforeSend')
+			},
 			success: function(r) {
 				console.log(r)
 			},
 			error: function(XMLHttpRequest, textStatus, errorThrown) {
 				console.log(XMLHttpRequest)
+			},
+			complete:function(){
+				console.log('ajaxComplete')
 			}
 		})
 	</script>

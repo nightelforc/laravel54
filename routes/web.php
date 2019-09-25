@@ -259,6 +259,8 @@ Route::group([
 
         Route::post('/export/eEmployeeLists', 'ExportController@eEmployeeLists');
         Route::post('/export/eEmployeeWage', 'ExportController@eEmployeeWage');
+        Route::post('/export/eAssignment', 'ExportController@eAssignment');
+        Route::post('/export/eAccounts', 'ExportController@eAccounts');
 
         Route::get('/download', 'ExportController@download');
     });

@@ -160,6 +160,8 @@ Route::group([
         Route::post('/projectGroup/info', 'ProjectGroupController@info');
         Route::post('/projectGroup/edit', 'ProjectGroupController@edit');
         Route::post('/projectGroup/editStatus', 'ProjectGroupController@editStatus');
+        Route::post('/projectGroup/delete', 'ProjectGroupController@delete');
+        Route::post('/projectGroup/changeProject', 'ProjectGroupController@changeProject');
         Route::post('/projectGroup/memberLists', 'ProjectGroupController@memberLists');
         Route::post('/projectGroup/addMember', 'ProjectGroupController@addMember');
         Route::post('/projectGroup/delMember', 'ProjectGroupController@delMember');

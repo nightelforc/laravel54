@@ -9,6 +9,7 @@
 namespace App\Http\Controllers\Project;
 
 
+use App\Http\Controllers\Auth\ApprovalController;
 use App\Http\Controllers\Controller;
 use App\Http\Model\EmployeeModel;
 use App\Http\Model\ProjectGroupMembersModel;
@@ -183,8 +184,8 @@ class ProjectGroupController extends Controller
             'id' => 'required|integer',
         ];
         $message = [
-            'id.required' => '获取项目参数失败',
-            'id.integer' => '项目参数类型错误',
+            'id.required' => '获取班组参数失败',
+            'id.integer' => '班组参数类型错误',
         ];
         $input = $request->only(['id']);
         $validator = Validator::make($input, $rules, $message);
@@ -493,6 +494,101 @@ class ProjectGroupController extends Controller
                 }
                 if (key($failed['id']) == 'Integer') {
                     $this->code = 430902;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function delete(Request $request){
+        $rules = [
+            'id' => 'required|integer',
+        ];
+        $message = [
+            'id.required' => '获取班组参数失败',
+            'id.integer' => '班组参数类型错误',
+        ];
+        $input = $request->only(['id']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $projectGroupModel = new ProjectGroupModel();
+            $result = $projectGroupModel->delete($input);
+            if (!is_bool($result) && $result != true){
+                switch ($result){
+                    case 'separateAccounts':
+                        $this->code = 431003;
+                        $this->msg = $validator->errors()->first();
+                        break;
+                    case 'assignment':
+                        $this->code = 431004;
+                        $this->msg = $validator->errors()->first();
+                        break;
+                    case 'members':
+                        $this->code = 431005;
+                        $this->msg = $validator->errors()->first();
+                        break;
+                }
+            }
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'id') {
+                if (key($failed['id']) == 'Required') {
+                    $this->code = 431001;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['id']) == 'Integer') {
+                    $this->code = 431002;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function changeProject(Request $request){
+        $rules = [
+            'id' => 'required|integer',
+            'projectId' => 'required|integer',
+        ];
+        $message = [
+            'id.required' => '获取班组参数失败',
+            'id.integer' => '班组参数类型错误',
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型错误',
+        ];
+        $input = $request->only(['id','projectId']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $projectGroupModel = new ProjectGroupModel();
+            $projectGroupModel->changeProject($input);
+
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'id') {
+                if (key($failed['id']) == 'Required') {
+                    $this->code = 431101;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['id']) == 'Integer') {
+                    $this->code = 431102;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 431103;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 431104;
                     $this->msg = $validator->errors()->first();
                 }
             }

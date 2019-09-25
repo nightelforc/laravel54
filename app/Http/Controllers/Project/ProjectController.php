@@ -896,15 +896,19 @@ class ProjectController extends Controller
             $projectGroupAssignmentModel = new ProjectGroupAssignmentModel();
             $projectGroupSeparateAccountsModel = new ProjectGroupSeparateAccountsModel();
             foreach ($this->data as $key => $d) {
-                //施工项分账记录
+
                 $data = [
                     'projectId' => $input['projectId'],
                     'sectionId' => $input['sectionId'],
                     'groupId' => $d->id
                 ];
+                //施工项分账记录
                 $this->data[$key]->assignment = $projectGroupAssignmentModel->lists($data);
                 //班组成员分账记录
                 $this->data[$key]->separate = $projectGroupSeparateAccountsModel->lists($data);
+                if (empty($this->data[$key]->assignment) && empty($this->data[$key]->assignment)){
+                    unset($this->data[$key]);
+                }
             }
         } else {
             $failed = $validator->failed();

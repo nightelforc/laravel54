@@ -121,8 +121,8 @@ class EmployeeLeaveModel
         //变更审批状态
         DB::table($this->table)->where('id',$pk)->update(['status'=>$approvalResult]);
         if ($approvalResult == 1){
-            //修改工人的status为3请假
-            (new EmployeeModel())->updateStatus(['id'=>$data['employeeId'],'status'=>3]);
+            //修改工人的status为4请假
+            (new EmployeeModel())->updateStatus(['id'=>$data['employeeId'],'status'=>4]);
         }
 
     }

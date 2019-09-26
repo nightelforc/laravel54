@@ -33,9 +33,9 @@ class ProjectGroupController extends Controller
         $rules = [
             'projectId' => 'required|integer',
             'professionId' => 'nullable|integer',
-            'draw' => 'required|integer',
-            'length' => 'required|integer|in:10,20,50',
-            'start' => 'required|integer|min:0',
+            'draw' => 'nullable|integer',
+            'length' => 'nullable|integer|in:10,20,50',
+            'start' => 'nullable|integer|min:0',
         ];
         $message = [
             'projectId.required' => '获取项目参数失败',

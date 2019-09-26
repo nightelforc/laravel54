@@ -41,7 +41,7 @@ class ExportController extends Controller
      */
     private function downloadURL($filename, $request)
     {
-        return '点击<a target="_blank" href="http://' . $_SERVER['HTTP_HOST'] . '/excel/download?name=' . $filename . '&token=' . $request->input(self::$token) . '">链接</a>开始下载';
+        return '点击<a target="_blank" href="http://' . $_SERVER['HTTP_HOST'] . '/excel/download?name=' . urlencode($filename) . '&token=' . $request->input(self::$token) . '">链接</a>开始下载';
     }
 
     /**
@@ -64,9 +64,10 @@ class ExportController extends Controller
     public function download(Request $request)
     {
         $input = $request->only(['name']);
-        $path = self::PATH . $input['name'];
+        $filename = $this->fileName(urldecode($input['name']));
+        $path = self::PATH . $filename;
         if (file_exists($path)) {
-            return response()->download($path);
+            return response()->download($path,$input['name']);
         } else {
             return "文件不存在,请尝试重新下载";
         }

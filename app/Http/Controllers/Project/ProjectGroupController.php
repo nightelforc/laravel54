@@ -49,7 +49,7 @@ class ProjectGroupController extends Controller
             'start.integer' => '页码参数类型错误',
             'start.min' => '页码参数值不小于:min',
         ];
-        $input = $request->only(['projectId','professionId','search','draw','length','start']);
+        $input = $request->only(['projectId', 'professionId', 'search', 'draw', 'length', 'start']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();
@@ -72,12 +72,12 @@ class ProjectGroupController extends Controller
                     $this->code = 430102;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'professionId') {
+            } elseif (key($failed) == 'professionId') {
                 if (key($failed['professionId']) == 'Integer') {
                     $this->code = 430103;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'draw') {
+            } elseif (key($failed) == 'draw') {
                 if (key($failed['draw']) == 'Required') {
                     $this->code = 430104;
                     $this->msg = $validator->errors()->first();
@@ -121,7 +121,8 @@ class ProjectGroupController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function add(Request $request){
+    public function add(Request $request)
+    {
         $rules = [
             'projectId' => 'required|integer',
             'name' => 'required',
@@ -134,14 +135,14 @@ class ProjectGroupController extends Controller
             'professionId.required' => '请选择工种',
             'professionId.integer' => '工种参数类型错误',
         ];
-        $input = $request->only(['projectId','name','professionId']);
+        $input = $request->only(['projectId', 'name', 'professionId']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();
-            $info = $projectGroupModel->checkRepeat(['projectId'=>$input['projectId'],'name'=>$input['name'],'professionId'=>$input['professionId']]);
-            if (empty($info)){
+            $info = $projectGroupModel->checkRepeat(['projectId' => $input['projectId'], 'name' => $input['name'], 'professionId' => $input['professionId']]);
+            if (empty($info)) {
                 $projectGroupModel->insert($input);
-            }else{
+            } else {
                 $this->code = 430206;
                 $this->msg = '相同工种下，班组名称不能重复命名';
             }
@@ -156,12 +157,12 @@ class ProjectGroupController extends Controller
                     $this->code = 430202;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif(key($failed) == 'name'){
+            } elseif (key($failed) == 'name') {
                 if (key($failed['name']) == 'Required') {
                     $this->code = 430203;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'professionId') {
+            } elseif (key($failed) == 'professionId') {
                 if (key($failed['professionId']) == 'Required') {
                     $this->code = 430204;
                     $this->msg = $validator->errors()->first();
@@ -179,7 +180,8 @@ class ProjectGroupController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function info(Request $request){
+    public function info(Request $request)
+    {
         $rules = [
             'id' => 'required|integer',
         ];
@@ -212,7 +214,8 @@ class ProjectGroupController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request){
+    public function edit(Request $request)
+    {
         $rules = [
             'id' => 'required|integer',
             'name' => 'required',
@@ -225,15 +228,15 @@ class ProjectGroupController extends Controller
             'professionId.required' => '请选择工种',
             'professionId.integer' => '工种参数类型错误',
         ];
-        $input = $request->only(['id','name','professionId']);
+        $input = $request->only(['id', 'name', 'professionId']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();
-            $info = $projectGroupModel->info(['id'=>$input['id']]);
-            $info = $projectGroupModel->checkRepeat(['projectId'=>$info['projectId'],'name'=>$input['name'],'professionId'=>$input['professionId']],$input['id']);
-            if (empty($info)){
+            $info = $projectGroupModel->info(['id' => $input['id']]);
+            $info = $projectGroupModel->checkRepeat(['projectId' => $info['projectId'], 'name' => $input['name'], 'professionId' => $input['professionId']], $input['id']);
+            if (empty($info)) {
                 $projectGroupModel->update($input);
-            }else{
+            } else {
                 $this->code = 430406;
                 $this->msg = '相同工种下，班组名称不能重复命名';
             }
@@ -248,12 +251,12 @@ class ProjectGroupController extends Controller
                     $this->code = 430402;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif(key($failed) == 'name'){
+            } elseif (key($failed) == 'name') {
                 if (key($failed['name']) == 'Required') {
                     $this->code = 430403;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'professionId') {
+            } elseif (key($failed) == 'professionId') {
                 if (key($failed['professionId']) == 'Required') {
                     $this->code = 430404;
                     $this->msg = $validator->errors()->first();
@@ -271,7 +274,8 @@ class ProjectGroupController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function editStatus(Request $request){
+    public function editStatus(Request $request)
+    {
         $rules = [
             'id' => 'required|integer',
             'status' => 'required|integer|in:1,2',
@@ -283,7 +287,7 @@ class ProjectGroupController extends Controller
             'status.integer' => '班组状态参数类型错误',
             'status.in' => '班组状态参数不正确',
         ];
-        $input = $request->only(['id','status']);
+        $input = $request->only(['id', 'status']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();
@@ -299,7 +303,7 @@ class ProjectGroupController extends Controller
                     $this->code = 430502;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'status') {
+            } elseif (key($failed) == 'status') {
                 if (key($failed['status']) == 'Required') {
                     $this->code = 430503;
                     $this->msg = $validator->errors()->first();
@@ -321,7 +325,8 @@ class ProjectGroupController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function memberLists(Request $request){
+    public function memberLists(Request $request)
+    {
         $rules = [
             'groupId' => 'required|integer',
         ];
@@ -354,7 +359,8 @@ class ProjectGroupController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function addMember(Request $request){
+    public function addMember(Request $request)
+    {
         $rules = [
             'projectId' => 'required|integer',
             'employeeId' => 'required|integer',
@@ -368,25 +374,25 @@ class ProjectGroupController extends Controller
             'groupId.required' => '获取班组参数失败',
             'groupId.integer' => '班组参数类型错误',
         ];
-        $input = $request->only(['projectId','employeeId','groupId']);
+        $input = $request->only(['projectId', 'employeeId', 'groupId']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupMembersModel = new ProjectGroupMembersModel();
             $result = $projectGroupMembersModel->isInGroup($input);
-            if (!$result){
+            if (!$result) {
                 $info = $projectGroupMembersModel->info($input);
-                if (empty($info)){
+                if (empty($info)) {
                     $projectGroupMembersModel->insert($input);
-                }else{
-                    if ($info['isDel'] == 1){
-                        $projectGroupMembersModel->update(['id'=>$info['id']],['isDel'=>0]);
+                } else {
+                    if ($info['isDel'] == 1) {
+                        $projectGroupMembersModel->update(['id' => $info['id']], ['isDel' => 0]);
                     }
                 }
                 $employeeModel = new EmployeeModel();
-                $employeeModel->update($input['employeeId'],['groupId'=>$input['groupId']]);
-            }else{
+                $employeeModel->update($input['employeeId'], ['groupId' => $input['groupId']]);
+            } else {
                 $this->code = 430707;
-                $this->msg = '工人已经属于班组'.$result['name'];
+                $this->msg = '工人已经属于班组' . $result['name'];
             }
         } else {
             $failed = $validator->failed();
@@ -399,7 +405,7 @@ class ProjectGroupController extends Controller
                     $this->code = 430702;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'employeeId') {
+            } elseif (key($failed) == 'employeeId') {
                 if (key($failed['employeeId']) == 'Required') {
                     $this->code = 430703;
                     $this->msg = $validator->errors()->first();
@@ -408,7 +414,7 @@ class ProjectGroupController extends Controller
                     $this->code = 430704;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'groupId') {
+            } elseif (key($failed) == 'groupId') {
                 if (key($failed['groupId']) == 'Required') {
                     $this->code = 430705;
                     $this->msg = $validator->errors()->first();
@@ -426,7 +432,8 @@ class ProjectGroupController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function delMember(Request $request){
+    public function delMember(Request $request)
+    {
         $rules = [
             'id' => 'required|integer',
         ];
@@ -439,10 +446,10 @@ class ProjectGroupController extends Controller
         if ($validator->passes()) {
             $projectGroupMembersModel = new ProjectGroupMembersModel();
             $projectGroupMembersModel->delMember($input);
-            $info = $projectGroupMembersModel->info(['id'=>$input['id']]);
-            if (!empty($info)){
+            $info = $projectGroupMembersModel->info(['id' => $input['id']]);
+            if (!empty($info)) {
                 $employeeModel = new EmployeeModel();
-                $employeeModel->update($info['employeeId'],['groupId'=>null]);
+                $employeeModel->update($info['employeeId'], ['groupId' => null]);
             }
         } else {
             $failed = $validator->failed();
@@ -464,7 +471,8 @@ class ProjectGroupController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function setLeader(Request $request){
+    public function setLeader(Request $request)
+    {
         $rules = [
             'id' => 'required|integer',
         ];
@@ -480,11 +488,11 @@ class ProjectGroupController extends Controller
             //获取组员信息
             $info = $projectGroupMembersModel->info($input);
             //清空原有组员的班组长状态
-            $projectGroupMembersModel->update(['groupId'=>$info['groupId']],['isLeader'=>0]);
+            $projectGroupMembersModel->update(['groupId' => $info['groupId']], ['isLeader' => 0]);
             //设置新班组长
-            $projectGroupMembersModel->update(['id'=>$input['id']],['isLeader'=>1]);
+            $projectGroupMembersModel->update(['id' => $input['id']], ['isLeader' => 1]);
             //更新班组中的班组长字段
-            $projectGroupModel->updateIsLeader(['groupId'=>$info['groupId'],'groupLeader' => $info['employeeId']]);
+            $projectGroupModel->updateIsLeader(['groupId' => $info['groupId'], 'groupLeader' => $info['employeeId']]);
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {
@@ -505,7 +513,8 @@ class ProjectGroupController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function delete(Request $request){
+    public function delete(Request $request)
+    {
         $rules = [
             'id' => 'required|integer',
         ];
@@ -518,19 +527,21 @@ class ProjectGroupController extends Controller
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();
             $result = $projectGroupModel->delete($input);
-            if (!is_bool($result) && $result != true){
-                switch ($result){
+            if (!is_bool($result)){
+                switch ($result) {
                     case 'separateAccounts':
                         $this->code = 431003;
-                        $this->msg = $validator->errors()->first();
+                        $this->msg = '该班组已有班组人员记录分账';
                         break;
                     case 'assignment':
                         $this->code = 431004;
-                        $this->msg = $validator->errors()->first();
+                        $this->msg = '该班组已记录施工项分账';
                         break;
                     case 'members':
                         $this->code = 431005;
-                        $this->msg = $validator->errors()->first();
+                        $this->msg = '该班组已有班组人员';
+                        break;
+                    default:
                         break;
                 }
             }
@@ -554,7 +565,8 @@ class ProjectGroupController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function changeProject(Request $request){
+    public function changeProject(Request $request)
+    {
         $rules = [
             'id' => 'required|integer',
             'projectId' => 'required|integer',
@@ -565,7 +577,7 @@ class ProjectGroupController extends Controller
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型错误',
         ];
-        $input = $request->only(['id','projectId']);
+        $input = $request->only(['id', 'projectId']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();

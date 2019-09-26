@@ -32,13 +32,13 @@ class ProjectGroupModel
      */
     public function lists(array $data)
     {
-        return DB::table($this->table)
+        $result = DB::table($this->table)
             ->leftJoin('profession as p', 'p.id', '=', $this->table . '.professionId')
             ->leftJoin('project', 'project.id', '=', $this->table . '.projectId')
             ->leftJoin('employee as e', 'e.id', $this->table . '.groupLeader')
             ->where(function ($query) use ($data) {
                 $query->where($this->table . '.projectId', $data['projectId'])
-                    ->whereIn($this->table . '.status', [1, 2])
+                    ->whereIn($this->table . '.status', [1,2])
                     ->where($this->table . '.createTime', '>', $this->startTime)
                     ->where($this->table . '.createTime', '<', $this->endTime);;
                 if (isset($data['professionId']) && !is_null($data['professionId'])) {
@@ -48,8 +48,17 @@ class ProjectGroupModel
                     $query->where($this->table . '.name', 'like', '%' . $data['search'] . '%');
                 }
             })
-            ->select($this->table . '.*', 'p.name as professionName', 'e.name as employeeName', 'project.name as projectName')
-            ->get()->toArray();
+            ->select($this->table . '.*', 'p.name as professionName', 'e.name as employeeName', 'project.name as projectName');
+        if(isset($data['length']) && isset($data['start']))  {
+            $limit = config('yucheng.limit');
+            $start = is_null($data['start']) ? 0 : $data['start'];
+
+            if (isset($data['length']) && !is_null($data['length'])) {
+                $limit = $data['length'];
+            }
+            $result = $result->offset($start)->limit($limit);
+        }
+            return $result->get()->toArray();
     }
 
     /**
@@ -163,17 +172,17 @@ class ProjectGroupModel
     {
         //查看班组是否有分账
         $info = (new ProjectGroupSeparateAccountsModel())->info(['groupId' => $input['id']]);
-        if (empty($info)) {
+        if (!empty($info)) {
             return 'separateAccounts';
         }
         //查看班组是否有施工项
         $info = (new ProjectGroupAssignmentModel())->info(['groupId' => $input['id']]);
-        if (empty($info)) {
+        if (!empty($info)) {
             return 'assignment';
         }
         //查看班组下是否有成员
-        $info = (new ProjectGroupAssignmentModel())->info(['groupId' => $input['id']]);
-        if (empty($info)) {
+        $info = (new ProjectGroupMembersModel())->info(['groupId' => $input['id']]);
+        if (!empty($info)) {
             return 'members';
         }
 

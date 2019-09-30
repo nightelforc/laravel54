@@ -262,6 +262,11 @@ Route::group([
         Route::post('/export/eAssignment', 'ExportController@eAssignment');
         Route::post('/export/eAccounts', 'ExportController@eAccounts');
 
+        Route::post('/export/eWageLists', 'ExportController@eWageLists');
+        Route::post('/export/eSupplierOrder', 'ExportController@eSupplierOrder');
+        Route::post('/export/eLoanLists', 'ExportController@eLoanLists');
+        Route::post('/export/eLivingLists', 'ExportController@eLivingLists');
+
         Route::get('/download', 'ExportController@download');
     });
 });

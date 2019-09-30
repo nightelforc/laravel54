@@ -906,7 +906,7 @@ class ProjectController extends Controller
                 $this->data[$key]->assignment = $projectGroupAssignmentModel->lists($data);
                 //班组成员分账记录
                 $this->data[$key]->separate = $projectGroupSeparateAccountsModel->lists($data);
-                if (empty($this->data[$key]->assignment) && empty($this->data[$key]->assignment)){
+                if (empty($this->data[$key]->assignment) && empty($this->data[$key]->separate)){
                     unset($this->data[$key]);
                 }
             }
@@ -1278,6 +1278,7 @@ class ProjectController extends Controller
     {
         $rules = [
             'projectId' => 'required|integer',
+            'sectionId' => 'required|integer',
             'draw' => 'required|integer',
             'length' => 'required|integer|in:10,20,50',
             'start' => 'required|integer|min:0',
@@ -1285,6 +1286,8 @@ class ProjectController extends Controller
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型错误',
+            'sectionId.required' => '获取项目参数失败',
+            'sectionId.integer' => '项目参数类型错误',
             'length.required' => '获取项目参数失败',
             'length.integer' => '记录条数参数类型错误',
             'length.in' => '记录条数参数值不正确',
@@ -1292,7 +1295,7 @@ class ProjectController extends Controller
             'start.integer' => '起始记录参数类型错误',
             'start.min' => '起始记录参数值不小于:min',
         ];
-        $input = $request->only(['projectId', 'draw', 'length', 'start', 'search']);
+        $input = $request->only(['projectId', 'sectoionId','draw', 'length', 'start', 'search']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectOtherSeparateAccountsModel = new ProjectOtherSeparateAccountsModel();
@@ -1315,39 +1318,48 @@ class ProjectController extends Controller
                     $this->code = 422002;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'draw') {
-                if (key($failed['draw']) == 'Required') {
+            } elseif (key($failed) == 'sectionId') {
+                if (key($failed['sectionId']) == 'Required') {
                     $this->code = 422003;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['draw']) == 'Integer') {
+                if (key($failed['sectionId']) == 'Integer') {
                     $this->code = 422004;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'draw') {
+                if (key($failed['draw']) == 'Required') {
+                    $this->code = 422005;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['draw']) == 'Integer') {
+                    $this->code = 422006;
                     $this->msg = $validator->errors()->first();
                 }
             } elseif (key($failed) == 'length') {
                 if (key($failed['length']) == 'Required') {
-                    $this->code = 422005;
+                    $this->code = 422007;
                     $this->msg = $validator->errors()->first();
                 }
                 if (key($failed['length']) == 'Integer') {
-                    $this->code = 422006;
+                    $this->code = 422008;
                     $this->msg = $validator->errors()->first();
                 }
                 if (key($failed['length']) == 'In') {
-                    $this->code = 422007;
+                    $this->code = 422009;
                     $this->msg = $validator->errors()->first();
                 }
             } elseif (key($failed) == 'start') {
                 if (key($failed['start']) == 'Required') {
-                    $this->code = 422008;
+                    $this->code = 422010;
                     $this->msg = $validator->errors()->first();
                 }
                 if (key($failed['start']) == 'Integer') {
-                    $this->code = 422009;
+                    $this->code = 422011;
                     $this->msg = $validator->errors()->first();
                 }
                 if (key($failed['start']) == 'Min') {
-                    $this->code = 422010;
+                    $this->code = 422012;
                     $this->msg = $validator->errors()->first();
                 }
             }

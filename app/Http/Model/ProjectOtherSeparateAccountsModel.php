@@ -55,6 +55,9 @@ class ProjectOtherSeparateAccountsModel
                 if (isset($input['projectId']) && $input['projectId'] != 0) {
                     $query->where($this->table . '.projectId', $input['projectId']);
                 }
+                if (isset($input['sectionId']) && $input['sectionId'] != 0) {
+                    $query->where($this->table . '.sectionId', $input['sectionId']);
+                }
                 if (isset($input['search']) && $input['search'] != 0) {
                     $query->where(function ($query1) use ($input) {
                         $query1->where('e.name', 'like', '%'.$input['search'].'%')->orWhere('e.jobNumber', 'like', '%'.$input['search'].'%');
@@ -83,6 +86,9 @@ class ProjectOtherSeparateAccountsModel
             ->where(function ($query) use ($input) {
                 if (isset($input['projectId']) && $input['projectId'] != 0) {
                     $query->where($this->table . '.projectId', $input['projectId']);
+                }
+                if (isset($input['sectionId']) && $input['sectionId'] != 0) {
+                    $query->where($this->table . '.sectionId', $input['sectionId']);
                 }
                 if (isset($input['search']) && $input['search'] != 0) {
                     $query->where(function ($query1) use ($input) {

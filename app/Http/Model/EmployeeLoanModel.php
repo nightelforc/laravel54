@@ -52,18 +52,12 @@ class EmployeeLoanModel
 
     /**
      * @param array $input
+     * @param bool $exports
      * @return mixed
      */
-    public function lists(array $input)
+    public function lists(array $input,$exports = false)
     {
-        $limit = config('yucheng.limit');
-        $start = is_null($input['start']) ? 0 : $input['start'];
-
-        if (isset($input['length']) && !is_null($input['length'])) {
-            $limit = $input['length'];
-        }
-
-        return DB::table($this->table)
+        $result = DB::table($this->table)
             ->leftJoin('employee as e','e.id','=',$this->table.'.employeeId')
             ->where(function ($query) use ($input) {
                 if (isset($input['projectId']) && !empty($input['projectId'])){
@@ -83,10 +77,20 @@ class EmployeeLoanModel
                         $query1->where('e.name', 'like', '%' . $input['search'] . '%')->orWhere('e.jobNumber', 'like', '%' . $input['search'] . '%');
                     });
                 }
-            })
-            ->offset($start)->limit($limit)
-            ->select($this->table . '.*', 'e.name as employeeName','e.jobNumber')
+            });
+            if(!$exports){
+                $limit = config('yucheng.limit');
+                $start = is_null($input['start']) ? 0 : $input['start'];
+
+                if (isset($input['length']) && !is_null($input['length'])) {
+                    $limit = $input['length'];
+                }
+                $result = $result->offset($start)->limit($limit);
+            }
+            $result = $result->select($this->table . '.*', 'e.name as employeeName','e.jobNumber')
             ->get()->toArray();
+
+            return $result;
     }
 
     /**

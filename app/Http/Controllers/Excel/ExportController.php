@@ -10,6 +10,8 @@ namespace App\Http\Controllers\Excel;
 
 
 use App\Http\Controllers\Controller;
+use App\Http\Model\EmployeeLivingModel;
+use App\Http\Model\EmployeeLoanModel;
 use App\Http\Model\EmployeeModel;
 use App\Http\Model\ProjectAreaModel;
 use App\Http\Model\ProjectGroupAssignmentModel;
@@ -17,6 +19,7 @@ use App\Http\Model\ProjectGroupModel;
 use App\Http\Model\ProjectGroupSeparateAccountsModel;
 use App\Http\Model\ProjectModel;
 use App\Http\Model\ProjectSectionModel;
+use App\Http\Model\SupplierOrdersModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -472,6 +475,443 @@ class ExportController extends Controller
                 }
                 if (key($failed['professionId']) == 'Integer') {
                     $this->code = 410202;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    public function eWageLists(Request $request){
+        $rules = [
+            'projectId' => 'required|integer',
+            'professionId' => 'nullable|integer',
+            'status' => 'nullable|integer',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型错误',
+            'professionId.integer' => '工种参数类型错误',
+            'status.integer' => '工作状态参数类型错误',
+        ];
+        $input = $request->all();
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $employeeModel = new EmployeeModel();
+            $lists = $employeeModel->lists($input,$employeeModel->employeeStatus,true);
+            foreach ($lists as $key => $l) {
+                $wages = $employeeModel->wages($l->id);
+                $wagesTotal = [
+                    'bonus' => 0,
+                    'fine' => 0,
+                    'living' => 0,
+                    'loan' => 0,
+                    'materialOrder' => 0,
+                    'attendance' => 0,
+                    'separateAccounts' => 0,
+                    'otherSeparateAccounts' => 0,
+                ];
+                foreach ($wages as $w){
+                    $wagesTotal['bonus'] += $w['bonus'];
+                    $wagesTotal['fine'] += $w['fine'];
+                    $wagesTotal['living'] += $w['living'];
+                    $wagesTotal['loan'] += $w['loan'];
+                    $wagesTotal['materialOrder'] += $w['materialOrder'];
+                    $wagesTotal['attendance'] += $w['attendance'];
+                    $wagesTotal['separateAccounts'] += $w['separateAccounts'];
+                    $wagesTotal['otherSeparateAccounts'] += $w['otherSeparateAccounts'];
+                }
+                $lists[$key]->wage = $wagesTotal;
+            }
+
+            $projectInfo = (new ProjectModel())->info(['id' => $input['projectId']]);
+            $projectName = (isset($projectInfo['name'])&&!empty($projectInfo['name']))?$projectInfo['name']:'';
+            $fileName = date('Y').'年度'.$projectName . '工人工资年度汇总表'.date('Ymd');
+            $fileNameExcel = $this->fileName($fileName);
+            $extensions = 'xlsx';
+            Excel::create($fileNameExcel, function ($excel) use ($lists,$fileName) {
+                $excel->sheet('sheet1', function ($sheet) use ($lists,$fileName) {
+                    $sheet->setWidth([
+                        "A" => "6",
+                        "B" => "15",
+                        "C" => "8",
+                        "D" => "6",
+                        "E" => "6",
+                        "F" => "8",
+                        "G" => "8",
+                        "H" => "8",
+                        "J" => "8",
+                        "K" => "8",
+                        "L" => "8",
+                        "M" => "8",
+                        "N" => "8",
+                        "O" => "8",
+                        "P" => "12",
+                        "Q" => "50",
+                    ]);
+                    $sheet->setCellValue('A1', $fileName);
+                    $sheet->mergeCells('A1:Q1');
+
+                    $cellData = [["编号", "项目", "姓名", "工号", "工种", "在职状态", "总计", "包工费", "杂工费",
+                        "考勤工资", "材料费", "生活费", "借款","奖金","罚款","签字","备注"]];
+                    foreach ($lists as $key => $d) {
+                        switch ($d->status){
+                            case 1:
+                                $status = '在岗';
+                                break;
+                            case 2:
+                                $status = '待岗';
+                                break;
+                            case 3:
+                                $status = '离职';
+                                break;
+                            case 4:
+                                $status = '请假';
+                                break;
+                            default:
+                                $status = '-';
+                                break;
+                        }
+                        $total = $d->wage['separateAccounts']+$d->wage['otherSeparateAccounts']+$d->wage['attendance']*$d->dayValue-
+                            $d->wage['materialOrder']-$d->wage['living']-$d->wage['loan']+$d->wage['bonus']-$d->wage['fine'];
+                        $rowData = [$key+1,$d->projectName,$d->name,$d->jobNumber,$d->professionName,$status,$total,
+                            $d->wage['separateAccounts'],$d->wage['otherSeparateAccounts'],$d->wage['attendance']*$d->dayValue,
+                            $d->wage['materialOrder'],$d->wage['living'],$d->wage['loan'],$d->wage['bonus'],$d->wage['fine']];
+                        array_push($cellData, $rowData);
+                    }
+                    $sheet->fromArray($cellData, null, 'A2', true, false);
+                });
+            })->store($extensions);
+            $filename = $fileName . '.' . $extensions;
+            $this->msg = $this->downloadURL($filename, $request);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 410301;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 410302;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'professionId') {
+                if (key($failed['professionId']) == 'Integer') {
+                    $this->code = 410303;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'status') {
+                if (key($failed['status']) == 'Integer') {
+                    $this->code = 410304;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    public function eSupplierOrder(Request $request){
+        $rules = [
+            'projectId' => 'required|integer',
+            'time' => 'nullable|date_format:Y-m',
+            'isPay' => 'nullable|integer|in:0,1',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型不正确',
+            'time.date_format' => '月份格式不正确',
+            'isPay.integer' => '付款状态参数类型错误',
+            'isPay.in' => '付款状态参数值不正确',
+
+        ];
+        $input = $request->only(['projectId', 'isPay', 'search', 'time']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $supplierOrdersModel = new SupplierOrdersModel();
+            $lists = $supplierOrdersModel->lists($input,true);
+
+            $projectInfo = (new ProjectModel())->info(['id' => $input['projectId']]);
+            $projectName = (isset($projectInfo['name'])&&!empty($projectInfo['name']))?$projectInfo['name']:'';
+            $fileName = date('Y').'年度'.$projectName . '项目采购费用年度汇总表'.date('Ymd');
+            $fileNameExcel = $this->fileName($fileName);
+            $extensions = 'xlsx';
+            Excel::create($fileNameExcel, function ($excel) use ($lists,$fileName) {
+                $excel->sheet('sheet1', function ($sheet) use ($lists,$fileName) {
+                    $sheet->setWidth([
+                        "A" => "10",
+                        "B" => "15",
+                        "C" => "15",
+                        "D" => "15",
+                        "E" => "15",
+                        "F" => "15",
+                        "G" => "15",
+                        "H" => "25",
+                        "I" => "25",
+                    ]);
+                    $sheet->setCellValue('A1', $fileName);
+                    $sheet->mergeCells('A1:I1');
+
+                    $cellData = [["编号", "货单号", "供应商", "提货项目", "总价（元）", "送货日期", "付款方式", "是否还款", "记录时间"]];
+                    foreach ($lists as $key => $d) {var_dump($d);
+                        switch ($d->payType){
+                            case 1:
+                                $payType = '现金';
+                                break;
+                            case 2:
+                                $payType = '记账';
+                                break;
+                            default:
+                                $payType = '-';
+                                break;
+                        }
+                        switch ($d->isPay){
+                            case 1:
+                                $isPay = '已付款';
+                                break;
+                            case 2:
+                                $isPay = '未付款';
+                                break;
+                            default:
+                                $isPay = '-';
+                                break;
+                        }
+                        $rowData = [$key+1,$d->ordersn,$d->supplierName,$d->projectName,$d->totalPrice,$d->deliveryTime,$payType,$isPay,$d->createTime];
+                        array_push($cellData, $rowData);
+                    }
+                    $sheet->fromArray($cellData, null, 'A2', true, false);
+                });
+            })->store($extensions);
+            $filename = $fileName . '.' . $extensions;
+            $this->msg = $this->downloadURL($filename, $request);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 410401;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 410402;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'time') {
+                if (key($failed['time']) == 'DateFormat') {
+                    $this->code = 410403;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'isPay') {
+                if (key($failed['isPay']) == 'Integer') {
+                    $this->code = 410404;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['isPay']) == 'In') {
+                    $this->code = 410405;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    public function eLoanLists(Request $request){
+        $rules = [
+            'projectId' => 'required|integer',
+            'startTime' => 'nullable|date_format:Y-m-d',
+            'endTime' => 'nullable|date_format:Y-m-d',
+            'status' => 'nullable|integer|in:0,1',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型不正确',
+            'startTime.date_format' => '日期格式不正确',
+            'endTime.date_format' => '日期格式不正确',
+            'status.integer' => '付款状态参数类型错误',
+            'status.in' => '付款状态参数值不正确',
+        ];
+        $input = $request->only(['projectId', 'startTime', 'endTime', 'status', 'search']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $employeeLoanModel = new EmployeeLoanModel();
+            $lists = $employeeLoanModel->lists($input,true);
+
+            $projectInfo = (new ProjectModel())->info(['id' => $input['projectId']]);
+            $projectName = (isset($projectInfo['name'])&&!empty($projectInfo['name']))?$projectInfo['name']:'';
+            $fileName = date('Y').'年度'.$projectName . '项目借款费用记录表'.date('Ymd');
+            $fileNameExcel = $this->fileName($fileName);
+            $extensions = 'xlsx';
+            Excel::create($fileNameExcel, function ($excel) use ($lists,$fileName) {
+                $excel->sheet('sheet1', function ($sheet) use ($lists,$fileName) {
+                    $sheet->setWidth([
+                        "A" => "10",
+                        "B" => "15",
+                        "C" => "15",
+                        "D" => "15",
+                        "E" => "15",
+                        "F" => "15",
+                        "G" => "15",
+                        "H" => "25",
+                    ]);
+                    $sheet->setCellValue('A1', $fileName);
+                    $sheet->mergeCells('A1:H1');
+
+                    $cellData = [["编号", "姓名", "工号", "借款金额", "借款时间", "记录时间", "审核状态", "备注"]];
+                    foreach ($lists as $key => $d) {
+                        switch ($d->status){
+                            case 1:
+                                $status = '审核通过';
+                                break;
+                            case 2:
+                                $status = '审核驳回';
+                                break;
+                            default:
+                                $status = '待审核';
+                                break;
+                        }
+                        $rowData = [$key+1,$d->employeeName,$d->jobNumber,$d->account,$d->loanTime,$d->createTime,$status,''];
+                        array_push($cellData, $rowData);
+                    }
+                    $sheet->fromArray($cellData, null, 'A2', true, false);
+                });
+            })->store($extensions);
+            $filename = $fileName . '.' . $extensions;
+            $this->msg = $this->downloadURL($filename, $request);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 410501;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 410502;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'startTime') {
+                if (key($failed['startTime']) == 'DateFormat') {
+                    $this->code = 410503;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'endTime') {
+                if (key($failed['endTime']) == 'DateFormat') {
+                    $this->code = 410504;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'status') {
+                if (key($failed['status']) == 'Integer') {
+                    $this->code = 410505;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['status']) == 'In') {
+                    $this->code = 410506;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    public function eLivingLists(Request $request){
+        $rules = [
+            'projectId' => 'required|integer',
+            'startTime' => 'nullable|date_format:Y-m-d',
+            'endTime' => 'nullable|date_format:Y-m-d',
+            'status' => 'nullable|integer|in:0,1,2',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型不正确',
+            'startTime.date_format' => '日期格式不正确',
+            'endTime.date_format' => '日期格式不正确',
+            'status.integer' => '审批状态参数类型错误',
+            'status.in' => '审批状态参数值不正确',
+        ];
+        $input = $request->only(['projectId', 'startTime', 'endTime', 'status', 'search']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $employeeLivingModel = new EmployeeLivingModel();
+            $lists = $employeeLivingModel->lists($input,true);
+
+            $projectInfo = (new ProjectModel())->info(['id' => $input['projectId']]);
+            $projectName = (isset($projectInfo['name'])&&!empty($projectInfo['name']))?$projectInfo['name']:'';
+            $fileName = date('Y').'年度'.$projectName . '项目生活费用记录表'.date('Ymd');
+            $fileNameExcel = $this->fileName($fileName);
+            $extensions = 'xlsx';
+            Excel::create($fileNameExcel, function ($excel) use ($lists,$fileName) {
+                $excel->sheet('sheet1', function ($sheet) use ($lists,$fileName) {
+                    $sheet->setWidth([
+                        "A" => "10",
+                        "B" => "15",
+                        "C" => "15",
+                        "D" => "15",
+                        "E" => "15",
+                        "F" => "15",
+                        "G" => "15",
+                        "H" => "25",
+                        "I" => "25",
+                    ]);
+                    $sheet->setCellValue('A1', $fileName);
+                    $sheet->mergeCells('A1:I1');
+
+                    $cellData = [["编号", "姓名", "工号", "类型", "金额", "操作时间", "记录时间", "审核状态","备注"]];
+                    foreach ($lists as $key => $d) {
+                        switch ($d->status){
+                            case 1:
+                                $status = '审核通过';
+                                break;
+                            case 2:
+                                $status = '审核驳回';
+                                break;
+                            default:
+                                $status = '待审核';
+                                break;
+                        }
+                        switch ($d->type){
+                            case 1:
+                                $type = '充值';
+                                break;
+                            case 2:
+                                $type = '退费';
+                                break;
+                            default:
+                                $type = '-';
+                                break;
+                        }
+                        $rowData = [$key+1,$d->employeeName,$d->jobNumber,$type,$d->account,$d->livingTime,$d->createTime,$status,''];
+                        array_push($cellData, $rowData);
+                    }
+                    $sheet->fromArray($cellData, null, 'A2', true, false);
+                });
+            })->store($extensions);
+            $filename = $fileName . '.' . $extensions;
+            $this->msg = $this->downloadURL($filename, $request);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 410601;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 410602;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'startTime') {
+                if (key($failed['startTime']) == 'DateFormat') {
+                    $this->code = 410603;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'endTime') {
+                if (key($failed['endTime']) == 'DateFormat') {
+                    $this->code = 410604;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'status') {
+                if (key($failed['status']) == 'Integer') {
+                    $this->code = 410605;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['status']) == 'In') {
+                    $this->code = 410606;
                     $this->msg = $validator->errors()->first();
                 }
             }

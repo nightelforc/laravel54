@@ -17,18 +17,12 @@ class SupplierOrdersModel
 
     /**
      * @param array $input
+     * @param bool $exports
      * @return mixed
      */
-    public function lists(array $input)
+    public function lists(array $input,$exports = false)
     {
-        $limit = config('yucheng.limit');
-        $start = is_null($input['start']) ? 0 : $input['start'];
-
-        if (isset($input['length']) && !is_null($input['length'])) {
-            $limit = $input['length'];
-        }
-
-        return DB::table($this->table)
+        $result =  DB::table($this->table)
             ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
             ->leftJoin('supplier as s','s.id','=',$this->table.'.supplierId')
             ->where(function ($query) use ($input) {
@@ -60,11 +54,20 @@ class SupplierOrdersModel
                 if (isset($input['search']) && !is_null($input['search'])) {
                     $query->where('ordersn', 'like', '%' . $input['search'] . '%');
                 }
-            })
-            ->offset($start)->limit($limit)
-            ->orderBy('createTime','desc')
+            });
+            if(!$exports){
+                $limit = config('yucheng.limit');
+                $start = is_null($input['start']) ? 0 : $input['start'];
+
+                if (isset($input['length']) && !is_null($input['length'])) {
+                    $limit = $input['length'];
+                }
+                $result = $result->offset($start)->limit($limit);
+            }
+            $result =$result->orderBy('createTime','desc')
             ->select($this->table.'.*','p.name as projectName','s.name as supplierName')
             ->get()->toArray();
+            return $result;
     }
 
     /**

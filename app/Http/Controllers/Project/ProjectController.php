@@ -279,7 +279,7 @@ class ProjectController extends Controller
         if ($validator->passes()) {
             $projectAreaModel = new ProjectAreaModel();
             $info = $projectAreaModel->info(['id' => $input['id']]);
-            $info = $projectAreaModel->checkRepeat(['projectId' => $info['projectId'], 'name' => $input['name']],$input['id']);
+            $info = $projectAreaModel->checkRepeat(['projectId' => $info['projectId'], 'name' => $input['name']], $input['id']);
             if (empty($info)) {
                 $projectAreaModel->update($input);
             } else {
@@ -449,11 +449,11 @@ class ProjectController extends Controller
             'area.numeric' => '施工段面积参数类型错误',
             'name.required' => '请填写项目名称',
         ];
-        $input = $request->only(['projectId', 'areaId', 'name', 'area','remark']);
+        $input = $request->only(['projectId', 'areaId', 'name', 'area', 'remark']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectSectionModel = new ProjectSectionModel();
-            $info = $projectSectionModel->checkRepeat(['projectId' => $input['projectId'],'areaId' => $input['areaId'], 'name' => $input['name']]);
+            $info = $projectSectionModel->checkRepeat(['projectId' => $input['projectId'], 'areaId' => $input['areaId'], 'name' => $input['name']]);
             if (empty($info)) {
                 $projectSectionModel->insert($input);
                 $projectAreaModel = new ProjectAreaModel();
@@ -520,7 +520,7 @@ class ProjectController extends Controller
             'area.required' => '请填写施工区面积',
             'area.numeric' => '施工区面积数据类型错误',
         ];
-        $input = $request->only(['projectId', 'areaId', 'amount','area']);
+        $input = $request->only(['projectId', 'areaId', 'amount', 'area']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectSectionModel = new ProjectSectionModel();
@@ -530,8 +530,8 @@ class ProjectController extends Controller
             } else {
                 $start = intval(substr($batchInfo['name'], 0, -2)) + 1;
             }
-            for ($i = $start; $i < $start+$input['amount']; $i++) {
-                $projectSectionModel->insert(['areaId' => $input['areaId'], 'name' => $i . '层','area'=>$input['area']]);
+            for ($i = $start; $i < $start + $input['amount']; $i++) {
+                $projectSectionModel->insert(['areaId' => $input['areaId'], 'name' => $i . '层', 'area' => $input['area']]);
             }
             $projectAreaModel = new ProjectAreaModel();
             $projectAreaModel->updateAreaArea($input['areaId']);
@@ -633,12 +633,12 @@ class ProjectController extends Controller
             'name.required' => '请填写项目名称',
             'area.numeric' => '施工段面积参数类型错误',
         ];
-        $input = $request->only(['id', 'name','area', 'remark']);
+        $input = $request->only(['id', 'name', 'area', 'remark']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectSectionModel = new ProjectSectionModel();
-            $info = $projectSectionModel->info(['id'=>$input['id']]);
-            $repeat = $projectSectionModel->checkRepeat(['projectId' => $info['projectId'],'areaId' => $info['areaId'], 'name' => $input['name']],$input['id']);
+            $info = $projectSectionModel->info(['id' => $input['id']]);
+            $repeat = $projectSectionModel->checkRepeat(['projectId' => $info['projectId'], 'areaId' => $info['areaId'], 'name' => $input['name']], $input['id']);
             if (empty($repeat)) {
                 $projectSectionModel->update($input);
                 $projectAreaModel = new ProjectAreaModel();
@@ -688,7 +688,7 @@ class ProjectController extends Controller
             $projectGroupAssignmentModel = new ProjectGroupAssignmentModel();
             $projectBudgetModel = new ProjectBudgetModel();
             $result = $projectGroupAssignmentModel->isAssignment(['sectionId' => $input['id']]);
-            $result1 =$projectBudgetModel->info(['sectionId' => $input['id']]);
+            $result1 = $projectBudgetModel->info(['sectionId' => $input['id']]);
             if ($result == 0 && empty($result1)) {
                 $projectSectionModel = new ProjectSectionModel();
                 $projectSectionModel->delete($input);
@@ -906,7 +906,7 @@ class ProjectController extends Controller
                 $this->data[$key]->assignment = $projectGroupAssignmentModel->lists($data);
                 //班组成员分账记录
                 $this->data[$key]->separate = $projectGroupSeparateAccountsModel->lists($data);
-                if (empty($this->data[$key]->assignment) && empty($this->data[$key]->separate)){
+                if (empty($this->data[$key]->assignment) && empty($this->data[$key]->separate)) {
                     unset($this->data[$key]);
                 }
             }
@@ -1286,8 +1286,8 @@ class ProjectController extends Controller
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型错误',
-            'sectionId.required' => '获取项目参数失败',
-            'sectionId.integer' => '项目参数类型错误',
+            'sectionId.required' => '获取楼层参数失败',
+            'sectionId.integer' => '楼层参数类型错误',
             'length.required' => '获取项目参数失败',
             'length.integer' => '记录条数参数类型错误',
             'length.in' => '记录条数参数值不正确',
@@ -1295,7 +1295,7 @@ class ProjectController extends Controller
             'start.integer' => '起始记录参数类型错误',
             'start.min' => '起始记录参数值不小于:min',
         ];
-        $input = $request->only(['projectId', 'sectoionId','draw', 'length', 'start', 'search']);
+        $input = $request->only(['projectId', 'sectionId', 'draw', 'length', 'start', 'search']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectOtherSeparateAccountsModel = new ProjectOtherSeparateAccountsModel();
@@ -1327,7 +1327,7 @@ class ProjectController extends Controller
                     $this->code = 422004;
                     $this->msg = $validator->errors()->first();
                 }
-            }elseif (key($failed) == 'draw') {
+            } elseif (key($failed) == 'draw') {
                 if (key($failed['draw']) == 'Required') {
                     $this->code = 422005;
                     $this->msg = $validator->errors()->first();
@@ -1378,7 +1378,10 @@ class ProjectController extends Controller
             'employeeId' => 'required|integer',
             'account' => 'required|numeric',
             'separateTime' => 'required|date_format:Y-m-d',
-            'data' => 'required|array',
+            'areaId' => 'required|integer',
+            'sectionId' => 'required|integer',
+            'professionId' => 'required|integer',
+            'assignmentId' => 'required|integer',
         ];
         $message = [
             'projectId.required' => '获取项目参数失败',
@@ -1389,100 +1392,34 @@ class ProjectController extends Controller
             'account.numeric' => '分账金额类型错误',
             'separateTime.required' => '请选择分账时间',
             'separateTime.date_format' => '分账时间格式不正确',
-            'data.required' => '请填写作业内容',
-            'data.array' => '作业内容类型不正确',
+            'areaId.required' => '请选择施工区',
+            'areaId.integer' => '施工区参数类型错误',
+            'sectionId.required' => '请选择楼层/施工段',
+            'sectionId.integer' => '施工段参数类型错误',
+            'professionId.required' => '请选择工种',
+            'professionId.integer' => '工种参数类型错误',
+            'assignmentId.required' => '请选择施工项',
+            'assignmentId.integer' => '施工项参数类型错误',
         ];
-        $input = $request->only(['projectId', 'employeeId', 'account', 'separateTime', 'data', self::$token]);
+        $input = $request->only(['projectId', 'employeeId', 'account', 'separateTime', 'areaId', 'sectionId', 'professionId', 'assignmentId', 'assignmentDetail', self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            $rules1 = [
-                'areaId' => 'required|integer',
-                'sectionId' => 'required|integer',
-                'professionId' => 'required|integer',
-                'assignmentId' => 'required|integer',
-            ];
-            $message1 = [
-                'areaId.required' => '请选择施工区',
-                'areaId.integer' => '施工区参数类型错误',
-                'sectionId.required' => '请选择楼层/施工段',
-                'sectionId.integer' => '施工段参数类型错误',
-                'professionId.required' => '请选择工种',
-                'professionId.integer' => '工种参数类型错误',
-                'assignmentId.required' => '请选择施工项',
-                'assignmentId.integer' => '施工项参数类型错误',
-            ];
-            $input1 = $input['data'];
-            $continue = true;
-            foreach ($input1 as $key => $i) {
-                $validator1 = Validator::make($i, $rules1, $message1);
-                if ($validator1->fails()) {
-                    $continue = false;
-                    $failed1 = $validator1->failed();
-                    if (key($failed1) == 'areaId') {
-                        if (key($failed1['areaId']) == 'Required') {
-                            $this->code = 422111;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['areaId']) == 'Integer') {
-                            $this->code = 422112;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'sectionId') {
-                        if (key($failed1['sectionId']) == 'Required') {
-                            $this->code = 422113;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['sectionId']) == 'Integer') {
-                            $this->code = 422114;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'professionId') {
-                        if (key($failed1['professionId']) == 'Required') {
-                            $this->code = 422115;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['professionId']) == 'Integer') {
-                            $this->code = 422116;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                    } elseif (key($failed1) == 'assignmentId') {
-                        if (key($failed1['assignmentId']) == 'Required') {
-                            $this->code = 422117;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
-                        if (key($failed1['assignmentId']) == 'Integer') {
-                            $this->code = 422118;
-                            $this->msg = $validator1->errors()->first();
-                            break;
-                        }
+            if ($input['separateTime'] <= date('Y-m-d')) {
+                $projectOtherSeparateModel = new ProjectOtherSeparateAccountsModel();
+                $insertId = $projectOtherSeparateModel->insert($input);
+                $input['id'] = $insertId;
+                $approval = ApprovalController::approval('otherSeparate', $input);
+                if ($approval['status']) {
+                    if ($approval['result']) {
+                        $this->msg = '申请提交成功，请等待审批结果';
+                    } else {
+                        $this->code = 422118;
+                        $this->msg = '保存失败，请稍后重试';
                     }
                 }
-            }
-            if ($continue) {
-                if ($input['separateTime'] <= date('Y-m-d')){
-                    $projectOtherSeparateModel = new ProjectOtherSeparateAccountsModel();
-                    $insertId = $projectOtherSeparateModel->insert($input);
-                    $input['ids'] = $insertId;
-                    $approval = ApprovalController::approval('otherSeparate', $input);
-                    if ($approval['status']) {
-                        if ($approval['result']) {
-                            $this->msg = '申请提交成功，请等待审批结果';
-                        } else {
-                            $this->code = 422120;
-                            $this->msg = '保存失败，请稍后重试';
-                        }
-                    }
-                }else{
-                    $this->code = 422119;
-                    $this->msg = '记账时间不能超过当前日期';
-                }
+            } else {
+                $this->code = 422117;
+                $this->msg = '记账时间不能超过当前日期';
             }
         } else {
             $failed = $validator->failed();
@@ -1522,13 +1459,40 @@ class ProjectController extends Controller
                     $this->code = 422108;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'data') {
-                if (key($failed['data']) == 'Required') {
+            } elseif (key($failed) == 'areaId') {
+                if (key($failed['areaId']) == 'Required') {
                     $this->code = 422109;
                     $this->msg = $validator->errors()->first();
                 }
-                if (key($failed['data']) == 'Array') {
+                if (key($failed['areaId']) == 'Integer') {
                     $this->code = 422110;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'sectionId') {
+                if (key($failed['sectionId']) == 'Required') {
+                    $this->code = 422111;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['sectionId']) == 'Integer') {
+                    $this->code = 422112;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'professionId') {
+                if (key($failed['professionId']) == 'Required') {
+                    $this->code = 422113;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['professionId']) == 'Integer') {
+                    $this->code = 422114;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'assignmentId') {
+                if (key($failed['assignmentId']) == 'Required') {
+                    $this->code = 422115;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['assignmentId']) == 'Integer') {
+                    $this->code = 422116;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -1724,7 +1688,8 @@ class ProjectController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function delAssignment(Request $request){
+    public function delAssignment(Request $request)
+    {
         $rules = [
             'id' => 'required|integer',
         ];
@@ -1737,15 +1702,15 @@ class ProjectController extends Controller
         if ($validator->passes()) {
             $projectGroupAssignmentModel = new ProjectGroupAssignmentModel();
             $info = $projectGroupAssignmentModel->info($input);
-            if ($info['status'] == 0){
+            if ($info['status'] == 0) {
                 $this->code = 422603;
                 $this->msg = '账目尚未审核不能删除';
-            }elseif ($info['status'] == 1){
+            } elseif ($info['status'] == 1) {
                 $this->code = 422604;
                 $this->msg = '账目已完成审核不能删除';
-            }elseif ($info['status'] == 2){
+            } elseif ($info['status'] == 2) {
                 $result = $projectGroupAssignmentModel->delAssignment($input);
-                if (!$result){
+                if (!$result) {
                     $this->code = 422605;
                     $this->msg = '删除失败';
                 }
@@ -1770,7 +1735,8 @@ class ProjectController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function delSeparate(Request $request){
+    public function delSeparate(Request $request)
+    {
         $rules = [
             'id' => 'required|integer',
         ];
@@ -1783,15 +1749,15 @@ class ProjectController extends Controller
         if ($validator->passes()) {
             $projectGroupSeparateAccountsModel = new ProjectGroupSeparateAccountsModel();
             $info = $projectGroupSeparateAccountsModel->info($input);
-            if ($info['status'] == 0){
+            if ($info['status'] == 0) {
                 $this->code = 422703;
                 $this->msg = '账目尚未审核不能删除';
-            }elseif ($info['status'] == 1){
+            } elseif ($info['status'] == 1) {
                 $this->code = 422704;
                 $this->msg = '账目已完成审核不能删除';
-            }elseif ($info['status'] == 2){
+            } elseif ($info['status'] == 2) {
                 $result = $projectGroupSeparateAccountsModel->delete($input);
-                if (!$result){
+                if (!$result) {
                     $this->code = 422705;
                     $this->msg = '删除失败';
                 }

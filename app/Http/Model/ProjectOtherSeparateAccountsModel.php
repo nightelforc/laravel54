@@ -60,13 +60,13 @@ class ProjectOtherSeparateAccountsModel
                 }
                 if (isset($input['search']) && $input['search'] != 0) {
                     $query->where(function ($query1) use ($input) {
-                        $query1->where('e.name', 'like', '%'.$input['search'].'%')->orWhere('e.jobNumber', 'like', '%'.$input['search'].'%');
+                        $query1->where('e.name', 'like', '%' . $input['search'] . '%')->orWhere('e.jobNumber', 'like', '%' . $input['search'] . '%');
                     });
                 }
             })
             ->orderBy($this->table . '.separateTime', 'des')
             ->offset($start)->limit($limit)
-            ->select($this->table . '.*', 'e.name as employeeName', 'e.jobNumber', 'p.name as professionName', 'pa.name as areaName', 'ps.name as sectionName', 'a.name as assignmentName','project.name as projectName')
+            ->select($this->table . '.*', 'e.name as employeeName', 'e.jobNumber', 'p.name as professionName', 'pa.name as areaName', 'ps.name as sectionName', 'a.name as assignmentName', 'project.name as projectName')
             ->get()->toArray();
     }
 
@@ -105,25 +105,20 @@ class ProjectOtherSeparateAccountsModel
      */
     public function insert($data)
     {
-        $insertDataId = [];
-        foreach ($data['data'] as $d) {
-            $insertData = [
-                'projectId' => $data['projectId'],
-                'employeeId' => $data['employeeId'],
-                'areaId' => $d['areaId'],
-                'sectionId' => $d['sectionId'],
-                'professionId' => $d['professionId'],
-                'assignmentId' => $d['assignmentId'],
-                'assignmentDetail' => $d['assignmentDetail'],
-                'account' => $data['account'] / count($data['data']),
-                'separateTime' => $data['separateTime'],
-                'createTime' => date('Y-m-d H:i:s'),
-            ];
-            $result = DB::table($this->table)->insertGetId($insertData);
-            $insertDataId[] = $result;
-        }
-
-        return $insertDataId;
+        $insertData = [
+            'projectId' => $data['projectId'],
+            'employeeId' => $data['employeeId'],
+            'areaId' => $data['areaId'],
+            'sectionId' => $data['sectionId'],
+            'professionId' => $data['professionId'],
+            'assignmentId' => $data['assignmentId'],
+            'assignmentDetail' => $data['assignmentDetail'],
+            'account' => $data['account'],
+            'separateTime' => $data['separateTime'],
+            'createTime' => date('Y-m-d H:i:s'),
+        ];
+        $result = DB::table($this->table)->insertGetId($insertData);
+        return $result;
     }
 
     /**
@@ -142,9 +137,7 @@ class ProjectOtherSeparateAccountsModel
      */
     public function otherSeparateApproval($pk, $data, $approvalResult)
     {
-        foreach ($data['ids'] as $id) {
-            DB::table($this->table)->where('id', $id)->update(['status' => $approvalResult]);
-        }
+        DB::table($this->table)->where('id', $pk)->update(['status' => $approvalResult]);
     }
 
     /**

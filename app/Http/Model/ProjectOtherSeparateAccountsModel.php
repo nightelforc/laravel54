@@ -150,5 +150,9 @@ class ProjectOtherSeparateAccountsModel
         return empty($result) ? [] : get_object_vars($result);
     }
 
+    public function otherSeparateSummary(array $data){
+        return DB::table($this->table)->where($data)->sum('account');
+    }
+
 
 }

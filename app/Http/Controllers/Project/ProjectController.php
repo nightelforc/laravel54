@@ -62,6 +62,10 @@ class ProjectController extends Controller
             $projectAreaModel = new ProjectAreaModel();
             $lists = $projectAreaModel->lists($input);
             $countLists = $projectAreaModel->countLists($input);
+            $projectOtherSeparateModel = new ProjectOtherSeparateAccountsModel();
+            foreach($lists as $key => $value){
+                $lists[$key]->otherTotal = $projectOtherSeparateModel->otherSeparateSummary(['areaId'=>$value->id]);
+            }
             $this->data = [
                 "draw" => $input['draw'],
                 "data" => $lists,

@@ -95,6 +95,7 @@ class AdminController extends Controller
             'roleId' => 'required|integer',
             'name' => 'required',
             'projectId' => 'required|integer',
+            'professionId' => 'required|integer',
             'phone' => 'required',
         ];
         $message = [
@@ -104,9 +105,11 @@ class AdminController extends Controller
             'name.required' => '请填写姓名',
             'projectId.required' => '请选择账号所属项目',
             'projectId.integer' => '项目参数类型错误',
+            'professionId.required' => '请选择账号负责工种',
+            'professionId.integer' => '工种参数类型错误',
             'phone.required' => '请填写联系方式',
         ];
-        $input = $request->only(['username', 'roleId', 'name', 'projectId', 'phone']);
+        $input = $request->only(['username', 'roleId', 'name', 'projectId', 'phone','professionId']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $adminModel = new AdminModel();
@@ -114,11 +117,11 @@ class AdminController extends Controller
             if (empty($info)){
                 $result = $adminModel->addAdmin($input);
                 if (!$result) {
-                    $this->code = 120209;
+                    $this->code = 120210;
                     $this->msg = json_encode($result);
                 }
             }else{
-                $this->code = 120208;
+                $this->code = 120211;
                 $this->msg = '不能建立相同账号名或相同姓名的账号';
             }
 
@@ -152,9 +155,18 @@ class AdminController extends Controller
                     $this->code = 120206;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'phone') {
-                if (key($failed['phone']) == 'Required') {
+            } elseif (key($failed) == 'professionId') {
+                if (key($failed['professionId']) == 'Required') {
                     $this->code = 120207;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['professionId']) == 'Integer') {
+                    $this->code = 120208;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'phone') {
+                if (key($failed['phone']) == 'Required') {
+                    $this->code = 120209;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -208,6 +220,7 @@ class AdminController extends Controller
 //            'roleId' => 'required|integer',
             'name' => 'required',
             'projectId' => 'required|integer',
+            'professionId' => 'required|integer',
             'phone' => 'required',
         ];
         $message = [
@@ -219,15 +232,17 @@ class AdminController extends Controller
             'name.required' => '请填写姓名',
             'projectId.required' => '请选择账号所属项目',
             'projectId.integer' => '项目参数类型错误',
+            'professionId.required' => '请选择账号负责工种',
+            'professionId.integer' => '工种参数类型错误',
             'phone.required' => '请填写联系方式',
         ];
-        $input = $request->only(['id', 'username', 'name', 'projectId', 'phone']);
+        $input = $request->only(['id', 'username', 'name', 'projectId', 'phone','professionId']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $adminModel = new AdminModel();
             $result = $adminModel->editAdmin($input);
             if (!$result) {
-                $this->code = 120410;
+                $this->code = 120412;
                 $this->msg = $result;
             }
         } else {
@@ -271,9 +286,18 @@ class AdminController extends Controller
                     $this->code = 120408;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'phone') {
-                if (key($failed['phone']) == 'Required') {
+            } elseif (key($failed) == 'professionId') {
+                if (key($failed['professionId']) == 'Required') {
                     $this->code = 120409;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['professionId']) == 'Integer') {
+                    $this->code = 120410;
+                    $this->msg = $validator->errors()->first();
+                }
+            }elseif (key($failed) == 'phone') {
+                if (key($failed['phone']) == 'Required') {
+                    $this->code = 120411;
                     $this->msg = $validator->errors()->first();
                 }
             }

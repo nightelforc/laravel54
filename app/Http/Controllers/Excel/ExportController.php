@@ -15,6 +15,7 @@ use App\Http\Model\EmployeeLoanModel;
 use App\Http\Model\EmployeeModel;
 use App\Http\Model\ProjectAreaModel;
 use App\Http\Model\ProjectGroupAssignmentModel;
+use App\Http\Model\ProjectGroupMembersModel;
 use App\Http\Model\ProjectGroupModel;
 use App\Http\Model\ProjectGroupSeparateAccountsModel;
 use App\Http\Model\ProjectModel;
@@ -281,11 +282,13 @@ class ExportController extends Controller
             $sectionInfo = (new ProjectSectionModel())->info(['id' => $input['sectionId']]);
             $areaInfo = (new ProjectAreaModel())->info(['id' => $sectionInfo['areaId']]);
             $groupInfo = (new ProjectGroupModel())->info(['id' => $input['groupId']]);
+            $projectGroupMembersModel = new ProjectGroupMembersModel();
+            $memberLists = $projectGroupMembersModel->lists(['groupId'=>$input['groupId']]);
             $fileName = $projectInfo['name'] . '-' . $areaInfo['name'] . '-' . $sectionInfo['name'] . '-' . $groupInfo['name'] . '分账表';
             $fileNameExcel = $this->fileName($fileName);
             $extensions = 'xlsx';
-            Excel::create($fileNameExcel, function ($excel) use ($assignment, $separate, $fileName, $projectInfo, $sectionInfo, $areaInfo, $groupInfo) {
-                $excel->sheet('sheet1', function ($sheet) use ($assignment, $separate, $fileName, $projectInfo, $sectionInfo, $areaInfo, $groupInfo) {
+            Excel::create($fileNameExcel, function ($excel) use ($assignment, $separate, $fileName, $projectInfo, $sectionInfo, $areaInfo, $groupInfo,$memberLists) {
+                $excel->sheet('sheet1', function ($sheet) use ($assignment, $separate, $fileName, $projectInfo, $sectionInfo, $areaInfo, $groupInfo,$memberLists) {
                     $sheet->setWidth([
                         "A" => "10",
                         "B" => "15",
@@ -311,6 +314,11 @@ class ExportController extends Controller
                     foreach ($assignment as $key => $d) {
                         $rowData = [$key + 1, $d->assignmentName, $d->amount, '-', $d->price, $d->totalPrice, $d->completeTime, ''];
                         array_push($cellData, $rowData);
+                    }
+                    array_push($cellData, ['','','','','','','',''],['','','','','','','','']);
+                    array_push($cellData, ['编号','班组成员','分账金额','备注','签字']);
+                    foreach ($memberLists as $k =>$m){
+                        array_push($cellData, [$k+1,$m->employeeName,'','','']);
                     }
                     $sheet->fromArray($cellData, null, 'A3', true, false);
                 });

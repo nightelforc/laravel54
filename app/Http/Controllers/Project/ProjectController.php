@@ -813,8 +813,10 @@ class ProjectController extends Controller
             $lists = $projectSectionModel->lists($input);
             $countLists = $projectSectionModel->countLists($input);
             $projectGroupAssignmentModel = new ProjectGroupAssignmentModel();
+            $projectOtherSeparateModel = new ProjectOtherSeparateAccountsModel();
             foreach ($lists as $key => $r) {
                 $lists[$key]->group = $projectGroupAssignmentModel->sectionLists(['sectionId' => $r->id]);
+                $lists[$key]->otherTotal = $projectOtherSeparateModel->otherSeparateSummary(['sectionId'=>$r->id]);
             }
             $this->data = [
                 "draw" => $input['draw'],

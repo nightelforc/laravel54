@@ -55,13 +55,14 @@ class AdminModel
         }
         $result = DB::table($this->table)
             ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
+            ->leftJoin('profession as pro','pro.id','=',$this->table.'.professionId')
             ->where($where)
             ->where(function ($query) use ($id){
                 if (!empty($id)){
                     $query->where($this->table.'.id',$id);
                 }
             })
-            ->select([$this->table.'.id','username',$this->table.'.name','projectId','phone','lastLoginTime',$this->table.'.status','p.name as projectName'])
+            ->select([$this->table.'.id','username',$this->table.'.name','projectId','professionId','phone','lastLoginTime',$this->table.'.status','p.name as projectName','pro.name as professionName'])
             ->first();
         return empty($result) ? [] : get_object_vars($result);
     }
@@ -121,6 +122,7 @@ class AdminModel
         return DB::table($this->table)
             ->leftJoin('admin_role as ar','ar.adminId','=',$this->table.'.id')
             ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
+            ->leftJoin('profession as pro','pro.id','=',$this->table.'.professionId')
             ->leftJoin('role as r','r.id','=','ar.roleId')
             ->where(function($query) use ($input){
                 if (isset($input['projectId']) && !is_null($input['projectId'])){
@@ -131,7 +133,7 @@ class AdminModel
                 }
             })
             ->offset($start)->limit($limit)
-            ->select($this->table.'.id',$this->table.'.username',$this->table.'.name',$this->table.'.projectId',$this->table.'.phone',$this->table.'.lastLoginTime',$this->table.'.status','p.name as projectName','r.name as roleName')
+            ->select($this->table.'.id',$this->table.'.username',$this->table.'.name',$this->table.'.projectId',$this->table.'.professionId','pro.name as professionName',$this->table.'.phone',$this->table.'.lastLoginTime',$this->table.'.status','p.name as projectName','r.name as roleName')
             ->get()->toArray();
     }
 

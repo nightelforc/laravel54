@@ -581,8 +581,13 @@ class ProjectGroupController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $projectGroupModel = new ProjectGroupModel();
-            $projectGroupModel->changeProject($input);
-
+            $info = $projectGroupModel->info(['id'=>$input['id']]);
+            if ($info['projectId'] != $input['projectId']){
+                $projectGroupModel->changeProject($input);
+            }else{
+                $this->code = 431105;
+                $this->msg = '所选项目与当前项目一致，不能完成此操作';
+            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'id') {

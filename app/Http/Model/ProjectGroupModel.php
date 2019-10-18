@@ -38,7 +38,7 @@ class ProjectGroupModel
             ->leftJoin('employee as e', 'e.id', $this->table . '.groupLeader')
             ->where(function ($query) use ($data) {
                 $query->where($this->table . '.projectId', $data['projectId'])
-                    ->whereIn($this->table . '.status', [1,2])
+                    ->whereIn($this->table . '.status', [1])
                     ->where($this->table . '.createTime', '>', $this->startTime)
                     ->where($this->table . '.createTime', '<', $this->endTime);;
                 if (isset($data['professionId']) && !is_null($data['professionId'])) {

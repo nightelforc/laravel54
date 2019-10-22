@@ -115,7 +115,7 @@ class ProjectGroupMembersModel
             })
             ->where($this->table.'.groupId',$data['groupId'])
             ->where($this->table.'.isDel',0)
-            ->select('pgsa.account','pgsa.remark','pgsa.separateTime','pgsa.status','e.name as employeeName','e.jobNumber',$this->table.'.isLeader',$this->table.'.id as memberId',$this->table.'.employeeId')
+            ->select('pgsa.id as accountId','pgsa.account','pgsa.remark','pgsa.separateTime','pgsa.status','e.name as employeeName','e.jobNumber',$this->table.'.isLeader',$this->table.'.id as memberId',$this->table.'.employeeId')
             ->get()->toArray();
     }
 }

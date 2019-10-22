@@ -53,25 +53,8 @@ class ProjectGroupSeparateAccountsModel
      */
     public function insert(array $data)
     {
-        $insertDataId = [];
-        foreach ($data['data'] as $d){
-            $insertData = [
-                'projectId'=>$data['projectId'],
-                'areaId'=>$data['areaId'],
-                'sectionId'=>$data['sectionId'],
-                'groupId'=>$data['groupId'],
-                'memberId'=>$d['memberId'],
-                'employeeId'=>$d['employeeId'],
-                'account'=>$d['account'],
-                'remark'=>$d['remark'],
-                'separateTime'=>date('Y-m-d H:i:s'),
-                'createTime' =>date('Y-m-d H:i:s'),
-            ];
-            $result = DB::table($this->table)->insertGetId($insertData);
-            $insertDataId[] = $result;
-        }
-
-        return $insertDataId;
+        $result = DB::table($this->table)->insertGetId($data);
+        return $result;
     }
 
     /**
@@ -128,6 +111,16 @@ class ProjectGroupSeparateAccountsModel
             })
             ->select($this->table.'.*')
             ->get()->toArray();
+    }
+
+    /**
+     * @param array $array
+     * @param array $updateData
+     * @return mixed
+     */
+    public function update(array $array, array $updateData)
+    {
+        return DB::table($this->table)->where($array)->update($updateData);
     }
 
 }

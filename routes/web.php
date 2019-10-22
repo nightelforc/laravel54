@@ -151,6 +151,7 @@ Route::group([
         Route::post('/projectSeparate/delSeparate', 'ProjectController@delSeparate');
         //杂工分账
         Route::post('/projectSeparate/otherSeparateLists', 'ProjectController@otherSeparateLists');
+        Route::post('/projectSeparate/otherSeparateLists2', 'ProjectController@otherSeparateLists2');
         Route::post('/projectSeparate/addOtherSeparate', 'ProjectController@addOtherSeparate');
         Route::post('/projectSeparate/delOtherSeparate', 'ProjectController@delOtherSeparate');
 

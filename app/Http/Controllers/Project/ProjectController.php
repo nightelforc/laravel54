@@ -1212,8 +1212,39 @@ class ProjectController extends Controller
             }
             if ($continue) {
                 $projectGroupSeparateAccountsModel = new ProjectGroupSeparateAccountsModel();
-                $insertId = $projectGroupSeparateAccountsModel->insert($input);
-                $input['ids'] = $insertId;
+                foreach ($input['data'] as $d){
+                    if (isset($d['id']) && !empty($d['id'])){
+                        $insertData = [
+                            'projectId'=>$input['projectId'],
+                            'areaId'=>$input['areaId'],
+                            'sectionId'=>$input['sectionId'],
+                            'groupId'=>$input['groupId'],
+                            'memberId'=>$d['memberId'],
+                            'employeeId'=>$d['employeeId'],
+                            'account'=>$d['account'],
+                            'remark'=>$d['remark'],
+                            'separateTime'=>date('Y-m-d H:i:s'),
+                            'createTime' =>date('Y-m-d H:i:s'),
+                        ];
+                        $insertId = $projectGroupSeparateAccountsModel->insert($insertData);
+                        $input['ids'][] = $insertId;
+                    }else{
+                        $updateData = [
+                            'projectId'=>$input['projectId'],
+                            'areaId'=>$input['areaId'],
+                            'sectionId'=>$input['sectionId'],
+                            'groupId'=>$input['groupId'],
+                            'memberId'=>$d['memberId'],
+                            'employeeId'=>$d['employeeId'],
+                            'account'=>$d['account'],
+                            'remark'=>$d['remark'],
+                            'separateTime'=>date('Y-m-d H:i:s'),
+                            'status' =>0,
+                        ];
+                        $result = $projectGroupSeparateAccountsModel->update(['id'=>$d['accountId']],$updateData);
+                        $input['ids'][] = $d['accountId'];
+                    }
+                }
                 $approval = ApprovalController::approval('addSeparate', $input);
                 if ($approval['status']) {
                     if ($approval['result']) {
@@ -1366,6 +1397,46 @@ class ProjectController extends Controller
                 }
                 if (key($failed['start']) == 'Min') {
                     $this->code = 422012;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function otherSeparateLists2(Request $request)
+    {
+        $rules = [
+            'projectId' => 'required|integer',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型错误',
+            'length.required' => '获取项目参数失败',
+            'length.integer' => '记录条数参数类型错误',
+            'length.in' => '记录条数参数值不正确',
+            'start.required' => '获取起始记录参数失败',
+            'start.integer' => '起始记录参数类型错误',
+            'start.min' => '起始记录参数值不小于:min',
+        ];
+        $input = $request->only(['projectId']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $projectOtherSeparateAccountsModel = new ProjectOtherSeparateAccountsModel();
+            $this->data = $projectOtherSeparateAccountsModel->lists2($input);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 422001;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 422002;
                     $this->msg = $validator->errors()->first();
                 }
             }

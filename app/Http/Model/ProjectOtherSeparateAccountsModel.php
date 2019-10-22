@@ -74,6 +74,30 @@ class ProjectOtherSeparateAccountsModel
      * @param array $input
      * @return mixed
      */
+    public function lists2(array $input)
+    {
+        return DB::table($this->table)
+            ->leftJoin('employee as e', 'e.id', '=', $this->table . '.employeeId')
+            ->leftJoin('project', 'project.id', '=', $this->table . '.projectId')
+            ->leftJoin('profession as p', 'p.id', '=', $this->table . '.professionId')
+            ->leftJoin('project_area as pa', 'pa.id', '=', $this->table . '.areaId')
+            ->leftJoin('project_section as ps', 'ps.id', '=', $this->table . '.sectionId')
+            ->leftJoin('assignment as a', 'a.id', '=', $this->table . '.assignmentId')
+            ->where(function ($query) use ($input) {
+                if (isset($input['projectId']) && $input['projectId'] != 0) {
+                    $query->where($this->table . '.projectId', $input['projectId']);
+                }
+                $query->where($this->table . '.createTime','>', date("Y-m-d H:i:s",strtotime("-3 day")));
+            })
+            ->orderBy($this->table . '.separateTime', 'des')
+            ->select($this->table . '.*', 'e.name as employeeName', 'e.jobNumber', 'p.name as professionName', 'pa.name as areaName', 'ps.name as sectionName', 'a.name as assignmentName', 'project.name as projectName')
+            ->get()->toArray();
+    }
+
+    /**
+     * @param array $input
+     * @return mixed
+     */
     public function countLists(array $input)
     {
         return DB::table($this->table)

@@ -68,23 +68,25 @@ class ProfessionController extends Controller
     {
         $rules = [
             'name' => 'required',
+            'order' => 'integer',
         ];
         $message = [
             'name.required' => '请输入工种名称',
+            'order.integer' => '工种排序数据类型不正确',
         ];
-        $input = $request->only(['name']);
+        $input = $request->only(['name','order']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $professionModel = new ProfessionModel();
-            $info = $professionModel->checkRepeat($input);
+            $info = $professionModel->checkRepeat(['name'=>$input['name']]);
             if (empty($info)){
                 $result = $professionModel->insert($input);
                 if (!$result) {
-                    $this->code = 240203;
+                    $this->code = 240204;
                     $this->msg = '保存失败，请稍后重试';
                 }
             }else{
-                $this->code = 240202;
+                $this->code = 240203;
                 $this->msg = '请勿重复建立相同名称的工种';
             }
         } else {
@@ -92,6 +94,11 @@ class ProfessionController extends Controller
             if (key($failed) == 'name') {
                 if (key($failed['name']) == 'Required') {
                     $this->code = 240201;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'order') {
+                if (key($failed['order']) == 'Integer') {
+                    $this->code = 240202;
                     $this->msg = $validator->errors()->first();
                 }
             }
@@ -108,13 +115,15 @@ class ProfessionController extends Controller
         $rules = [
             'id' => 'required|integer',
             'name' => 'required',
+            'order' => 'integer',
         ];
         $message = [
             'id.required' => '获取工种参数失败',
             'id.integer' => '工种参数类型错误',
             'name.required' => '请输入工种名称',
+            'order.integer' => '工种排序数据类型不正确',
         ];
-        $input = $request->all();
+        $input = $request->only(['id','name','order']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $professionModel = new ProfessionModel();
@@ -142,8 +151,8 @@ class ProfessionController extends Controller
                     $this->code = 240303;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'shortname') {
-                if (key($failed['shortname']) == 'Required') {
+            } elseif (key($failed) == 'order') {
+                if (key($failed['order']) == 'Integer') {
                     $this->code = 240304;
                     $this->msg = $validator->errors()->first();
                 }

@@ -35,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
                     storage_path('logs' . DIRECTORY_SEPARATOR . date('Y-m-d') . '_query.log'),
                     'a+'
                 );
-                fwrite($logFile, date('Y-m-d H:i:s') . ': ' . $query . PHP_EOL);
+                fwrite($logFile, date('Y-m-d H:i:s') .' TIME:' . $sql->time . ' SQL: ' . $query .  PHP_EOL);
                 fclose($logFile);
             }
         );

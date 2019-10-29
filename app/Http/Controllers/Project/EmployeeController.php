@@ -588,37 +588,37 @@ class EmployeeController extends Controller
     {
         $rules = [
             'employeeId' => 'required|integer',
-            'day' => 'required|date_format:Y-m-d',
-            'length' => 'required|numeric|min:0'
+//            'day' => 'required|date_format:Y-m-d',
+//            'length' => 'required|numeric|min:0'
         ];
         $message = [
             'employeeId.required' => '获取工人参数失败',
             'employeeId.integer' => '工人参数类型错误',
-            'day.required' => '请选择考勤日期',
-            'day.date_format' => '考勤日期格式不正确',
-            'length.required' => '请填写工作时长',
-            'length.numeric' => '工作时长类型错误',
-            'length.min' => '工作时长必须大于:min',
+//            'day.required' => '请选择考勤日期',
+//            'day.date_format' => '考勤日期格式不正确',
+//            'length.required' => '请填写工作时长',
+//            'length.numeric' => '工作时长类型错误',
+//            'length.min' => '工作时长必须大于:min',
         ];
-        $input = $request->only(['employeeId', 'day', 'length']);
+        $input = $request->only(['employeeId']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
-            if ($input['day'] <= date('Y-m-d')){
+//            if ($input['day'] <= date('Y-m-d')){
                 //追加工人当前的projectId
                 $employeeModel = new EmployeeModel();
                 $info = $employeeModel->info(['id' => $input['employeeId']]);
                 $input['projectId'] = $info['projectId'];
                 $employeeAttendanceModel = new EmployeeAttendanceModel();
-                $attendanceInfo = $employeeAttendanceModel->info(['employeeId'=>$input['employeeId'],'day'=>$input['day'],'projectId'=>$input['projectId']]);
-                if (!empty($attendanceInfo)){
-                    $employeeAttendanceModel->delete(['employeeId'=>$input['employeeId'],'day'=>$input['day'],'projectId'=>$input['projectId']]);
-                }
-                $employeeAttendanceModel->insert($input);
+//                $attendanceInfo = $employeeAttendanceModel->info(['employeeId'=>$input['employeeId'],'day'=>$input['day'],'projectId'=>$input['projectId']]);
+//                if (!empty($attendanceInfo)){
+//                    $employeeAttendanceModel->delete(['employeeId'=>$input['employeeId'],'day'=>$input['day'],'projectId'=>$input['projectId']]);
+//                }
+//                $employeeAttendanceModel->insert($input);
                 $employeeModel->hasAttendance(['id' => $input['employeeId']]);
-            }else{
-                $this->code = 410808;
-                $this->msg = '考勤日期不能超过当前日期';
-            }
+//            }else{
+//                $this->code = 410808;
+//                $this->msg = '考勤日期不能超过当前日期';
+//            }
         } else {
             $failed = $validator->failed();
             if (key($failed) == 'employeeId') {
@@ -630,29 +630,30 @@ class EmployeeController extends Controller
                     $this->code = 410802;
                     $this->msg = $validator->errors()->first();
                 }
-            } elseif (key($failed) == 'day') {
-                if (key($failed['day']) == 'Required') {
-                    $this->code = 410803;
-                    $this->msg = $validator->errors()->first();
-                }
-                if (key($failed['day']) == 'DateFormat') {
-                    $this->code = 410804;
-                    $this->msg = $validator->errors()->first();
-                }
-            } elseif (key($failed) == 'length') {
-                if (key($failed['length']) == 'Required') {
-                    $this->code = 410805;
-                    $this->msg = $validator->errors()->first();
-                }
-                if (key($failed['length']) == 'Numeric') {
-                    $this->code = 410806;
-                    $this->msg = $validator->errors()->first();
-                }
-                if (key($failed['length']) == 'Min') {
-                    $this->code = 410807;
-                    $this->msg = $validator->errors()->first();
-                }
             }
+//            elseif (key($failed) == 'day') {
+//                if (key($failed['day']) == 'Required') {
+//                    $this->code = 410803;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//                if (key($failed['day']) == 'DateFormat') {
+//                    $this->code = 410804;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//            } elseif (key($failed) == 'length') {
+//                if (key($failed['length']) == 'Required') {
+//                    $this->code = 410805;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//                if (key($failed['length']) == 'Numeric') {
+//                    $this->code = 410806;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//                if (key($failed['length']) == 'Min') {
+//                    $this->code = 410807;
+//                    $this->msg = $validator->errors()->first();
+//                }
+//            }
         }
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }

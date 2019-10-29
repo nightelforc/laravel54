@@ -20,7 +20,7 @@ class ProfessionModel
      */
     public function lists()
     {
-        return DB::table($this->table)->get()->toArray();
+        return DB::table($this->table)->orderBy('order','desc')->get()->toArray();
     }
 
     /**
@@ -39,8 +39,14 @@ class ProfessionModel
      */
     public function insert(Array $data)
     {
+        if (!isset($data['order']) || empty($data['order'])){
+            $order = 1;
+        }else{
+            $order = $data['order'];
+        }
         $insertData = [
             'name' => $data['name'],
+            'order' => $order,
         ];
         return DB::table($this->table)->insert($insertData);
     }
@@ -51,8 +57,14 @@ class ProfessionModel
      */
     public function update($data)
     {
+        if (!isset($data['order']) || empty($data['order'])){
+            $order = 1;
+        }else{
+            $order = $data['order'];
+        }
         $updateData = [
             'name' => $data['name'],
+            'order' => $order,
         ];
         return DB::table($this->table)->where('id', $data['id'])->update($updateData);
     }

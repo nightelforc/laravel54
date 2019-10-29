@@ -34,6 +34,7 @@ class AssignmentModel
         return DB::table($this->table)
             ->leftJoin('unit as u','u.id','=',$this->table.'.unitId')
             ->where($data)
+            ->orderBy('order','desc')
             ->select($this->table.'.*','u.name as unitName')
             ->get()->toArray();
     }
@@ -63,10 +64,16 @@ class AssignmentModel
      */
     public function update($data)
     {
+        if (!isset($data['order']) || empty($data['order'])){
+            $order = 1;
+        }else{
+            $order = $data['order'];
+        }
         $updateData = [
             'name' => $data['name'],
             'unitId' => $data['unitId'],
             'remark' => $data['remark'],
+            'order' => $order,
         ];
         return DB::table($this->table)->where('id', $data['id'])->update($updateData);
     }

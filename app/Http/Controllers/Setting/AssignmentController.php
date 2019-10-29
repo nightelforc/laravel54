@@ -94,6 +94,7 @@ class AssignmentController extends Controller
             'professionId' => 'required|integer',
             'name' => 'required',
             'unitId' => 'required|integer',
+            'order' => 'integer',
         ];
         $message = [
             'professionId.required' => '获取工种参数失败',
@@ -101,8 +102,9 @@ class AssignmentController extends Controller
             'name.required' => '请输入施工项名称',
             'unitId.required' => '获取工种参数失败',
             'unitId.integer' => '工种参数类型错误',
+            'order.integer' => '排序参数类型错误',
         ];
-        $input = $request->only(['professionId','name','unitId','remark']);
+        $input = $request->only(['professionId', 'name', 'unitId', 'remark', 'order']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $assignmentModel = new AssignmentModel();
@@ -110,11 +112,11 @@ class AssignmentController extends Controller
             if (empty($info)) {
                 $result = $assignmentModel->insert($input);
                 if (!$result) {
-                    $this->code = 250207;
+                    $this->code = 250208;
                     $this->msg = '保存失败，请稍后重试';
                 }
             } else {
-                $this->code = 250206;
+                $this->code = 250207;
                 $this->msg = '当前工种下，请勿重复建立相同名称的施工项';
             }
         } else {
@@ -142,6 +144,11 @@ class AssignmentController extends Controller
                     $this->code = 250205;
                     $this->msg = $validator->errors()->first();
                 }
+            } elseif (key($failed) == 'order') {
+                if (key($failed['order']) == 'Integer') {
+                    $this->code = 250206;
+                    $this->msg = $validator->errors()->first();
+                }
             }
         }
         return $this->ajaxResult($this->code, $this->msg, $this->data);
@@ -151,13 +158,13 @@ class AssignmentController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public
-    function edit(Request $request)
+    public function edit(Request $request)
     {
         $rules = [
             'id' => 'required|integer',
             'name' => 'required',
             'unitId' => 'required|integer',
+            'order' => 'integer',
         ];
         $message = [
             'id.required' => '获取施工项参数失败',
@@ -165,16 +172,18 @@ class AssignmentController extends Controller
             'name.required' => '请输入施工项名称',
             'unitId.required' => '获取工种参数失败',
             'unitId.integer' => '工种参数类型错误',
+            'order.integer' => '排序参数类型错误',
         ];
-        $input = $request->all();
+        $input = $request->only(['id','name','unitId','remark','order']);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $assignmentModel = new AssignmentModel();
-            $info = $assignmentModel->checkRepeat(['professionId' => $input['id'], 'name' => $input['name']],$input['id']);
+            $info = $assignmentModel->info(['id' => $input['id']]);
+            $info = $assignmentModel->checkRepeat(['professionId' => $info['professionId'], 'name' => $input['name']], $input['id']);
             if (empty($info)) {
                 $assignmentModel->update($input);
             } else {
-                $this->code = 250306;
+                $this->code = 250307;
                 $this->msg = '当前工种下，请勿重复建立相同名称的施工项';
             }
         } else {
@@ -201,6 +210,11 @@ class AssignmentController extends Controller
                 }
                 if (key($failed['unitId']) == 'Integer') {
                     $this->code = 250305;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'order') {
+                if (key($failed['order']) == 'Integer') {
+                    $this->code = 250306;
                     $this->msg = $validator->errors()->first();
                 }
             }

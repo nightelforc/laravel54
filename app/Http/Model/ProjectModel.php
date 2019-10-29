@@ -37,6 +37,8 @@ class ProjectModel
                     });
                 }
             })
+            ->orderBy('status')
+            ->orderBy('order','desc')
             ->orderBy('createTime','desc')
             ->offset($start)->limit($limit)
             ->get()->toArray();
@@ -60,11 +62,17 @@ class ProjectModel
      */
     public function update(array $data)
     {
+        if (!isset($data['order']) || empty($data['order'])){
+            $order = 1;
+        }else{
+            $order = $data['order'];
+        }
         $updateData = [
             'name'=>$data['name'],
             'city'=>$data['city'],
             'projectAmount'=>$data['projectAmount'],
             'projectAccount'=>$data['projectAccount'],
+            'order'=>$order,
         ];
         return DB::table($this->table)->where('id',$data['id'])->update($updateData);
     }
@@ -83,7 +91,12 @@ class ProjectModel
      */
     public function selectLists()
     {
-        return DB::table($this->table)->where('id','>',1)->get()->toArray();
+        return DB::table($this->table)
+            ->where('id','>',1)
+            ->orderBy('status')
+            ->orderBy('order','desc')
+            ->orderBy('createTime','desc')
+            ->get()->toArray();
     }
 
 

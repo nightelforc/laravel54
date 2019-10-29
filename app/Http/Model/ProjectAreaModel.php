@@ -37,6 +37,7 @@ class ProjectAreaModel
                     $query->where($this->table.'.name', 'like', '%' . $input['search'] . '%');
                 }
             })
+            ->orderBy('order','desc')
             ->select($this->table.'.*','p.name as projectName')
             ->offset($start)->limit($limit)->get()->toArray();
     }
@@ -87,6 +88,9 @@ class ProjectAreaModel
     {
         $id = $data['id'];
         unset($data['id']);
+        if (!isset($data['order']) || empty($data['order'])){
+            $data['order'] = 1;
+        }
         return DB::table($this->table)->where('id', $id)->update($data);
     }
 
@@ -109,6 +113,7 @@ class ProjectAreaModel
             ->where(function ($query) use ($input) {
                 $query->where('projectId', $input['projectId']);
             })
+            ->orderBy('order','desc')
             ->get()->toArray();
     }
 
@@ -159,5 +164,14 @@ class ProjectAreaModel
     public static function getValue(array $data, $string)
     {
         return DB::table(self::TABLE)->where($data)->value($string);
+    }
+
+    /**
+     * @param array $data
+     * @return mixed
+     */
+    public function getOrder(array $data)
+    {
+        return DB::table(self::TABLE)->where($data)->max('order');
     }
 }

@@ -10,6 +10,7 @@ namespace App\Http\Controllers\Project;
 
 use App\Http\Controllers\Auth\ApprovalController;
 use App\Http\Controllers\Controller;
+use App\Http\Model\AdminSessionModel;
 use App\Http\Model\ProjectAreaModel;
 use App\Http\Model\ProjectBudgetModel;
 use App\Http\Model\ProjectGroupAssignmentModel;
@@ -1029,6 +1030,8 @@ class ProjectController extends Controller
             ];
             $input1 = $input['data'];
             $continue = true;
+            $session = AdminSessionModel::get($input[parent::$token]);
+            $input['adminId'] = $session['adminId'];
             foreach ($input1 as $key => $i) {
                 $validator1 = Validator::make($i, $rules1, $message1);
                 if ($validator1->fails()) {
@@ -1199,6 +1202,7 @@ class ProjectController extends Controller
             ];
             $input1 = $input['data'];
             $continue = true;
+            $session = AdminSessionModel::get($input[parent::$token]);
             foreach ($input1 as $key => $i) {
                 $validator1 = Validator::make($i, $rules1, $message1);
                 if ($validator1->fails()) {
@@ -1243,7 +1247,7 @@ class ProjectController extends Controller
             if ($continue) {
                 $projectGroupSeparateAccountsModel = new ProjectGroupSeparateAccountsModel();
                 foreach ($input['data'] as $d){
-                    if (isset($d['id']) && !empty($d['id'])){
+                    if (empty($d['accountId'])){
                         $insertData = [
                             'projectId'=>$input['projectId'],
                             'areaId'=>$input['areaId'],
@@ -1255,6 +1259,7 @@ class ProjectController extends Controller
                             'remark'=>$d['remark'],
                             'separateTime'=>date('Y-m-d H:i:s'),
                             'createTime' =>date('Y-m-d H:i:s'),
+                            'adminId' =>$session['adminId']
                         ];
                         $insertId = $projectGroupSeparateAccountsModel->insert($insertData);
                         $input['ids'][] = $insertId;
@@ -1270,6 +1275,7 @@ class ProjectController extends Controller
                             'remark'=>$d['remark'],
                             'separateTime'=>date('Y-m-d H:i:s'),
                             'status' =>0,
+                            'adminId' =>$session['adminId']
                         ];
                         $result = $projectGroupSeparateAccountsModel->update(['id'=>$d['accountId']],$updateData);
                         $input['ids'][] = $d['accountId'];

@@ -40,10 +40,11 @@ class ProjectGroupSeparateAccountsModel
         return DB::table($this->table)
             ->leftJoin('employee as e','e.id','=',$this->table.'.employeeId')
             ->leftJoin('project_group_members as pgm','pgm.id','=',$this->table.'.memberId')
+            ->leftJoin('admin as a','a.id','=',$this->table.'.adminId')
             ->where($this->table.'.projectId',$data['projectId'])
             ->where('sectionId',$data['sectionId'])
             ->where($this->table.'.groupId',$data['groupId'])
-            ->select($this->table.'.*','e.name as employeeName','e.jobNumber','pgm.isLeader')
+            ->select($this->table.'.*','e.name as employeeName','e.jobNumber','pgm.isLeader','a.name as adminName')
             ->get()->toArray();
     }
 

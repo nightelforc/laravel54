@@ -59,8 +59,13 @@ class ProjectGroupAssignmentModel
         return DB::table($this->table)
             ->leftJoin('assignment as a','a.id','=',$this->table.'.assignmentId')
             ->leftJoin('unit as u','u.id','=','a.unitId')
-            ->where($data)
-            ->select($this->table.'.*','a.name as assignmentName','u.name as unitName')
+            ->leftJoin('admin','admin.id','=',$this->table.'.adminId')
+            ->where(function($query) use ($data){
+                $query->where($this->table.'.projectId',$data['projectId']);
+                $query->where($this->table.'.sectionId',$data['sectionId']);
+                $query->where($this->table.'.groupId',$data['groupId']);
+            })
+            ->select($this->table.'.*','a.name as assignmentName','u.name as unitName','admin.name as adminName')
             ->get()->toArray();
     }
 
@@ -84,6 +89,8 @@ class ProjectGroupAssignmentModel
                 'totalPrice'=>$d['totalPrice'],
                 'completeTime'=>date('Y-m-d H:i:s'),
                 'createTime' =>date('Y-m-d H:i:s'),
+                'adminId' =>$data['adminId'],
+                'remark' =>$d['remark'],
             ];
             $result = DB::table($this->table)->insertGetId($insertData);
             $insertDataId[] = $result;

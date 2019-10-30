@@ -109,13 +109,14 @@ class ProjectGroupMembersModel
         return DB::table($this->table)
             ->leftJoin('project_group_separate_accounts as pgsa','pgsa.memberId','=',$this->table.'.id')
             ->leftJoin('employee as e','e.id','=',$this->table.'.employeeId')
+            ->leftJoin('admin as a','a.id','=','pgsa.adminId')
             ->where($this->table.'.projectId',$data['projectId'])
             ->where(function ($query) use ($data){
                 $query->where('sectionId',$data['sectionId'])->orWhere('sectionId',null);
             })
             ->where($this->table.'.groupId',$data['groupId'])
             ->where($this->table.'.isDel',0)
-            ->select('pgsa.id as accountId','pgsa.account','pgsa.remark','pgsa.separateTime','pgsa.status','e.name as employeeName','e.jobNumber',$this->table.'.isLeader',$this->table.'.id as memberId',$this->table.'.employeeId')
+            ->select('pgsa.id as accountId','pgsa.account','pgsa.remark','pgsa.separateTime','pgsa.status','e.name as employeeName','e.jobNumber',$this->table.'.isLeader',$this->table.'.id as memberId',$this->table.'.employeeId','a.name as adminName')
             ->get()->toArray();
     }
 }

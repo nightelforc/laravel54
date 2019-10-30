@@ -74,10 +74,22 @@ class EmployeeAttendanceModel
     {
         if (count($data) == count($data,1)){
             $data['createTime'] = date('Y-m-d H:i:s');
+            $d = [
+                'employeeId'=>$data['employeeId'],
+                'projectId'=>$data['projectId'],
+                'day'=>$data['day'],
+            ];
+            DB::table($this->table)->where($d)->delete();
             return DB::table($this->table)->insert($data);
         }else{
             foreach ($data['data'] as $key => $d){
                 $data['data'][$key]['createTime'] = date('Y-m-d H:i:s');
+                $dd = [
+                    'employeeId'=>$d['employeeId'],
+                    'projectId'=>$d['projectId'],
+                    'day'=>$d['day'],
+                ];
+                DB::table($this->table)->where($dd)->delete();
             }
             return DB::table($this->table)->insert($data['data']);
         }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Project;
 
 use App\Http\Controllers\Auth\ApprovalController;
 use App\Http\Controllers\Controller;
+use App\Http\Model\AdminSessionModel;
 use App\Http\Model\EmployeeAttendanceModel;
 use App\Http\Model\EmployeeLeaveModel;
 use App\Http\Model\EmployeeLivingModel;
@@ -682,8 +683,9 @@ class EmployeeController extends Controller
             'length.required' => '请填写工作时长',
             'length.numeric' => '工作时长类型错误',
         ];
-        $data = $request->only(['data']);
+        $data = $request->only(['data',self::$token]);
         $return = false;
+        $session = AdminSessionModel::get($data[parent::$token]);
         foreach ($data['data'] as $key => $d) {
             $validator = Validator::make($d, $rules, $message);
             if ($validator->fails()) {
@@ -735,10 +737,13 @@ class EmployeeController extends Controller
                 $return =true;
                 break;
             }
+
+            $data['data'][$key]['adminId'] = $session['adminId'];
         }
 
         if (!$return) {
             $employeeAttendanceModel = new EmployeeAttendanceModel();
+
             $result = $employeeAttendanceModel->insert($data);
             if (!$result) {
                 $this->code = 410909;

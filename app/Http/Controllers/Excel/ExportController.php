@@ -310,12 +310,14 @@ class ExportController extends Controller
                     $sheet->setCellValue('G2', '班组');
                     $sheet->setCellValue('H2', $groupInfo['name']);
 
-                    $cellData = [["编号", "施工项", "工程量", "单位", "单价", "总价", "记录时间", "签字"]];
+                    $cellData = [["编号", "施工项", "工程量", "单位", "单价", "总价", "备注","记录时间", "签字"]];
+                    $totalPrice = 0;
                     foreach ($assignment as $key => $d) {
-                        $rowData = [$key + 1, $d->assignmentName, $d->amount, '-', $d->price, $d->totalPrice, $d->completeTime, ''];
+                        $rowData = [$key + 1, $d->assignmentName, $d->amount, '-', $d->price, $d->totalPrice,$d->remark, $d->completeTime, ''];
                         array_push($cellData, $rowData);
+                        $totalPrice += $d->totalPrice;
                     }
-                    array_push($cellData, ['','','','','','','',''],['','','','','','','','']);
+                    array_push($cellData, ['总计','','','','',$totalPrice,'','',''],['','','','','','','','',''],['','','','','','','','','']);
                     array_push($cellData, ['编号','班组成员','分账金额','备注','签字']);
                     foreach ($memberLists as $k =>$m){
                         array_push($cellData, [$k+1,$m->employeeName,'','','']);
@@ -436,12 +438,14 @@ class ExportController extends Controller
                     $sheet->setCellValue('H2', $groupInfo['name']);
 
                     $cellData_1 = [["编号", "姓名", "工号", "角色", "分账金额", "记录时间", "备注", "签字"]];
+                    $totalPrice = 0;
                     foreach ($separate as $key => $d) {
                         $leader = $d->isLeader ? '组长' : '组员';
                         $rowData = [$key + 1, $d->employeeName, $d->jobNumber, $leader, $d->account, $d->separateTime, $d->remark, ''];
                         array_push($cellData_1, $rowData);
+                        $totalPrice += $d->account;
                     }
-
+                    array_push($cellData_1, ['总计','','','',$totalPrice,'','','']);
                     $sheet->fromArray($cellData_1, null, 'A3', true, false);
                 });
             })->store($extensions);

@@ -87,7 +87,7 @@ class ProjectOtherSeparateAccountsModel
                 if (isset($input['projectId']) && $input['projectId'] != 0) {
                     $query->where($this->table . '.projectId', $input['projectId']);
                 }
-                $query->where($this->table . '.createTime','>', date("Y-m-d H:i:s",strtotime("-3 day")));
+                $query->where($this->table . '.createTime', '>', date("Y-m-d H:i:s", strtotime("-3 day")));
             })
             ->orderBy($this->table . '.separateTime', 'des')
             ->select($this->table . '.*', 'e.name as employeeName', 'e.jobNumber', 'p.name as professionName', 'pa.name as areaName', 'ps.name as sectionName', 'a.name as assignmentName', 'project.name as projectName')
@@ -129,20 +129,23 @@ class ProjectOtherSeparateAccountsModel
      */
     public function insert($data)
     {
-        $insertData = [
-            'projectId' => $data['projectId'],
-            'employeeId' => $data['employeeId'],
-            'areaId' => $data['areaId'],
-            'sectionId' => $data['sectionId'],
-            'professionId' => $data['professionId'],
-            'assignmentId' => $data['assignmentId'],
-            'assignmentDetail' => $data['assignmentDetail'],
-            'account' => $data['account'],
-            'separateTime' => $data['separateTime'],
-            'createTime' => date('Y-m-d H:i:s'),
-        ];
-        $result = DB::table($this->table)->insertGetId($insertData);
-        return $result;
+        foreach ($data['data'] as $d) {
+            $insertData = [
+                'projectId' => $data['projectId'],
+                'employeeId' => $data['employeeId'],
+                'areaId' => $d['areaId'],
+                'sectionId' => $d['sectionId'],
+                'professionId' => $d['professionId'],
+                'assignmentId' => $d['assignmentId'],
+                'assignmentDetail' => $d['assignmentDetail'],
+                'account' => $d['account'],
+                'separateTime' => $data['separateTime'],
+                'createTime' => date('Y-m-d H:i:s'),
+            ];
+            $result = DB::table($this->table)->insertGetId($insertData);
+            $ids[] = $result;
+        }
+        return $ids;
     }
 
     /**
@@ -161,7 +164,7 @@ class ProjectOtherSeparateAccountsModel
      */
     public function otherSeparateApproval($pk, $data, $approvalResult)
     {
-        DB::table($this->table)->where('id', $pk)->update(['status' => $approvalResult]);
+        DB::table($this->table)->whereIn('id', $data['ids'])->update(['status' => $approvalResult]);
     }
 
     /**
@@ -174,8 +177,50 @@ class ProjectOtherSeparateAccountsModel
         return empty($result) ? [] : get_object_vars($result);
     }
 
-    public function otherSeparateSummary(array $data){
+    public function otherSeparateSummary(array $data)
+    {
         return DB::table($this->table)->where($data)->sum('account');
+    }
+
+    public function export(array $data)
+    {
+        if (isset($data['startTime']) && !empty($data['startTime'])) {
+            $startTime = $data['startTime'];
+        } else {
+            $startTime = date('Y-m-01');
+        }
+
+        if (isset($data['endTime']) && !empty($data['endTime'])) {
+            $endTime = $data['endTime'];
+        } else {
+            $endTime = date('Y-m-t');
+        }
+
+        $result = DB::table($this->table)
+            ->leftJoin('employee as e', 'e.id', '=', $this->table . '.employeeId')
+            ->leftJoin('assignment as a', 'a.id', '=', $this->table . '.assignmentId')
+            ->leftJoin('project_area as pa', 'pa.id', '=', $this->table . '.areaId')
+            ->leftJoin('project_section as ps', 'ps.id', '=', $this->table . '.sectionId')
+            ->where('separateTime', '>=', $startTime)
+            ->where('separateTime', '<=', $endTime)
+            ->select(DB::raw("e.name,e.jobNumber,date_format( separateTime, '%Y-%m-%d' ) AS separateTime,sum(account) as accounts,group_concat(CONCAT_WS(',',pa.name,ps.name,a.name,assignmentDetail) SEPARATOR '|') as work"));
+        if (isset($data['employeeId']) && !empty($data['employeeId'])) {
+            $result = $result->where('employeeId', $data['employeeId']);
+        }
+        $result = $result->groupBy('separateTime', 'employeeId')
+            ->orderBy('separateTime', 'desc')
+            ->get()->toArray();
+        return $result;
+    }
+
+    /**
+     * @param array $where
+     * @param array $input
+     * @return mixed
+     */
+    public function update(array $where, array $input)
+    {
+        return DB::table($this->table)->where($where)->update($input);
     }
 
 

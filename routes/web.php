@@ -153,6 +153,8 @@ Route::group([
         Route::post('/projectSeparate/otherSeparateLists', 'ProjectController@otherSeparateLists');
         Route::post('/projectSeparate/otherSeparateLists2', 'ProjectController@otherSeparateLists2');
         Route::post('/projectSeparate/addOtherSeparate', 'ProjectController@addOtherSeparate');
+        Route::post('/projectSeparate/editOtherSeparate', 'ProjectController@editOtherSeparate');
+        Route::post('/projectSeparate/otherSeparateInfo', 'ProjectController@otherSeparateInfo');
         Route::post('/projectSeparate/delOtherSeparate', 'ProjectController@delOtherSeparate');
 
         //班组
@@ -262,11 +264,14 @@ Route::group([
         Route::post('/export/eEmployeeWage', 'ExportController@eEmployeeWage');
         Route::post('/export/eAssignment', 'ExportController@eAssignment');
         Route::post('/export/eAccounts', 'ExportController@eAccounts');
+        Route::post('/export/eOtherSeparate', 'ExportController@eOtherSeparate');
 
         Route::post('/export/eWageLists', 'ExportController@eWageLists');
         Route::post('/export/eSupplierOrder', 'ExportController@eSupplierOrder');
         Route::post('/export/eLoanLists', 'ExportController@eLoanLists');
         Route::post('/export/eLivingLists', 'ExportController@eLivingLists');
+
+        Route::post('/export/eAreaLists', 'ExportController@eAreaLists');
 
         Route::get('/download', 'ExportController@download');
     });

@@ -18,18 +18,12 @@ class ProjectAreaModel
 
     /**
      * @param array $input
+     * @param bool $exports
      * @return mixed
      */
-    public function lists(array $input)
+    public function lists(array $input,$exports = false)
     {
-        $limit = config('yucheng.limit');
-        $start = is_null($input['start']) ? 0 : $input['start'];
-
-        if (isset($input['length']) && !is_null($input['length'])) {
-            $limit = $input['length'];
-        }
-
-        return DB::table($this->table)
+        $result = DB::table($this->table)
             ->leftJoin('project as p','p.id','=',$this->table.'.projectId')
             ->where(function ($query) use ($input) {
                 $query->where('projectId', $input['projectId']);
@@ -38,8 +32,18 @@ class ProjectAreaModel
                 }
             })
             ->orderBy('order','desc')
-            ->select($this->table.'.*','p.name as projectName')
-            ->offset($start)->limit($limit)->get()->toArray();
+            ->select($this->table.'.*','p.name as projectName');
+        if(!$exports){
+            $limit = config('yucheng.limit');
+            $start = is_null($input['start']) ? 0 : $input['start'];
+
+            if (isset($input['length']) && !is_null($input['length'])) {
+                $limit = $input['length'];
+            }
+            $result = $result->offset($start)->limit($limit);
+        }
+        $result = $result->get()->toArray();
+        return $result;
     }
 
     /**

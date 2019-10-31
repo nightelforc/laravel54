@@ -17,27 +17,30 @@ class ProjectSectionModel
 
     /**
      * @param array $data
+     * @param bool $exports
      * @return mixed
      */
-    public function lists(array $data)
+    public function lists(array $data,$exports= false)
     {
-        $limit = config('yucheng.limit');
-        $start =(!isset($data['start']) || is_null($data['start'])) ? 0 : $data['start'];
-
-        if (isset($data['length']) && !is_null($data['length'])) {
-            $limit = $data['length'];
-        }
-
-        return DB::table($this->table)
+        $result = DB::table($this->table)
             ->where(function ($query) use ($data) {
                 $query->where('areaId', $data['areaId']);
                 if (isset($data['search']) && !is_null($data['search'])) {
                     $query->where('name', 'like', '%' . $data['search'] . '%');
                 }
             })
-            ->orderBy('order','desc')
-            ->offset($start)->limit($limit)
-            ->get()->toArray();
+            ->orderBy('order','desc');
+        if(!$exports){
+            $limit = config('yucheng.limit');
+            $start = is_null($data['start']) ? 0 : $data['start'];
+
+            if (isset($data['length']) && !is_null($data['length'])) {
+                $limit = $data['length'];
+            }
+            $result = $result->offset($start)->limit($limit);
+        }
+        $result = $result->get()->toArray();
+        return $result;
     }
 
     /**

@@ -1489,38 +1489,38 @@ class ProjectController extends Controller
         $rules = [
             'projectId' => 'required|integer',
             'employeeId' => 'required|integer',
-            'account' => 'required|numeric',
             'separateTime' => 'required|date_format:Y-m-d',
-            'areaId' => 'required|integer',
-            'sectionId' => 'required|integer',
-            'professionId' => 'required|integer',
-            'assignmentId' => 'required|integer',
+//            'account' => 'required|numeric',
+//            'areaId' => 'required|integer',
+//            'sectionId' => 'required|integer',
+//            'professionId' => 'required|integer',
+//            'assignmentId' => 'required|integer',
         ];
         $message = [
             'projectId.required' => '获取项目参数失败',
             'projectId.integer' => '项目参数类型错误',
             'employeeId.required' => '请选择工人',
             'employeeId.integer' => '工人参数类型错误',
-            'account.required' => '请填写分账金额',
-            'account.numeric' => '分账金额类型错误',
+//            'account.required' => '请填写分账金额',
+//            'account.numeric' => '分账金额类型错误',
             'separateTime.required' => '请选择分账时间',
             'separateTime.date_format' => '分账时间格式不正确',
-            'areaId.required' => '请选择施工区',
-            'areaId.integer' => '施工区参数类型错误',
-            'sectionId.required' => '请选择楼层/施工段',
-            'sectionId.integer' => '施工段参数类型错误',
-            'professionId.required' => '请选择工种',
-            'professionId.integer' => '工种参数类型错误',
-            'assignmentId.required' => '请选择施工项',
-            'assignmentId.integer' => '施工项参数类型错误',
+//            'areaId.required' => '请选择施工区',
+//            'areaId.integer' => '施工区参数类型错误',
+//            'sectionId.required' => '请选择楼层/施工段',
+//            'sectionId.integer' => '施工段参数类型错误',
+//            'professionId.required' => '请选择工种',
+//            'professionId.integer' => '工种参数类型错误',
+//            'assignmentId.required' => '请选择施工项',
+//            'assignmentId.integer' => '施工项参数类型错误',
         ];
-        $input = $request->only(['projectId', 'employeeId', 'account', 'separateTime', 'areaId', 'sectionId', 'professionId', 'assignmentId', 'assignmentDetail', self::$token]);
+        $input = $request->only(['projectId', 'employeeId', 'separateTime','data', self::$token]);
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             if ($input['separateTime'] <= date('Y-m-d')) {
                 $projectOtherSeparateModel = new ProjectOtherSeparateAccountsModel();
                 $insertId = $projectOtherSeparateModel->insert($input);
-                $input['id'] = $insertId;
+                $input['ids'] = $insertId;
                 $approval = ApprovalController::approval('otherSeparate', $input);
                 if ($approval['status']) {
                     if ($approval['result']) {
@@ -1606,6 +1606,83 @@ class ProjectController extends Controller
                 }
                 if (key($failed['assignmentId']) == 'Integer') {
                     $this->code = 422116;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    public function editOtherSeparate(Request $request){
+        $rules = [
+            'id' => 'required|integer',
+            'account' => 'required|numeric',
+            'areaId' => 'required|integer',
+            'sectionId' => 'required|integer',
+            'professionId' => 'required|integer',
+            'assignmentId' => 'required|integer',
+            'separateTime' => 'required|date_format:Y-m-d',
+        ];
+        $message = [
+            'id.required' => '获取记录参数失败',
+            'id.integer' => '记录参数类型错误',
+            'account.required' => '请填写分账金额',
+            'account.numeric' => '分账金额类型错误',
+            'separateTime.required' => '请选择分账时间',
+            'separateTime.date_format' => '分账时间格式不正确',
+            'areaId.required' => '请选择施工区',
+            'areaId.integer' => '施工区参数类型错误',
+            'sectionId.required' => '请选择楼层/施工段',
+            'sectionId.integer' => '施工段参数类型错误',
+            'professionId.required' => '请选择工种',
+            'professionId.integer' => '工种参数类型错误',
+            'assignmentId.required' => '请选择施工项',
+            'assignmentId.integer' => '施工项参数类型错误',
+        ];
+        $input = $request->only(['id','account','areaId','sectionId','professionId','assignmentId','separateTime','assignmentDetail']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $projectOtherSeparateModel = new ProjectOtherSeparateAccountsModel();
+            $id = $input['id'];unset($input['id']);
+            $projectOtherSeparateModel->update(['id'=>$id],$input);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'id') {
+                if (key($failed['id']) == 'Required') {
+                    $this->code = 422901;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['id']) == 'Integer') {
+                    $this->code = 422902;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    public function otherSeparateInfo(Request $request){
+        $rules = [
+            'id' => 'required|integer',
+        ];
+        $message = [
+            'id.required' => '获取记录参数失败',
+            'id.integer' => '记录参数类型错误',
+        ];
+        $input = $request->only(['id']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $projectOtherSeparateModel = new ProjectOtherSeparateAccountsModel();
+            $this->data = $projectOtherSeparateModel->info($input);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'id') {
+                if (key($failed['id']) == 'Required') {
+                    $this->code = 422901;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['id']) == 'Integer') {
+                    $this->code = 422902;
                     $this->msg = $validator->errors()->first();
                 }
             }

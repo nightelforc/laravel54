@@ -19,6 +19,7 @@ use App\Http\Model\ProjectGroupMembersModel;
 use App\Http\Model\ProjectGroupModel;
 use App\Http\Model\ProjectGroupSeparateAccountsModel;
 use App\Http\Model\ProjectModel;
+use App\Http\Model\ProjectOtherSeparateAccountsModel;
 use App\Http\Model\ProjectSectionModel;
 use App\Http\Model\SupplierOrdersModel;
 use Illuminate\Http\Request;
@@ -71,7 +72,7 @@ class ExportController extends Controller
         $filename = $this->fileName(urldecode($input['name']));
         $path = self::PATH . $filename;
         if (file_exists($path)) {
-            return response()->download($path,$input['name']);
+            return response()->download($path, $input['name']);
         } else {
             return "文件不存在,请尝试重新下载";
         }
@@ -283,12 +284,12 @@ class ExportController extends Controller
             $areaInfo = (new ProjectAreaModel())->info(['id' => $sectionInfo['areaId']]);
             $groupInfo = (new ProjectGroupModel())->info(['id' => $input['groupId']]);
             $projectGroupMembersModel = new ProjectGroupMembersModel();
-            $memberLists = $projectGroupMembersModel->lists(['groupId'=>$input['groupId']]);
+            $memberLists = $projectGroupMembersModel->lists(['groupId' => $input['groupId']]);
             $fileName = $projectInfo['name'] . '-' . $areaInfo['name'] . '-' . $sectionInfo['name'] . '-' . $groupInfo['name'] . '分账表';
             $fileNameExcel = $this->fileName($fileName);
             $extensions = 'xlsx';
-            Excel::create($fileNameExcel, function ($excel) use ($assignment, $separate, $fileName, $projectInfo, $sectionInfo, $areaInfo, $groupInfo,$memberLists) {
-                $excel->sheet('sheet1', function ($sheet) use ($assignment, $separate, $fileName, $projectInfo, $sectionInfo, $areaInfo, $groupInfo,$memberLists) {
+            Excel::create($fileNameExcel, function ($excel) use ($assignment, $separate, $fileName, $projectInfo, $sectionInfo, $areaInfo, $groupInfo, $memberLists) {
+                $excel->sheet('sheet1', function ($sheet) use ($assignment, $separate, $fileName, $projectInfo, $sectionInfo, $areaInfo, $groupInfo, $memberLists) {
                     $sheet->setWidth([
                         "A" => "10",
                         "B" => "15",
@@ -310,17 +311,17 @@ class ExportController extends Controller
                     $sheet->setCellValue('G2', '班组');
                     $sheet->setCellValue('H2', $groupInfo['name']);
 
-                    $cellData = [["编号", "施工项", "工程量", "单位", "单价", "总价", "备注","记录时间", "签字"]];
+                    $cellData = [["编号", "施工项", "工程量", "单位", "单价", "总价", "备注", "记录时间", "签字"]];
                     $totalPrice = 0;
                     foreach ($assignment as $key => $d) {
-                        $rowData = [$key + 1, $d->assignmentName, $d->amount, '-', $d->price, $d->totalPrice,$d->remark, $d->completeTime, ''];
+                        $rowData = [$key + 1, $d->assignmentName, $d->amount, '-', $d->price, $d->totalPrice, $d->remark, $d->completeTime, ''];
                         array_push($cellData, $rowData);
                         $totalPrice += $d->totalPrice;
                     }
-                    array_push($cellData, ['总计','','','','',$totalPrice,'','',''],['','','','','','','','',''],['','','','','','','','','']);
-                    array_push($cellData, ['编号','班组成员','分账金额','备注','签字']);
-                    foreach ($memberLists as $k =>$m){
-                        array_push($cellData, [$k+1,$m->employeeName,'','','']);
+                    array_push($cellData, ['总计', '', '', '', '', $totalPrice, '', '', ''], ['', '', '', '', '', '', '', '', ''], ['', '', '', '', '', '', '', '', '']);
+                    array_push($cellData, ['编号', '班组成员', '分账金额', '备注', '签字']);
+                    foreach ($memberLists as $k => $m) {
+                        array_push($cellData, [$k + 1, $m->employeeName, '', '', '']);
                     }
                     $sheet->fromArray($cellData, null, 'A3', true, false);
                 });
@@ -445,7 +446,7 @@ class ExportController extends Controller
                         array_push($cellData_1, $rowData);
                         $totalPrice += $d->account;
                     }
-                    array_push($cellData_1, ['总计','','','',$totalPrice,'','','']);
+                    array_push($cellData_1, ['总计', '', '', '', $totalPrice, '', '', '']);
                     $sheet->fromArray($cellData_1, null, 'A3', true, false);
                 });
             })->store($extensions);
@@ -494,7 +495,13 @@ class ExportController extends Controller
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
 
-    public function eWageLists(Request $request){
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     * @throws \Exception
+     */
+    public function eWageLists(Request $request)
+    {
         $rules = [
             'projectId' => 'required|integer',
             'professionId' => 'nullable|integer',
@@ -510,7 +517,7 @@ class ExportController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeModel = new EmployeeModel();
-            $lists = $employeeModel->lists($input,$employeeModel->employeeStatus,true);
+            $lists = $employeeModel->lists($input, $employeeModel->employeeStatus, true);
             foreach ($lists as $key => $l) {
                 $wages = $employeeModel->wages($l->id);
                 $wagesTotal = [
@@ -523,7 +530,7 @@ class ExportController extends Controller
                     'separateAccounts' => 0,
                     'otherSeparateAccounts' => 0,
                 ];
-                foreach ($wages as $w){
+                foreach ($wages as $w) {
                     $wagesTotal['bonus'] += $w['bonus'];
                     $wagesTotal['fine'] += $w['fine'];
                     $wagesTotal['living'] += $w['living'];
@@ -537,12 +544,12 @@ class ExportController extends Controller
             }
 
             $projectInfo = (new ProjectModel())->info(['id' => $input['projectId']]);
-            $projectName = (isset($projectInfo['name'])&&!empty($projectInfo['name']))?$projectInfo['name']:'';
-            $fileName = date('Y').'年度'.$projectName . '工人工资年度汇总表'.date('Ymd');
+            $projectName = (isset($projectInfo['name']) && !empty($projectInfo['name'])) ? $projectInfo['name'] : '';
+            $fileName = date('Y') . '年度' . $projectName . '工人工资年度汇总表' . date('Ymd');
             $fileNameExcel = $this->fileName($fileName);
             $extensions = 'xlsx';
-            Excel::create($fileNameExcel, function ($excel) use ($lists,$fileName) {
-                $excel->sheet('sheet1', function ($sheet) use ($lists,$fileName) {
+            Excel::create($fileNameExcel, function ($excel) use ($lists, $fileName) {
+                $excel->sheet('sheet1', function ($sheet) use ($lists, $fileName) {
                     $sheet->setWidth([
                         "A" => "6",
                         "B" => "15",
@@ -565,9 +572,9 @@ class ExportController extends Controller
                     $sheet->mergeCells('A1:Q1');
 
                     $cellData = [["编号", "项目", "姓名", "工号", "工种", "在职状态", "总计", "包工费", "杂工费",
-                        "考勤工资", "材料费", "生活费", "借款","奖金","罚款","签字","备注"]];
+                        "考勤工资", "材料费", "生活费", "借款", "奖金", "罚款", "签字", "备注"]];
                     foreach ($lists as $key => $d) {
-                        switch ($d->status){
+                        switch ($d->status) {
                             case 1:
                                 $status = '在岗';
                                 break;
@@ -584,11 +591,11 @@ class ExportController extends Controller
                                 $status = '-';
                                 break;
                         }
-                        $total = $d->wage['separateAccounts']+$d->wage['otherSeparateAccounts']+$d->wage['attendance']*$d->dayValue-
-                            $d->wage['materialOrder']-$d->wage['living']-$d->wage['loan']+$d->wage['bonus']-$d->wage['fine'];
-                        $rowData = [$key+1,$d->projectName,$d->name,$d->jobNumber,$d->professionName,$status,$total,
-                            $d->wage['separateAccounts'],$d->wage['otherSeparateAccounts'],$d->wage['attendance']*$d->dayValue,
-                            $d->wage['materialOrder'],$d->wage['living'],$d->wage['loan'],$d->wage['bonus'],$d->wage['fine']];
+                        $total = $d->wage['separateAccounts'] + $d->wage['otherSeparateAccounts'] + $d->wage['attendance'] * $d->dayValue -
+                            $d->wage['materialOrder'] - $d->wage['living'] - $d->wage['loan'] + $d->wage['bonus'] - $d->wage['fine'];
+                        $rowData = [$key + 1, $d->projectName, $d->name, $d->jobNumber, $d->professionName, $status, $total,
+                            $d->wage['separateAccounts'], $d->wage['otherSeparateAccounts'], $d->wage['attendance'] * $d->dayValue,
+                            $d->wage['materialOrder'], $d->wage['living'], $d->wage['loan'], $d->wage['bonus'], $d->wage['fine']];
                         array_push($cellData, $rowData);
                     }
                     $sheet->fromArray($cellData, null, 'A2', true, false);
@@ -622,7 +629,12 @@ class ExportController extends Controller
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
 
-    public function eSupplierOrder(Request $request){
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function eSupplierOrder(Request $request)
+    {
         $rules = [
             'projectId' => 'required|integer',
             'time' => 'nullable|date_format:Y-m',
@@ -640,15 +652,15 @@ class ExportController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $supplierOrdersModel = new SupplierOrdersModel();
-            $lists = $supplierOrdersModel->lists($input,true);
+            $lists = $supplierOrdersModel->lists($input, true);
 
             $projectInfo = (new ProjectModel())->info(['id' => $input['projectId']]);
-            $projectName = (isset($projectInfo['name'])&&!empty($projectInfo['name']))?$projectInfo['name']:'';
-            $fileName = date('Y').'年度'.$projectName . '项目采购费用年度汇总表'.date('Ymd');
+            $projectName = (isset($projectInfo['name']) && !empty($projectInfo['name'])) ? $projectInfo['name'] : '';
+            $fileName = date('Y') . '年度' . $projectName . '项目采购费用年度汇总表' . date('Ymd');
             $fileNameExcel = $this->fileName($fileName);
             $extensions = 'xlsx';
-            Excel::create($fileNameExcel, function ($excel) use ($lists,$fileName) {
-                $excel->sheet('sheet1', function ($sheet) use ($lists,$fileName) {
+            Excel::create($fileNameExcel, function ($excel) use ($lists, $fileName) {
+                $excel->sheet('sheet1', function ($sheet) use ($lists, $fileName) {
                     $sheet->setWidth([
                         "A" => "10",
                         "B" => "15",
@@ -664,8 +676,9 @@ class ExportController extends Controller
                     $sheet->mergeCells('A1:I1');
 
                     $cellData = [["编号", "货单号", "供应商", "提货项目", "总价（元）", "送货日期", "付款方式", "是否还款", "记录时间"]];
-                    foreach ($lists as $key => $d) {var_dump($d);
-                        switch ($d->payType){
+                    foreach ($lists as $key => $d) {
+                        var_dump($d);
+                        switch ($d->payType) {
                             case 1:
                                 $payType = '现金';
                                 break;
@@ -676,7 +689,7 @@ class ExportController extends Controller
                                 $payType = '-';
                                 break;
                         }
-                        switch ($d->isPay){
+                        switch ($d->isPay) {
                             case 1:
                                 $isPay = '已付款';
                                 break;
@@ -687,7 +700,7 @@ class ExportController extends Controller
                                 $isPay = '-';
                                 break;
                         }
-                        $rowData = [$key+1,$d->ordersn,$d->supplierName,$d->projectName,$d->totalPrice,$d->deliveryTime,$payType,$isPay,$d->createTime];
+                        $rowData = [$key + 1, $d->ordersn, $d->supplierName, $d->projectName, $d->totalPrice, $d->deliveryTime, $payType, $isPay, $d->createTime];
                         array_push($cellData, $rowData);
                     }
                     $sheet->fromArray($cellData, null, 'A2', true, false);
@@ -725,7 +738,12 @@ class ExportController extends Controller
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
 
-    public function eLoanLists(Request $request){
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function eLoanLists(Request $request)
+    {
         $rules = [
             'projectId' => 'required|integer',
             'startTime' => 'nullable|date_format:Y-m-d',
@@ -744,15 +762,15 @@ class ExportController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeLoanModel = new EmployeeLoanModel();
-            $lists = $employeeLoanModel->lists($input,true);
+            $lists = $employeeLoanModel->lists($input, true);
 
             $projectInfo = (new ProjectModel())->info(['id' => $input['projectId']]);
-            $projectName = (isset($projectInfo['name'])&&!empty($projectInfo['name']))?$projectInfo['name']:'';
-            $fileName = date('Y').'年度'.$projectName . '项目借款费用记录表'.date('Ymd');
+            $projectName = (isset($projectInfo['name']) && !empty($projectInfo['name'])) ? $projectInfo['name'] : '';
+            $fileName = date('Y') . '年度' . $projectName . '项目借款费用记录表' . date('Ymd');
             $fileNameExcel = $this->fileName($fileName);
             $extensions = 'xlsx';
-            Excel::create($fileNameExcel, function ($excel) use ($lists,$fileName) {
-                $excel->sheet('sheet1', function ($sheet) use ($lists,$fileName) {
+            Excel::create($fileNameExcel, function ($excel) use ($lists, $fileName) {
+                $excel->sheet('sheet1', function ($sheet) use ($lists, $fileName) {
                     $sheet->setWidth([
                         "A" => "10",
                         "B" => "15",
@@ -768,7 +786,7 @@ class ExportController extends Controller
 
                     $cellData = [["编号", "姓名", "工号", "借款金额", "借款时间", "记录时间", "审核状态", "备注"]];
                     foreach ($lists as $key => $d) {
-                        switch ($d->status){
+                        switch ($d->status) {
                             case 1:
                                 $status = '审核通过';
                                 break;
@@ -779,7 +797,7 @@ class ExportController extends Controller
                                 $status = '待审核';
                                 break;
                         }
-                        $rowData = [$key+1,$d->employeeName,$d->jobNumber,$d->account,$d->loanTime,$d->createTime,$status,''];
+                        $rowData = [$key + 1, $d->employeeName, $d->jobNumber, $d->account, $d->loanTime, $d->createTime, $status, ''];
                         array_push($cellData, $rowData);
                     }
                     $sheet->fromArray($cellData, null, 'A2', true, false);
@@ -822,7 +840,12 @@ class ExportController extends Controller
         return $this->ajaxResult($this->code, $this->msg, $this->data);
     }
 
-    public function eLivingLists(Request $request){
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function eLivingLists(Request $request)
+    {
         $rules = [
             'projectId' => 'required|integer',
             'startTime' => 'nullable|date_format:Y-m-d',
@@ -841,15 +864,15 @@ class ExportController extends Controller
         $validator = Validator::make($input, $rules, $message);
         if ($validator->passes()) {
             $employeeLivingModel = new EmployeeLivingModel();
-            $lists = $employeeLivingModel->lists($input,true);
+            $lists = $employeeLivingModel->lists($input, true);
 
             $projectInfo = (new ProjectModel())->info(['id' => $input['projectId']]);
-            $projectName = (isset($projectInfo['name'])&&!empty($projectInfo['name']))?$projectInfo['name']:'';
-            $fileName = date('Y').'年度'.$projectName . '项目生活费用记录表'.date('Ymd');
+            $projectName = (isset($projectInfo['name']) && !empty($projectInfo['name'])) ? $projectInfo['name'] : '';
+            $fileName = date('Y') . '年度' . $projectName . '项目生活费用记录表' . date('Ymd');
             $fileNameExcel = $this->fileName($fileName);
             $extensions = 'xlsx';
-            Excel::create($fileNameExcel, function ($excel) use ($lists,$fileName) {
-                $excel->sheet('sheet1', function ($sheet) use ($lists,$fileName) {
+            Excel::create($fileNameExcel, function ($excel) use ($lists, $fileName) {
+                $excel->sheet('sheet1', function ($sheet) use ($lists, $fileName) {
                     $sheet->setWidth([
                         "A" => "10",
                         "B" => "15",
@@ -864,9 +887,9 @@ class ExportController extends Controller
                     $sheet->setCellValue('A1', $fileName);
                     $sheet->mergeCells('A1:I1');
 
-                    $cellData = [["编号", "姓名", "工号", "类型", "金额", "操作时间", "记录时间", "审核状态","备注"]];
+                    $cellData = [["编号", "姓名", "工号", "类型", "金额", "操作时间", "记录时间", "审核状态", "备注"]];
                     foreach ($lists as $key => $d) {
-                        switch ($d->status){
+                        switch ($d->status) {
                             case 1:
                                 $status = '审核通过';
                                 break;
@@ -877,7 +900,7 @@ class ExportController extends Controller
                                 $status = '待审核';
                                 break;
                         }
-                        switch ($d->type){
+                        switch ($d->type) {
                             case 1:
                                 $type = '充值';
                                 break;
@@ -888,7 +911,7 @@ class ExportController extends Controller
                                 $type = '-';
                                 break;
                         }
-                        $rowData = [$key+1,$d->employeeName,$d->jobNumber,$type,$d->account,$d->livingTime,$d->createTime,$status,''];
+                        $rowData = [$key + 1, $d->employeeName, $d->jobNumber, $type, $d->account, $d->livingTime, $d->createTime, $status, ''];
                         array_push($cellData, $rowData);
                     }
                     $sheet->fromArray($cellData, null, 'A2', true, false);
@@ -924,6 +947,229 @@ class ExportController extends Controller
                 }
                 if (key($failed['status']) == 'In') {
                     $this->code = 410606;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function eOtherSeparate(Request $request)
+    {
+        $rules = [
+            'projectId' => 'required|integer',
+            'startTime' => 'nullable|date_format:Y-m-d',
+            'endTime' => 'nullable|date_format:Y-m-d',
+            'employeeId' => 'required|integer',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型不正确',
+            'startTime.date_format' => '日期格式不正确',
+            'endTime.date_format' => '日期格式不正确',
+            'employeeId.integer' => '工人参数类型错误',
+            'employeeId.required' => '请选择工人',
+        ];
+        $input = $request->only(['projectId', 'startTime', 'endTime', 'employeeId']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $projectOtherSeparateAccountsModel = new ProjectOtherSeparateAccountsModel();
+            $data = $projectOtherSeparateAccountsModel->export($input);
+
+            $employeeInfo = (new EmployeeModel())->info(['id' => $input['employeeId']]);
+            $projectInfo = (new ProjectModel())->info(['id' => $input['projectId']]);
+            $fileName = $projectInfo['name'] . $employeeInfo['name'] . '杂工包工明细账表';
+            $fileNameExcel = $this->fileName($fileName);
+            $extensions = 'xlsx';
+            Excel::create($fileNameExcel, function ($excel) use ($fileName, $projectInfo, $employeeInfo, $data) {
+                $excel->sheet('sheet1', function ($sheet) use ($fileName, $projectInfo, $employeeInfo, $data) {
+                    $sheet->setWidth([
+                        "A" => "15",
+                        "B" => "15",
+                        "C" => "15",
+                        "D" => "15",
+                        "E" => "15",
+                        "F" => "60",
+                        "G" => "15",
+                    ]);
+                    $sheet->setCellValue('A1', $fileName);
+                    $sheet->mergeCells('A1:G1');
+                    $sheet->setCellValue('A2', '项目');
+                    $sheet->setCellValue('B2', $projectInfo['name']);
+                    $sheet->setCellValue('C2', '导出时间');
+                    $sheet->setCellValue('D2', date('Y-m-d H:i:s'));
+
+
+                    $cellData_1 = [["编号", "姓名", "工号", "作业时间", "分账金额", "施工内容", "签字"]];
+                    $totalPrice = 0;
+                    foreach ($data as $key => $d) {
+                        $rowData = [$key + 1, $d->name, $d->jobNumber, $d->separateTime, $d->accounts, $d->work, ''];
+                        array_push($cellData_1, $rowData);
+                        $totalPrice += $d->accounts;
+                    }
+                    array_push($cellData_1, ['总计', '', '', '', $totalPrice, '', '', '']);
+                    $sheet->fromArray($cellData_1, null, 'A3', true, false);
+                });
+            })->store($extensions);
+            $filename = $fileName . '.' . $extensions;
+            $this->msg = $this->downloadURL($filename, $request);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 410601;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 410602;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'startTime') {
+                if (key($failed['startTime']) == 'DateFormat') {
+                    $this->code = 410603;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'endTime') {
+                if (key($failed['endTime']) == 'DateFormat') {
+                    $this->code = 410604;
+                    $this->msg = $validator->errors()->first();
+                }
+            } elseif (key($failed) == 'employeeId') {
+                if (key($failed['employeeId']) == 'Required') {
+                    $this->code = 410605;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['employeeId']) == 'Integer') {
+                    $this->code = 410606;
+                    $this->msg = $validator->errors()->first();
+                }
+            }
+        }
+        return $this->ajaxResult($this->code, $this->msg, $this->data);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function eAreaLists(Request $request)
+    {
+        $rules = [
+            'projectId' => 'required|integer',
+        ];
+        $message = [
+            'projectId.required' => '获取项目参数失败',
+            'projectId.integer' => '项目参数类型不正确',
+        ];
+        $input = $request->only(['projectId']);
+        $validator = Validator::make($input, $rules, $message);
+        if ($validator->passes()) {
+            $projectAreaModel = new ProjectAreaModel();
+            $areaLists = $projectAreaModel->lists(['projectId'=>$input['projectId']],true);
+
+            $projectInfo = (new ProjectModel())->info(['id' => $input['projectId']]);
+            $fileName = $projectInfo['name'] . '施工区明细'.date('Y-m-d');
+            $fileNameExcel = $this->fileName($fileName);
+            $extensions = 'xlsx';
+            Excel::create($fileNameExcel, function ($excel) use ($fileName, $projectInfo, $areaLists) {
+                $excel->sheet('sheet1', function ($sheet) use ($fileName, $projectInfo, $areaLists) {
+                    $sheet->setWidth([
+                        "A" => "15",
+                        "B" => "15",
+                        "C" => "15",
+                        "D" => "15",
+                        "E" => "15",
+                        "F" => "15",
+                        "G" => "15",
+                        "H" => "15",
+                        "I" => "15",
+                        "J" => "20",
+                    ]);
+                    $sheet->setCellValue('A1', $fileName);
+                    $sheet->mergeCells('A1:J1');
+
+                    $title = ["编号", "名称", "面积（平方米）", "预算", "预算单价", "成本", "成本单价","杂工成本","杂工成本单价","备注"];
+                    $cellData = [$title];
+                    $totalBudget = 0;
+                    $totalCost = 0;
+                    $totalOther = 0;
+                    $projectOtherSeparateModel = new ProjectOtherSeparateAccountsModel();
+                    foreach ($areaLists as $key => $d) {
+                        $otherTotal = $projectOtherSeparateModel->otherSeparateSummary(['areaId'=>$d->id]);
+                        $budgetPrice = (!empty($d->area)&&$d->area>0)?round($d->budget/$d->area,2):'-';
+                        $costPrice = (!empty($d->area)&&$d->area>0)?round($d->cost/$d->area,2):'-';
+                        $otherPrice = (!empty($d->area)&&$d->area>0)?round($otherTotal/$d->area,2):'-';
+                        $rowData = [$key + 1, $d->name,
+                            is_numeric($d->area)?$d->area:'-',
+                            is_numeric($d->budget)?$d->budget:'-',
+                            $budgetPrice,
+                            is_numeric($d->cost)?$d->cost:'-',
+                            $costPrice,
+                            $otherTotal,
+                            $otherPrice,
+                            ''];
+                        array_push($cellData, $rowData);
+                        $totalBudget += $d->budget;
+                        $totalCost += $d->cost;
+                        $totalOther += $otherTotal;
+                    }
+                    array_push($cellData, ['总计', '', '',  $totalBudget, '', $totalCost, '', $totalOther, '','']);
+
+                    //施工段的明细
+                    $projectSectionModel = new ProjectSectionModel();
+                    $length = [];
+                    foreach ($areaLists as $d) {
+                        array_push($cellData, ['','','','','','','','','',''],[$d->name.'施工段明细','','','','','','','','',''],$title);
+                        $sectionLists = $projectSectionModel->lists(['areaId'=>$d->id],true);
+                        array_push($length,count($sectionLists));
+                        $totalBudget = 0;
+                        $totalCost = 0;
+                        $totalOther = 0;
+                        foreach ($sectionLists as $key => $d1) {
+                            $otherTotal = $projectOtherSeparateModel->otherSeparateSummary(['sectionId'=>$d1->id]);
+                            $budgetPrice = (!empty($d1->area)&&$d1->area>0)?round($d1->budget/$d1->area,2):'-';
+                            $costPrice = (!empty($d1->area)&&$d1->area>0)?round($d1->cost/$d1->area,2):'-';
+                            $otherPrice = (!empty($d1->area)&&$d1->area>0)?round($otherTotal/$d1->area,2):'-';
+                            $rowData = [$key + 1, $d1->name,
+                                is_numeric($d1->area)?$d1->area:'-',
+                                is_numeric($d1->budget)?$d1->budget:'-',
+                                $budgetPrice,
+                                is_numeric($d1->cost)?$d1->cost:'-',
+                                $costPrice,
+                                $otherTotal,
+                                $otherPrice,
+                                ''];
+                            array_push($cellData, $rowData);
+                            $totalBudget += $d1->budget;
+                            $totalCost += $d1->cost;
+                            $totalOther += $otherTotal;
+                        }
+                        array_push($cellData, ['总计', '', '', $totalBudget, '', $totalCost, '', $totalOther, '', '']);
+                    }
+
+                    $location = 1+1+count($areaLists)+1+2;
+                    foreach ($length as $l){
+                        $sheet->mergeCells('A'.$location.':J'.$location);
+                        $location+=1+$l+1+2;
+                    }
+                    $sheet->fromArray($cellData, null, 'A2', true, false);
+                });
+            })->store($extensions);
+            $filename = $fileName . '.' . $extensions;
+            $this->msg = $this->downloadURL($filename, $request);
+        } else {
+            $failed = $validator->failed();
+            if (key($failed) == 'projectId') {
+                if (key($failed['projectId']) == 'Required') {
+                    $this->code = 410601;
+                    $this->msg = $validator->errors()->first();
+                }
+                if (key($failed['projectId']) == 'Integer') {
+                    $this->code = 410602;
                     $this->msg = $validator->errors()->first();
                 }
             }
